@@ -2,7 +2,7 @@
 
 
 sudo apt-get update
-sudo apt-get install -y ca-certificates curl gnupg
+sudo apt-get install -y ca-certificates curl gnupg jq
 
 if [[ ! -e /etc/apt/keyrings/docker.gpg ]]
 then
