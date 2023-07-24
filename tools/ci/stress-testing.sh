@@ -44,9 +44,9 @@ function bootstrap-qdrant-nodes {
 		declare VM_PRIV_ADDR; VM_PRIV_ADDR="$(get-virtual-machine-private-ip "$NODE")"
 
 		remote-run "$VM_ADDR" install-docker
-		run-remote-qdrant-node --uri "http://$VM_PRIV_ADDR:6335" "${BOOTSTRAP[@]}"
+		run-remote-qdrant-node "$VM_ADDR" --uri "http://$VM_PRIV_ADDR:6335" "${BOOTSTRAP[@]}"
 
-		if [[ !${BOOTSTRAP-} ]]
+		if [[ ! ${BOOTSTRAP-} ]]
 		then
 			BOOTSTRAP=( --bootstrap "http://$VM_PRIV_ADDR:6335" )
 		fi
@@ -226,7 +226,7 @@ function remote-run {
 
 	declare VM_ADDR="$1"
 
-	if [[ !${ECHO-} ]]
+	if [[ ! ${ECHO-} ]]
 	then
 		echo REMOTE=1 | cat - "$SELF_PATH" | ssh "$VM_USER@$VM_ADDR" -- bash -s "${@:2}"
 	else
