@@ -3,6 +3,20 @@
 set -euo pipefail
 
 
+function self {
+	realpath "$0" 2>/dev/null || which "$0" 2>/dev/null
+	return "$?"
+}
+
+
+declare SELF="$(self)"
+
+declare CI="${CI:-$(dirname "$SELF")}"
+declare LOCAL="${LOCAL:-$(dirname "$CI")/local}"
+
+declare INSTALL_DOCKER="${INSTALL_DOCKER:-$LOCAL/install-docker.sh}"
+
+
 declare BASE_NAME="${BASE_NAME:-qdrant-stress-testing}"
 
 declare GROUP="${GROUP:-$BASE_NAME}"
@@ -43,7 +57,7 @@ function bootstrap-qdrant-nodes {
 		declare VM_ADDR; VM_ADDR="$(get-virtual-machine-public-ip "$NODE")"
 		declare VM_PRIV_ADDR; VM_PRIV_ADDR="$(get-virtual-machine-private-ip "$NODE")"
 
-		remote-run "$VM_ADDR" install-docker
+		install-docker "$VM_ADDR"
 		run-remote-qdrant-node "$VM_ADDR" --uri "http://$VM_PRIV_ADDR:6335" "${BOOTSTRAP[@]}"
 
 		if [[ ! ${BOOTSTRAP-} ]]
@@ -90,7 +104,7 @@ function bootstrap-bfb-nodes {
 
 		declare VM_ADDR; VM_ADDR="$(get-virtual-machine-public-ip "$NODE")"
 
-		remote-run "$VM_ADDR" install-docker
+		install-docker "$VM_ADDR"
 		run-remote-bfb-node "$VM_ADDR" "${@:2}"
 	done
 }
@@ -125,38 +139,14 @@ function nodes {
 }
 
 function install-docker {
-	if [[ ${ECHO-} ]]
+	declare VM_ADDR="$1"
+
+	if [[ ! ${ECHO-} ]]
 	then
-		declare -f install-docker | tail -n +7 | tail -r | tail -n +2 | tail -r >&2
-		return 0
+		cat "$INSTALL_DOCKER" | ssh "$VM_USER@$VM_ADDR" -- bash -s "${@:2}"
+	else
+		echo "cat $INSTALL_DOCKER | ssh $VM_USER@$VM_ADDR -- bash -s ${@:2}" >&2
 	fi
-
-	if which docker &>/dev/null
-	then
-		return 0
-	fi
-
-	sudo apt-get update
-	sudo apt-get install -y ca-certificates curl gnupg
-
-	if [[ ! -e /etc/apt/keyrings/docker.gpg ]]
-	then
-		sudo install -m 0755 -d /etc/apt/keyrings
-		curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --batch --dearmor -o /etc/apt/keyrings/docker.gpg
-		sudo chmod a+r /etc/apt/keyrings/docker.gpg
-	fi
-
-	if [[ ! -e /etc/apt/sources.list.d/docker.list ]]
-	then
-		cat <<-EOF | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
-		deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable
-		EOF
-	fi
-
-	sudo apt-get update
-	sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-	sudo usermod "$VM_USER" -aG docker
 }
 
 
@@ -222,15 +212,13 @@ function get-virtual-machine-ip {
 }
 
 function remote-run {
-	declare SELF_PATH="$(self)"
-
 	declare VM_ADDR="$1"
 
 	if [[ ! ${ECHO-} ]]
 	then
-		echo REMOTE=1 | cat - "$SELF_PATH" | ssh "$VM_USER@$VM_ADDR" -- bash -s "${@:2}"
+		echo REMOTE=1 | cat - "$SELF" | ssh "$VM_USER@$VM_ADDR" -- bash -s "${@:2}"
 	else
-		echo "echo REMOTE=1 | cat - $SELF_PATH | ssh $VM_USER@$VM_ADDR -- bash -s ${@:2}" >&2
+		echo "echo REMOTE=1 | cat - $SELF | ssh $VM_USER@$VM_ADDR -- bash -s ${@:2}" >&2
 	fi
 }
 
@@ -269,8 +257,7 @@ function dockerize {
 	then
 		"$@"
 	else
-		declare SELF_PATH="$(self)"
-		declare SELF_NAME="$(basename "$SELF_PATH")"
+		declare SELF_NAME="$(basename "$SELF")"
 
 		- docker run --rm -it \
 			-v "$SELF_PATH":/bin/"$SELF_NAME" \
@@ -280,11 +267,6 @@ function dockerize {
 			mcr.microsoft.com/azure-cli \
 			bash "${@:+$SELF_NAME}" "$@"
 	fi
-}
-
-function self {
-	realpath "$0" 2>/dev/null || which "$0" 2>/dev/null
-	return "$?"
 }
 
 function - {
