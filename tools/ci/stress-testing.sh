@@ -260,7 +260,7 @@ function dockerize {
 		declare SELF_NAME="$(basename "$SELF")"
 
 		- docker run --rm -it \
-			-v "$SELF_PATH":/bin/"$SELF_NAME" \
+			-v "$SELF":/bin/"$SELF_NAME" \
 			-v "$HOME"/.azure:/root/.azure \
 			-v "$HOME"/.azure/ssh:/root/.ssh \
 			-e DOCKERIZED=1 \
