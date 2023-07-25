@@ -10,12 +10,14 @@ set -e
 TIMEOUT=${TIMEOUT:-"60"}
 SERVER_IP=${SERVER_IP:-"localhost"}
 
+QDRANT_API_KEY=${QDRANT_API_KEY:-""}
+
 
 START_TIMESTAMP=$(date +%s)
 
 echo "Waiting for qdrant node to start on $SERVER_IP"
 
-until [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://${SERVER_IP}:6333 )" == "200" ]]; do
+until [[ "$(curl -s -o /dev/null -w ''%{http_code}'' -H "api-key: ${QDRANT_API_KEY}" http://${SERVER_IP}:6333 )" == "200" ]]; do
     echo "Waiting for qdrant node to start on $SERVER_IP"
     sleep 2
 
