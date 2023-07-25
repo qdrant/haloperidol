@@ -17,7 +17,7 @@ BFB_PARAMETERS=" \
     ${QDRANT_URIS[@]/#/--uri } \
     --keywords 10 \
     --dim 768 \
-    -n 10000 \
+    -n 1000 \
     --threads 1 \
     --parallel 1 \
     --quantization scalar \
@@ -41,5 +41,5 @@ docker run \
     --name ${BFB_CONTAINER_NAME} \
     -e QDRANT_API_KEY=${QDRANT_API_KEY} \
     ${BFB_IMAGE_NAME} \
-    ./bfb ${BFB_PARAMETERS}
+    bash -c "while ./bfb ${BFB_PARAMETERS}; do sleep 10; done"
 
