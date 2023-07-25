@@ -2,18 +2,13 @@
 
 set -e
 
-QDRANT_HOSTS=("http://localhost:6333" "http://localhost:6343" "http://localhost:6353")
+QDRANT_HOSTS=( $QDRANT_HOSTS ) # Unescaped parameter expansion
+
 BFB_CONTAINER_NAME="bfb-upload"
 BFB_IMAGE_NAME="qdrant/bfb:latest"
 
-# Join all hosts as cli arguments
-QDRANT_URIS=""
 
-
-for host in "${QDRANT_HOSTS[@]}"
-do
-    QDRANT_URIS="${QDRANT_URIS} --uri ${host}"
-done
+QDRANT_URIS=( ${QDRANT_HOSTS/#/--uri } ) # Unescaped parameter expansion
 
 
 BFB_PARAMETERS=" \
@@ -46,4 +41,4 @@ docker run \
     --name ${BFB_CONTAINER_NAME} \
     ${BFB_IMAGE_NAME} \
     ./bfb ${BFB_PARAMETERS}
- 
+
