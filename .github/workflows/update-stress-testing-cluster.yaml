@@ -18,7 +18,7 @@ jobs:
         run: |
           bash -x tools/ci/install-tools.sh
           bash -x tools/ci/install-hcloud.sh
-      - name: Benches
+      - name: Run update cluster
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
-          bash -x tools/ci/update-stress-testing-cluster.sh
+          bash -x tools/run-qdrant-cluster.sh
