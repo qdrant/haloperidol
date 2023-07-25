@@ -24,7 +24,7 @@ BFB_PARAMETERS=" \
     --quantization scalar \
     --timing-threshold 1 \
     --max-id 100000 \
-    --delay 200
+    --delay 200 \
 "
 
 docker stop -t 10 ${BFB_CONTAINER_NAME} || true

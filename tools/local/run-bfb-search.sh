@@ -27,7 +27,7 @@ BFB_PARAMETERS=" \
     --skip-wait-index \
     --search \
     --search-limit 10 \
-    --quantization-rescore true
+    --quantization-rescore true \
 "
 
 
