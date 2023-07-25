@@ -17,7 +17,7 @@ jobs:
       - name: Install tools
         run: |
           bash -x tools/ci/install-hcloud.sh
-      - name: Update bfb
+      - name: Check bfb status
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           bash -x tools/check-bfb-status.sh

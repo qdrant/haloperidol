@@ -3,7 +3,7 @@
 set -euo pipefail
 
 function self {
-	[[ ${BASH_SOURCE[0]} != bash ]] && { realpath "${BASH_SOURCE[0]}" || which "${BASH_SOURCE[0]}" }
+	realpath "${BASH_SOURCE[0]}" || which "${BASH_SOURCE[0]}"
 	return "$?"
 }
 
