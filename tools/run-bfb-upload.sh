@@ -16,6 +16,9 @@ declare RUN_REMOTE="$ROOT/run_remote.sh"
 declare HETZNER="$ROOT/clouds/hetzner"
 declare GET_PRIVATE_IP="$HETZNER/get_private_ip.sh"
 
+declare LOCAL="$ROOT/local"
+declare RUN_BFB_UPLOAD="$LOCAL/run-bfb-upload.sh"
+
 
 declare QDRANT_HOSTS=()
 
