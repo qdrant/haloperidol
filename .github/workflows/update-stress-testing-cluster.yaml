@@ -26,3 +26,19 @@ jobs:
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           bash -x tools/run-bfb-upload.sh
+
+  update-bfb-upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Install tools
+        run: |
+          bash -x tools/ci/install-tools.sh
+          bash -x tools/ci/install-hcloud.sh
+      - name: Update bfb
+        run: |
+          export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
+          bash -x tools/run-bfb-upload.sh
