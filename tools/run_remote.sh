@@ -33,5 +33,5 @@ SERVER_IP=$(bash $SCRIPT_PATH/clouds/$CLOUD_NAME/get_public_ip.sh $SERVER_NAME)
 
 
 
-echo $ENV_CONTEXT | cat - "$RUN_SCRIPT" | ssh -oStrictHostKeyChecking=no "$SSH_USER@$SERVER_IP" bash
+echo $ENV_CONTEXT | cat - "$RUN_SCRIPT" | ssh -oStrictHostKeyChecking=no "$SSH_USER@$SERVER_IP" bash -x
 
