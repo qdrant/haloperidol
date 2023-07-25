@@ -17,14 +17,15 @@ BFB_PARAMETERS=" \
     --keywords 10 \
     --dim 768 \
     -n 1000000000 \
-    --batch-size 10 \
+    --batch-size 50 \
     --threads 1 \
     --parallel 1 \
     --wait-on-upsert \
     --quantization scalar \
     --timing-threshold 1 \
+    --on-disk-vectors true \
     --max-id 100000 \
-    --delay 200 \
+    --delay 100 \
 "
 
 docker stop -t 10 ${BFB_CONTAINER_NAME} || true
