@@ -52,7 +52,6 @@ fi
 docker run \
     -d \
     --network host \
-    --restart unless-stopped \
     -v $(pwd)/storage:/qdrant/storage \
     -e QDRANT__CLUSTER__ENABLED=true \
     ${API_KEY_ENV} \
