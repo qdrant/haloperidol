@@ -9,11 +9,12 @@ BFB_IMAGE_NAME="qdrant/bfb:latest"
 
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 
-QDRANT_URIS=( ${QDRANT_HOSTS[@]/#/--uri } ) # Unescaped parameter expansion
 
+QDRANT_URIS=( ${QDRANT_HOSTS[@]/#/http://} )
+QDRANT_URIS=( ${QDRANT_URIS[@]/%/:6334} )
 
 BFB_PARAMETERS=" \
-    ${QDRANT_URIS} \
+    ${QDRANT_URIS[@]/#/--uri } \
     --keywords 10 \
     --dim 768 \
     -n 10000 \
