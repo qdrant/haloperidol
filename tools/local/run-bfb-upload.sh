@@ -8,8 +8,11 @@ BFB_IMAGE_NAME="qdrant/bfb:latest"
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 
 
+QDRANT_URIS=( ${QDRANT_HOSTS[@]/#/https://} )
+QDRANT_URIS=( ${QDRANT_URIS[@]/%/:6334} )
+
 BFB_PARAMETERS=" \
-    ${QDRANT_HOSTS[@]/#/--uri } \
+    ${QDRANT_URIS[@]/#/--uri } \
     --replication-factor 2 \
     --keywords 10 \
     --dim 768 \
@@ -23,7 +26,6 @@ BFB_PARAMETERS=" \
     --max-id 100000 \
     --delay 200
 "
-
 
 docker stop -t 10 ${BFB_CONTAINER_NAME} || true
 
