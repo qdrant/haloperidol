@@ -24,11 +24,10 @@ declare QDRANT_HOSTS=()
 
 for IDX in $(seq 3)
 do
-    echo qdrant-node-"$IDX"
     QDRANT_HOSTS+=( "$("$GET_PRIVATE_IP" qdrant-node-"$IDX")" )
 done
 
 ENV_CONTEXT="QDRANT_HOSTS='${QDRANT_HOSTS[@]}'" \
 RUN_SCRIPT="$RUN_BFB_UPLOAD" \
 SERVER_NAME=qdrant-manager \
-"$RUN_REMOTE"
+bash -x "$RUN_REMOTE"
