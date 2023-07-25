@@ -7,7 +7,6 @@
 # Path to current script
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-
 CLOUD_NAME=${CLOUD_NAME:-"hetzner"}
 
 
@@ -17,12 +16,4 @@ SERVER_NAME=qdrant-node-1 bash -x $SCRIPT_PATH/clouds/$CLOUD_NAME/create_and_ins
 SERVER_NAME=qdrant-node-2 bash -x $SCRIPT_PATH/clouds/$CLOUD_NAME/create_and_install.sh
 SERVER_NAME=qdrant-node-3 bash -x $SCRIPT_PATH/clouds/$CLOUD_NAME/create_and_install.sh
 SERVER_NAME=qdrant-manager bash -x $SCRIPT_PATH/clouds/$CLOUD_NAME/create_and_install.sh
-
-
-
-# After machines are created, it should run qdrant cluster on them:
-
-# - Run first node with --url and no --bootstrap
-# - Run other nodes with --bootstrap parameter as a private ip of the first node
-
 

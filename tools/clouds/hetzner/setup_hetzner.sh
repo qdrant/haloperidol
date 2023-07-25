@@ -11,7 +11,8 @@ apt-get install -y \
     ca-certificates \
     curl \
     gnupg \
-    lsb-release
+    lsb-release \
+    jq
 
 mkdir -p /etc/apt/keyrings
 
