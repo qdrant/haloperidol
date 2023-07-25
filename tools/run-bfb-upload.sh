@@ -17,7 +17,7 @@ declare GET_PRIVATE_IP="$HETZNER/get_private_ip.sh"
 
 declare QDRANT_HOSTS=()
 
-for IDX in "$(seq 3)"
+for IDX in $(seq 3)
 do
     QDRANT_HOSTS+=( "$("$GET_PRIVATE_IP" qdrant-node-"$IDX")" )
 done
