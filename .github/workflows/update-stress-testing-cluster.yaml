@@ -21,4 +21,5 @@ jobs:
       - name: Update Qdrant cluster
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
+          export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
           bash -x tools/run-qdrant-cluster.sh
