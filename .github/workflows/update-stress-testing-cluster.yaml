@@ -1,0 +1,20 @@
+name: Update Stress Testing Cluster
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "00 23 * * *"
+
+jobs:
+  update-stress-testing-cluster:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Benches
+        run: |
+          export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
+          bash -x tools/ci/update-stress-testing-cluster.sh
