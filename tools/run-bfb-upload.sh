@@ -22,12 +22,14 @@ declare RUN_BFB_UPLOAD="$LOCAL/run-bfb-upload.sh"
 
 declare QDRANT_HOSTS=()
 
+QDRANT_API_KEY=${QDRANT_API_KEY:-""}
+
 for IDX in $(seq 3)
 do
     QDRANT_HOSTS+=( "$("$GET_PRIVATE_IP" qdrant-node-"$IDX")" )
 done
 
-ENV_CONTEXT="${QDRANT_HOSTS[@]@A}" \
+ENV_CONTEXT="${QDRANT_HOSTS[@]@A} ${QDRANT_API_KEY@A}" \
 RUN_SCRIPT="$RUN_BFB_UPLOAD" \
 SERVER_NAME=qdrant-manager \
 bash -x "$RUN_REMOTE"
