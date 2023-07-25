@@ -37,7 +37,7 @@ docker rmi -f ${BFB_IMAGE_NAME} || true
 
 
 docker run \
-    -it \
+    -d \
     --network host \
     --name ${BFB_CONTAINER_NAME} \
     -e QDRANT_API_KEY=${QDRANT_API_KEY} \
