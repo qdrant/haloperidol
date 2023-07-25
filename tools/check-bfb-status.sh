@@ -10,6 +10,19 @@ function self {
 declare SELF="$(self)"
 declare ROOT="$(dirname "$SELF")"
 
-RUN_SCRIPT="$ROOT/local/check-bfb-status.sh" \
-SERVER_NAME=qdrant-manager \
-bash -x "$ROOT/run_remote.sh"
+RUN_SCRIPT="$ROOT/local/check-docker-exit-code.sh"
+
+CONTAINER_NAME=bfb-upload
+
+RUN_SCRIPT=$RUN_SCRIPT \
+	ENV_CONTEXT="${CONTAINER_NAME@A}" \
+	SERVER_NAME=qdrant-manager \
+	bash -x "$ROOT/run_remote.sh"
+
+
+CONTAINER_NAME=bfb-search
+
+RUN_SCRIPT=$RUN_SCRIPT \
+	ENV_CONTEXT="${CONTAINER_NAME@A}" \
+	SERVER_NAME=qdrant-manager \
+	bash -x "$ROOT/run_remote.sh"
