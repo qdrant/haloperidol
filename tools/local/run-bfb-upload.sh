@@ -24,7 +24,7 @@ BFB_PARAMETERS=" \
     --quantization scalar \
     --timing-threshold 1 \
     --on-disk-vectors true \
-    --max-id 100000 \
+    --max-id 200000 \
     --delay 100 \
 "
 
