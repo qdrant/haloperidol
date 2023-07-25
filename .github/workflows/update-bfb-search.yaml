@@ -1,4 +1,4 @@
-name: Update BFB Upload
+name: Update BFB Search
 
 on:
   repository_dispatch:
@@ -7,7 +7,7 @@ on:
   #   - cron: "00 23 * * *"
 
 jobs:
-  update-bfb-upload:
+  update-bfb-search:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
