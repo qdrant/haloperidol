@@ -14,6 +14,10 @@ jobs:
       - uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Install tools
+        run: |
+          bash -x tools/ci/install-tools.sh
+          bash -x tools/ci/install-hcloud.sh
       - name: Benches
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
