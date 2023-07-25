@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 QDRANT_HOSTS=( $QDRANT_HOSTS ) # Unescaped parameter expansion
 
