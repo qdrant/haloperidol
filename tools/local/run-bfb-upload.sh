@@ -2,14 +2,14 @@
 
 set -euo pipefail
 
-QDRANT_HOSTS=( $QDRANT_HOSTS ) # Unescaped parameter expansion
+QDRANT_HOSTS_ARRAY=( $QDRANT_HOSTS ) # Unescaped parameter expansion
 
 BFB_CONTAINER_NAME="bfb-upload"
 BFB_IMAGE_NAME="qdrant/bfb:latest"
 
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 
-QDRANT_URIS=( ${QDRANT_HOSTS[@]/#/--uri } ) # Unescaped parameter expansion
+QDRANT_URIS=( ${QDRANT_HOSTS_ARRAY[@]/#/--uri } ) # Unescaped parameter expansion
 
 
 BFB_PARAMETERS=" \
