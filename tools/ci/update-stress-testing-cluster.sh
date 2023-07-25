@@ -37,7 +37,7 @@ function update-bfb-upload {
 
 	ENV_CONTEXT="QDRANT_HOSTS='${QDRANT_HOSTS[@]}'" \
 	RUN_SCRIPT="$RUN_QDRANT_NODE" \
-	SERVER_NAME=qdrant-bfb-upload \
+	SERVER_NAME=qdrant-manager \
 	"$RUN_REMOTE"
 }
 
