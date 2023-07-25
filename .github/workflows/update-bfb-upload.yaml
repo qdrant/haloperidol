@@ -3,8 +3,8 @@ name: Update BFB Upload
 on:
   repository_dispatch:
   workflow_dispatch:
-  # schedule:
-  #   - cron: "00 23 * * *"
+  schedule:
+    - cron: "20 23 * * *"
 
 jobs:
   update-bfb-upload:

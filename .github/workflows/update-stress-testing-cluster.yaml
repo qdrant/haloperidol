@@ -3,8 +3,8 @@ name: Update Stress Testing Cluster
 on:
   repository_dispatch:
   workflow_dispatch:
-  # schedule:
-  #   - cron: "00 23 * * *"
+  schedule:
+    - cron: "00 23 * * *"
 
 jobs:
   update-stress-testing-cluster:
