@@ -9,6 +9,18 @@ then
     exit 1
 fi
 
+# Check if container is running
+
+RUNNING=$(docker inspect --format="{{ .State.Running }}" $CONTAINER_NAME 2> /dev/null)
+
+# Error out if container is not running
+
+if [ "$RUNNING" != "true" ]; then
+    echo "Container $CONTAINER_NAME is not running"
+    exit 1
+fi
+
+
 # Check the exit code of the container
 # And if it is not 0, error out
 
