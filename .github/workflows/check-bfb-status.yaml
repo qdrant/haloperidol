@@ -1,4 +1,4 @@
-name: Check BFB Status
+name: Check bfb status
 
 on:
   repository_dispatch:
@@ -7,7 +7,7 @@ on:
     - cron: "20 * * * *"
 
 jobs:
-  check-bfb-status:
+  Check bfb status:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
