@@ -1,8 +1,6 @@
 #!/bin/bash
 
-set -e
-
-QDRANT_HOSTS=( $QDRANT_HOSTS ) # Unescaped parameter expansion
+set -euo pipefail
 
 BFB_CONTAINER_NAME="bfb-search"
 BFB_IMAGE_NAME="qdrant/bfb:latest"
