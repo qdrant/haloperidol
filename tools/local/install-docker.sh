@@ -1,5 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
+set -euo pipefail
+
+if which docker &>/dev/null
+then
+    echo "Docker is already installed" >&2
+    exit 0
+fi
 
 sudo apt-get update
 sudo apt-get install -y ca-certificates curl gnupg jq
@@ -22,4 +29,3 @@ sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 sudo usermod "$USER" -aG docker
-
