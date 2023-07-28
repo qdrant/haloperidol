@@ -21,6 +21,7 @@ BFB_PARAMETERS=" \
     --threads 1 \
     --parallel 1 \
     --wait-on-upsert \
+    --create-if-missing \
     --quantization scalar \
     --timing-threshold 1 \
     --on-disk-vectors true \
