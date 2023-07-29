@@ -1,9 +1,11 @@
-#!/usr/bin/env bash
+#!/bin/bash
+set -e
 
-set -euo pipefail
 
-QDRANT_CONTAINER_NAME="${1:-qdrant}"
+QDRANT_CONTAINER_NAME=${QDRANT_CONTAINER_NAME:-"qdrant-node"}
+docker restart -t 0 ${QDRANT_CONTAINER_NAME}
 
-docker restart -t 0 "$QDRANT_CONTAINER_NAME"
 sleep 1
-docker restart -t 0 "$QDRANT_CONTAINER_NAME"
+
+docker restart -t 0 ${QDRANT_CONTAINER_NAME}
+

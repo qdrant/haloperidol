@@ -1,4 +1,4 @@
-name: Update Qdrant cluster
+name: Update Stress Testing Cluster
 
 on:
   repository_dispatch:
@@ -7,7 +7,7 @@ on:
     - cron: "00 23 * * *"
 
 jobs:
-  Update Qdrant cluster:
+  update-stress-testing-cluster:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

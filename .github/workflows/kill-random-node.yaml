@@ -1,4 +1,4 @@
-name: Kill random Qdrant node
+name: Kill random node
 
 on:
   repository_dispatch:
@@ -7,7 +7,7 @@ on:
     - cron: "15 * * * *"
 
 jobs:
-  Kill random Qdrant node:
+  update-bfb-upload:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -18,7 +18,7 @@ jobs:
         run: |
           bash -x tools/ci/install-tools.sh
           bash -x tools/ci/install-hcloud.sh
-      - name: Kill random Qdrant node
+      - name: Update bfb
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           bash -x tools/kill-random-node.sh

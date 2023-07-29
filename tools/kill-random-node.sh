@@ -1,13 +1,19 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-set -euo pipefail
+
+set -e
 
 # Select random node, ssh to it and restart qdrant with docker restart
 
-SELF="$(realpath "${BASH_SOURCE[0]}")"
-ROOT="$(dirname "$SELF")"
+SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+CLOUD_NAME=${CLOUD_NAME:-"hetzner"}
 
 
-IDX=$((RANDOM % 3 + 1))
+SERVER_IDX=$(( ( RANDOM % 3 )  + 1 ))
 
-bash -x "$ROOT"/run-remote.sh qdrant-node-"$IDX" "$ROOT"/local/restart-qdrant-node.sh
+SERVER_NAME="qdrant-node-${SERVER_IDX}"
+
+
+RUN_SCRIPT="${SCRIPT_PATH}/local/restart-qdrant-node.sh" SERVER_NAME=${SERVER_NAME} bash -x $SCRIPT_PATH/run_remote.sh
+
+
