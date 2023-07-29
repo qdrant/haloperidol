@@ -1,31 +1,35 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-set -euo pipefail
+
+set -e
 
 # This script tries to reach qdrant node for a given IP address until it is available
 
-QDRANT_API_KEY="${QDRANT_API_KEY-}"
-
-SERVER_ADDR="${1:-localhost:6333}"
-TIMEOUT="${2:-60}"
 
 
-START_TIMESTAMP="$(date +%s)"
+TIMEOUT=${TIMEOUT:-"60"}
+SERVER_IP=${SERVER_IP:-"localhost"}
 
-echo "Waiting for qdrant node to start on $SERVER_ADDR"
+QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 
-until [[ "$(curl -s "http://$SERVER_ADDR" -H "api-key: $QDRANT_API_KEY" -w ''%{http_code}'' -o /dev/null)" == 200 ]]
-do
-    echo "Waiting for qdrant node to start on $SERVER_ADDR"
+
+START_TIMESTAMP=$(date +%s)
+
+echo "Waiting for qdrant node to start on $SERVER_IP"
+
+until [[ "$(curl -s -o /dev/null -w ''%{http_code}'' -H "api-key: ${QDRANT_API_KEY}" http://${SERVER_IP}:6333 )" == "200" ]]; do
+    echo "Waiting for qdrant node to start on $SERVER_IP"
     sleep 2
 
-    ELAPSED_TIME=$(("$(date +%s)" - START_TIMESTAMP))
+    ELAPSED_TIME=$(($(date +%s) - $START_TIMESTAMP))
 
-    if (( ELAPSED_TIME > TIMEOUT ))
-    then
+    if [[ "$ELAPSED_TIME" -gt "$TIMEOUT" ]]; then
         echo "Timeout reached"
         exit 1
     fi
 done
 
-echo "Qdrant node is started on $SERVER_ADDR"
+
+echo "Qdrant node is started on $SERVER_IP"
+
+
