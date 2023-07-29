@@ -7,7 +7,7 @@ on:
     - cron: "00 23 * * *"
 
 jobs:
-  Update Qdrant cluster:
+  update-qdrant-cluster:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

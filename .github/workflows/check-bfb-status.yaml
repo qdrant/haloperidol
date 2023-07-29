@@ -7,7 +7,7 @@ on:
     - cron: "20 * * * *"
 
 jobs:
-  Check bfb status:
+  check-bfb-status:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
