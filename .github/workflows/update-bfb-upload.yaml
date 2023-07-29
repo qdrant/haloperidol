@@ -1,4 +1,4 @@
-name: Update BFB Upload
+name: Update bfb upload
 
 on:
   repository_dispatch:
@@ -7,7 +7,7 @@ on:
     - cron: "20 23 * * *"
 
 jobs:
-  update-bfb-upload:
+  Update bfb upload:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -23,4 +23,3 @@ jobs:
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
           bash -x tools/run-bfb-upload.sh
-

@@ -1,32 +1,25 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
 
-CONTAINER_NAME=${CONTAINER_NAME:-""}
+set -euo pipefail
 
-if [[ -z "$CONTAINER_NAME" ]]
-then
-    echo "Please specify CONTAINER_NAME env variable"
-    exit 1
-fi
+CONTAINER_NAME="$1"
 
 # Check if container is running
-
-RUNNING=$(docker inspect --format="{{ .State.Running }}" $CONTAINER_NAME 2> /dev/null)
+IS_RUNNING="$(docker inspect "$CONTAINER_NAME" --format='{{ .State.Running }}' 2>/dev/null)"
 
 # Error out if container is not running
-
-if [ "$RUNNING" != "true" ]; then
-    echo "Container $CONTAINER_NAME is not running"
+if [[ $IS_RUNNING != true ]]
+then
+    echo "Container $CONTAINER_NAME is not running" >&2
     exit 1
 fi
 
+# Check the exit code of the container...
+EXIT_CODE="$(docker inspect "$CONTAINER_NAME" --format='{{ .State.ExitCode }}')"
 
-# Check the exit code of the container
-# And if it is not 0, error out
-
-EXIT_CODE=$(docker inspect -f '{{.State.ExitCode}}' $CONTAINER_NAME)
-
-if [ "$EXIT_CODE" != "0" ]; then
-    echo "Container $CONTAINER_NAME failed with exit code $EXIT_CODE"
-    exit $EXIT_CODE
+# ...and if it is not 0, error out
+if [[ $EXIT_CODE != 0 ]]
+then
+    echo "Container $CONTAINER_NAME failed with exit code $EXIT_CODE" >&2
+    exit "$EXIT_CODE"
 fi
