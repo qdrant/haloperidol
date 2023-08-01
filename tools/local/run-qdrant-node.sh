@@ -3,7 +3,7 @@ set -e
 
 # This script is used to perform version update of the running qdrant instance.
 
-QDRANT_TAG=${QDRANT_TAG:-"skip-outdated-raft-heartbeats"}
+QDRANT_TAG=${QDRANT_TAG:-"dev"}
 QDRANT_IMAGE="qdrant/qdrant:${QDRANT_TAG}"
 QDRANT_CONTAINER_NAME=${QDRANT_CONTAINER_NAME:-"qdrant-node"}
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
