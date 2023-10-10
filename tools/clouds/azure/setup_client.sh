@@ -23,9 +23,9 @@ fi
 cd vector-db-benchmark
 ls
 git checkout feat/benchmark-upgrades && git pull
-nohup python3 -m poetry run python run.py --engines "${VECTOR_DB}-m-*-ef-*" --datasets $DATASET --host $PRIVATE_SERVER_IP > output.log 2>&1 &
+#
+nohup python3 -m poetry run python run.py --engines "${VECTOR_DB}-m-*-ef-*" --datasets $DATASET --host $PRIVATE_SERVER_IP >> ${VECTOR_DB}.log 2>&1 &
 PID_BENCHMARK=$!
-echo $PID_BENCHMARK > run.pid
+echo $PID_BENCHMARK > benchmark.pid
 # wait for the benchmark to finish
-while ps -p $PID_BENCHMARK > /dev/null; do sleep 1; done
-# wait $PID_BENCHMARK
+wait $PID_BENCHMARK
