@@ -1,12 +1,13 @@
 #!/bin/bash
 
 set -e
+set -x
 
 VECTOR_DB=${1:-qdrant}
 
 # Install docker and docker-compose if not installed
 
-if [! -x "$(command -v docker)" ];
+if [! -x "$(command -v docker)" ]; then
     apt-get update
     apt-get install -y \
         ca-certificates \
@@ -29,12 +30,12 @@ if [! -x "$(command -v docker)" ];
 
     docker run hello-world
     docker-compose --version
-endif
+fi
 
 # Clone the benchmark repo if not cloned yet
 if [! -d "vector-db-benchmark" ]; then
     git clone https://github.com/qdrant/vector-db-benchmark
-endif
+fi
 
 # Run database in docker:
 cd vector-db-benchmark
