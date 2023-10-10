@@ -14,8 +14,6 @@ PUBLIC_CLIENT_IP=$2
 PRIVATE_SERVER_IP=$3
 DATASET=$4
 
-# ./setup.sh 74.235.202.27 74.235.201.54 10.1.0.6 glove-100-angular
-
 # if either of the above vars are not set, throw error with var name:
 if [ -z "$PUBLIC_SERVER_IP" ] || [ -z "$PUBLIC_CLIENT_IP" ] || [ -z "$PRIVATE_SERVER_IP" ]; then
     echo "ERROR: one or more of the following variables are not set: PUBLIC_SERVER_IP, PUBLIC_CLIENT_IP, PRIVATE_SERVER_IP"
