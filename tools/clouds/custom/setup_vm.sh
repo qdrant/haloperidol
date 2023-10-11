@@ -27,3 +27,7 @@ apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
 docker run hello-world
+
+# Install poetry
+apt install -y python3-pip
+python3 -m pip install poetry
