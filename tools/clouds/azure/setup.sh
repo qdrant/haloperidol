@@ -35,5 +35,7 @@ vectordbs=("qdrant" "weaviate" "milvus")
 for vdb in "${vectordbs[@]}"; do
     echo $vdb
     ssh "${SSH_USER}@${PUBLIC_SERVER_IP}" "sudo bash /home/${SSH_USER}/setup_server.sh ${vdb}"
+    # TODO: how to supress this kind of error and move to next config/db:
+    # Connection to 74.235.201.54 closed by remote host.
     ssh "${SSH_USER}@${PUBLIC_CLIENT_IP}" "bash /home/${SSH_USER}/setup_client.sh ${vdb} ${DATASET} ${PRIVATE_SERVER_IP}"
 done
