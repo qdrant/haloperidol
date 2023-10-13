@@ -13,5 +13,8 @@ fi
 cd vector-db-benchmark
 git checkout $BRANCH && git pull
 
+# stop all running containers:
+docker stop $(docker ps -q)
+
 cd engine/servers/${VECTOR_DB}-single-node
 docker compose up -d
