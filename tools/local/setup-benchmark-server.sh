@@ -34,7 +34,7 @@ db_health_urls["elasticsearch"]="http://localhost:9200/_cluster/health"
 if [ -n "${db_health_urls[$VECTOR_DB]}" ]; then
     url="${db_health_urls[$VECTOR_DB]}"
     # Retry logic for the specified URL
-    curl --max-time 120 --retry-connrefused --retry 5 --retry-delay 10 "$url"
+    curl --max-time 120 --retry-connrefused --retry 10 --retry-delay 10 "$url"
 else
     echo "Assuming engine $VECTOR_DB is already up"
 fi
