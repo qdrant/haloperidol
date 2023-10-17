@@ -27,10 +27,11 @@ docker compose up -d
 sleep 10 # OR Use retry curl on "Connection refused" or "Connection reset by peer"
 # wait for the engine to start
 if [ "$VECTOR_DB" == "milvus" ]; then
-    curl --max-time 120 http://localhost:19530/v1/vector/collections
+    # curl --max-time 120 --retry-all-errors --retry 5 --retry-delay 10 http://localhost:19530/v1/vector/collections
+    curl --max-time 120 --retry-connrefused --retry 5 --retry-delay 10 http://localhost:19530/v1/vector/collections
 elif [ "$VECTOR_DB" == "qdrant" ]; then
-    curl --max-time 120 http://localhost:6333
+    curl --max-time 120 --retry-connrefused --retry 5 --retry-delay 10 http://localhost:6333
 elif [ "$VECTOR_DB" == "elasticsearch" ]; then
     sleep 15 # FIXME: detect "connection reset by peer and retry" instead of sleeping
-    curl --max-time 120 http://localhost:9200/_cluster/health
+    curl --max-time 120 --retry-connrefused --retry 5 --retry-delay 10 http://localhost:9200/_cluster/health
 fi
