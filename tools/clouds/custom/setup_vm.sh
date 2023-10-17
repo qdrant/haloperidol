@@ -31,3 +31,4 @@ docker run hello-world
 # Install poetry
 apt install -y python3-pip
 python3 -m pip install poetry
+python3 -m poetry --version
