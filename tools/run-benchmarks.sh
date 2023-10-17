@@ -18,27 +18,23 @@ BRANCH="feat/benchmark-upgrades"
 #     SERVER_NAME=benchmark-server-${dataset} bash -x $SCRIPT_PATH/clouds/$CLOUD_NAME/create_and_install.sh
 # done
 
-function run_benchmarks {
-    DATASET=$1
-    SERVER_NAME=$2
+DATASET=$1
+SERVER_NAME=$2
 
-    # replace "server" with "client" if 3rd argument is not passed
-    CLIENT_NAME=${3:-"${SERVER_NAME/server/client}"}
-    PRIVATE_SERVER_IP=$(bash $SCRIPT_PATH/clouds/$CLOUD_NAME/get_private_ip.sh $SERVER_NAME)
+# replace "server" with "client" if 3rd argument is not passed
+CLIENT_NAME=${3:-"${SERVER_NAME/server/client}"}
+PRIVATE_SERVER_IP=$(bash $SCRIPT_PATH/clouds/$CLOUD_NAME/get_private_ip.sh $SERVER_NAME)
 
-    for VECTOR_DB in "${VECTOR_DBS[@]}"; do
-        echo Running benchmark for ${vdb} on ${DATASET}
+for VECTOR_DB in "${VECTOR_DBS[@]}"; do
+    echo Running benchmark for ${vdb} on ${DATASET}
 
-        RUN_SCRIPT="${SCRIPT_PATH}/local/setup-benchmark-server.sh" \
-            ENV_CONTEXT="${VECTOR_DB@A} ${BRANCH@A}" \
-            SERVER_NAME=${SERVER_NAME} \
-            bash -x $SCRIPT_PATH/run_remote.sh
+    RUN_SCRIPT="${SCRIPT_PATH}/local/setup-benchmark-server.sh" \
+        ENV_CONTEXT="${VECTOR_DB@A} ${BRANCH@A}" \
+        SERVER_NAME=${SERVER_NAME} \
+        bash -x $SCRIPT_PATH/run_remote.sh
 
-        RUN_SCRIPT="${SCRIPT_PATH}/local/setup-benchmark-client.sh" \
-            ENV_CONTEXT="${VECTOR_DB@A} ${BRANCH@A} ${PRIVATE_SERVER_IP@A} ${DATASET@A}" \
-            SERVER_NAME=${CLIENT_NAME} \
-            bash -x $SCRIPT_PATH/run_remote.sh
-    done
-}
-
-run_benchmarks $1 $2 $3
+    RUN_SCRIPT="${SCRIPT_PATH}/local/setup-benchmark-client.sh" \
+        ENV_CONTEXT="${VECTOR_DB@A} ${BRANCH@A} ${PRIVATE_SERVER_IP@A} ${DATASET@A}" \
+        SERVER_NAME=${CLIENT_NAME} \
+        bash -x $SCRIPT_PATH/run_remote.sh
+done
