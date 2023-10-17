@@ -24,14 +24,17 @@ fi
 cd engine/servers/${VECTOR_DB}-single-node
 docker compose up -d
 
-sleep 10 # OR Use retry curl on "Connection refused" or "Connection reset by peer"
-# wait for the engine to start
-if [ "$VECTOR_DB" == "milvus" ]; then
-    # curl --max-time 120 --retry-all-errors --retry 5 --retry-delay 10 http://localhost:19530/v1/vector/collections
-    curl --max-time 120 --retry-connrefused --retry 5 --retry-delay 10 http://localhost:19530/v1/vector/collections
-elif [ "$VECTOR_DB" == "qdrant" ]; then
-    curl --max-time 120 --retry-connrefused --retry 5 --retry-delay 10 http://localhost:6333
-elif [ "$VECTOR_DB" == "elasticsearch" ]; then
-    sleep 15 # FIXME: detect "connection reset by peer and retry" instead of sleeping
-    curl --max-time 120 --retry-connrefused --retry 5 --retry-delay 10 http://localhost:9200/_cluster/health
+# Define a map for database types and their health check URLs
+declare -A db_health_urls
+db_health_urls["milvus"]="http://localhost:19530/v1/vector/collections"
+db_health_urls["qdrant"]="http://localhost:6333"
+db_health_urls["elasticsearch"]="http://localhost:9200/_cluster/health"
+
+# Check if the specified database type exists in the map
+if [ -n "${db_health_urls[$VECTOR_DB]}" ]; then
+    url="${db_health_urls[$VECTOR_DB]}"
+    # Retry logic for the specified URL
+    curl --max-time 120 --retry-connrefused --retry 5 --retry-delay 10 "$url"
+else
+    echo "Assuming engine $VECTOR_DB is already up"
 fi
