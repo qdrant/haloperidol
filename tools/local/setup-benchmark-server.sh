@@ -24,6 +24,10 @@ fi
 cd engine/servers/${VECTOR_DB}-single-node
 docker compose up -d
 
+if [ "$VECTOR_DB" == "milvus" ]; then
+    sleep 30 # Throws connection reset which isn't handled by --retry-connrefused in curl. So we need to wait
+fi
+
 # Define a map for database types and their health check URLs
 declare -A db_health_urls
 db_health_urls["milvus"]="http://localhost:19530/v1/vector/collections"
