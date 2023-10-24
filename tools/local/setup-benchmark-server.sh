@@ -15,16 +15,17 @@ fi
 cd vector-db-benchmark
 git checkout $BRANCH && git pull
 
-# stop all running containers:
+# remove all running containers:
 RUNNING_CONTAINERS=$(docker ps -q)
 if [ -n "$RUNNING_CONTAINERS" ]; then
-    docker stop $RUNNING_CONTAINERS
+    docker container rm -f $RUNNING_CONTAINERS
 fi
 
 cd engine/servers/${VECTOR_DB}-single-node
 docker compose up -d
 
-if [ "$VECTOR_DB" == "milvus" ]; then
+# if vector DB is milvus or elasticsearch, wait for them to be up
+if [ "$VECTOR_DB" == "milvus" ] || [ "$VECTOR_DB" == "elasticsearch" ]; then
     sleep 30 # Throws connection reset which isn't handled by --retry-connrefused in curl. So we need to wait
 fi
 
