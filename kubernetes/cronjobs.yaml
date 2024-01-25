@@ -16,11 +16,18 @@ spec:
           - name: haloperidol
             image: bitnami/kubectl:latest
             command:
-            - bash
-            - -c
-            # If you change the size of the cluster, make sure to update this random range too
-            - "kubectl delete pod qdrant-haloperidol-$(shuf -i 0-4 -n 1) -n haloperidol"
+            - /scripts/run-kill-random-node.sh
+            volumeMounts:
+              - name: scripts
+                mountPath: /scripts/
           restartPolicy: Never
+          volumes:
+          - name: scripts
+            configMap:
+              # This name must match the configMapGenerator. Kustomize will
+              # append a hash to this name based on the content of the scripts
+              name: scripts
+              defaultMode: 0777
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -35,75 +42,31 @@ spec:
       backoffLimit: 0
       template:
         metadata:
-          # These labels must match the ones on the QdrantCluster or else
-          # the NetworkPolicy will block this pod from accessing the cluster
+          # These labels are needed to bypass the NetworkPolicy
           labels:
-            app: qdrant
+            app: cluster-manager
             cluster-id: haloperidol
             customer-id: haloperidol
         spec:
           containers:
           - name: haloperidol
-            image: qdrant/bfb:latest
+            image: nixery.dev/shell/curl/jq/busybox
             env:
             - name: QDRANT_URL
               value: http://qdrant-haloperidol.haloperidol.svc.cluster.local:6333
             command:
-            - bash
-            - -x
-            - /tools/local/run-snapshots.sh
+            - /scripts/run-snapshots.sh
             volumeMounts:
-              - name: local-scripts
-                mountPath: /tools/local/
+              - name: scripts
+                mountPath: /scripts/
           restartPolicy: Never
           volumes:
-          - name: local-scripts
+          - name: scripts
             configMap:
               # This name must match the configMapGenerator. Kustomize will
               # append a hash to this name based on the content of the scripts
-              name: local-scripts
----
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: bfb-search
-  namespace: haloperidol
-spec:
-  # Daily at 23:10 UTC
-  schedule: "10 23 * * *"
-  jobTemplate:
-    spec:
-      backoffLimit: 0
-      template:
-        metadata:
-          # These labels must match the ones on the QdrantCluster or else
-          # the NetworkPolicy will block this pod from accessing the cluster
-          labels:
-            app: qdrant
-            cluster-id: haloperidol
-            customer-id: haloperidol
-        spec:
-          containers:
-          - name: haloperidol
-            image: qdrant/bfb:latest
-            env:
-            - name: QDRANT_URL
-              value: http://qdrant-haloperidol.haloperidol.svc.cluster.local:6333
-            command:
-            - bash
-            - -x
-            # TODO: update this script to just run bfb, no docker commands
-            - /tools/local/run-bfb-search.sh
-            volumeMounts:
-              - name: local-scripts
-                mountPath: /tools/local/
-          restartPolicy: Never
-          volumes:
-          - name: local-scripts
-            configMap:
-              # This name must match the configMapGenerator. Kustomize will
-              # append a hash to this name based on the content of the scripts
-              name: local-scripts
+              name: scripts
+              defaultMode: 0777
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -118,10 +81,9 @@ spec:
       backoffLimit: 0
       template:
         metadata:
-          # These labels must match the ones on the QdrantCluster or else
-          # the NetworkPolicy will block this pod from accessing the cluster
+          # These labels are needed to bypass the NetworkPolicy
           labels:
-            app: qdrant
+            app: cluster-manager
             cluster-id: haloperidol
             customer-id: haloperidol
         spec:
@@ -130,19 +92,17 @@ spec:
             image: qdrant/bfb:latest
             env:
             - name: QDRANT_URL
-              value: http://qdrant-haloperidol.haloperidol.svc.cluster.local:6333
+              value: http://qdrant-haloperidol.haloperidol.svc.cluster.local:6334
             command:
-            - bash
-            - -x
-            # TODO: update this script to just run bfb, no docker commands
-            - /tools/local/run-bfb-upload.sh
+            - /scripts/run-bfb-upload.sh
             volumeMounts:
-              - name: local-scripts
-                mountPath: /tools/local/
+              - name: scripts
+                mountPath: /scripts
           restartPolicy: Never
           volumes:
-          - name: local-scripts
+          - name: scripts
             configMap:
               # This name must match the configMapGenerator. Kustomize will
               # append a hash to this name based on the content of the scripts
-              name: local-scripts
+              name: scripts
+              defaultMode: 0777

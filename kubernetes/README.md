@@ -2,9 +2,8 @@
 
 ![A diagram of how this code runs in the staging Kubernetes cluster](./k8s-diagram.png "How this code runs in the staging Kubernetes cluster")
 
-Any Kubernetes YAML files you add or change in this folder
-will be automatically applied to the staging cluster when
-the change is committed and pushed to the "master" branch.
+Any Kubernetes YAML files change in this folder will be automatically applied
+to the staging cluster when the change is committed and pushed to the "master" branch. Any new files will also be applied if added to `kustomization.yaml`.
 
 The configuration for this can be found here: https://github.com/qdrant/qdrant-cloud/tree/main/environments/staging/apps/haloperidol
 
