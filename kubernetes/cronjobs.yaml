@@ -8,9 +8,10 @@ spec:
   schedule: "15 * * * *"
   jobTemplate:
     spec:
+      backoffLimit: 0
       template:
         spec:
-          serviceAccountName: haloperidol
+          serviceAccountName: haloperidol-sa
           containers:
           - name: haloperidol
             image: bitnami/kubectl:latest
@@ -31,14 +32,16 @@ spec:
   schedule: "25 * * * *"
   jobTemplate:
     spec:
+      backoffLimit: 0
       template:
-        spec:
+        metadata:
+          # These labels must match the ones on the QdrantCluster or else
+          # the NetworkPolicy will block this pod from accessing the cluster
           labels:
-            # These labels must match the ones on the QdrantCluster or else
-            # the NetworkPolicy will block this pod from accessing the cluster
             app: qdrant
             cluster-id: haloperidol
             customer-id: haloperidol
+        spec:
           containers:
           - name: haloperidol
             image: qdrant/bfb:latest
@@ -70,14 +73,16 @@ spec:
   schedule: "10 23 * * *"
   jobTemplate:
     spec:
+      backoffLimit: 0
       template:
-        spec:
+        metadata:
+          # These labels must match the ones on the QdrantCluster or else
+          # the NetworkPolicy will block this pod from accessing the cluster
           labels:
-            # These labels must match the ones on the QdrantCluster or else
-            # the NetworkPolicy will block this pod from accessing the cluster
             app: qdrant
             cluster-id: haloperidol
             customer-id: haloperidol
+        spec:
           containers:
           - name: haloperidol
             image: qdrant/bfb:latest
@@ -110,14 +115,16 @@ spec:
   schedule: "20 23 * * *"
   jobTemplate:
     spec:
+      backoffLimit: 0
       template:
-        spec:
+        metadata:
+          # These labels must match the ones on the QdrantCluster or else
+          # the NetworkPolicy will block this pod from accessing the cluster
           labels:
-            # These labels must match the ones on the QdrantCluster or else
-            # the NetworkPolicy will block this pod from accessing the cluster
             app: qdrant
             cluster-id: haloperidol
             customer-id: haloperidol
+        spec:
           containers:
           - name: haloperidol
             image: qdrant/bfb:latest

@@ -31,5 +31,5 @@ roleRef:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: haloperidol
+  name: haloperidol-sa
   namespace: haloperidol
