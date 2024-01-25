@@ -1,22 +1,17 @@
 resources:
+- bfb-search.yaml
+- cronjobs.yaml
 - qdrantcluster.yaml
 - rbac.yaml
-- cronjobs.yaml
 
-# This section will load the contents of scripts into a k8s ConfigMap.
+# This section will load the contents of scripts/ into a k8s ConfigMap.
 # Any changes to these files will regenerate the ConfigMap automatically.
 configMapGenerator:
-- name: local-scripts
+- name: scripts
   namespace: haloperidol
-  # To regenerate this list: `find tools/local -type f -name "*.sh"`
+  # To regenerate this list: `find scripts -type f -name "*.sh"`
   files:
-  - tools/local/run-bfb-upload.sh
-  - tools/local/check-docker-exit-code.sh
-  - tools/local/run-qdrant-node.sh
-  - tools/local/restart-qdrant-node.sh
-  - tools/local/drop-qdrant-node.sh
-  - tools/local/run-snapshots.sh
-  - tools/local/install-docker.sh
-  - tools/local/run-bfb-search.sh
-  - tools/local/run-cluster-manager.sh
-  - tools/local/install-postgres.sh
+  - scripts/run-bfb-upload.sh
+  - scripts/run-snapshots.sh
+  - scripts/run-kill-random-node.sh
+  - scripts/run-bfb-search.sh
