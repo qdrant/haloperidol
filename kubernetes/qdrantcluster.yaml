@@ -1,0 +1,36 @@
+apiVersion: qdrant.io/v1
+kind: QdrantCluster
+metadata:
+  name: qdrant-haloperidol
+  namespace: haloperidol
+  # Any pods that need to access this cluster need these labels to bypass the NetworkPolicy
+  labels:
+    app: qdrant
+    customer-id: haloperidol
+    cluster-id: haloperidol
+spec:
+  id: haloperidol
+  version: dev
+  size: 5
+  distributed: true
+  resources:
+    cpu: "0.5"
+    memory: "2Gi"
+    storage: "8Gi"
+  ingress:
+    type: host
+    host: qdrant-haloperidol
+  tolerations:
+    - key: dedicated
+      # When running locally, change this to "free-tier"
+      value: general-purpose-small
+      operator: Equal
+      effect: NoSchedule
+  nodeSelector:
+    # When running locally, change this to "free-tier"
+    dedicated: general-purpose-small
+  security:
+    fsGroup: 3000
+    group: 2000
+    user: 1000
+  servicePerNode: true

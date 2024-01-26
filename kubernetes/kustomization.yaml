@@ -1,0 +1,19 @@
+resources:
+- bfb-search.yaml
+- bfb-upload.yaml
+- cronjobs.yaml
+- qdrantcluster.yaml
+- rbac.yaml
+
+# This section will load the contents of scripts/ into a k8s ConfigMap.
+# Any changes to these files will regenerate the ConfigMap automatically.
+configMapGenerator:
+- name: scripts
+  namespace: haloperidol
+  # To regenerate this list: `find scripts -type f -name "*.sh"`
+  files:
+  - scripts/run-bfb-upload.sh
+  - scripts/run-snapshots.sh
+  - scripts/run-kill-random-node.sh
+  - scripts/run-bfb-search.sh
+  - scripts/wait-for-collection.sh

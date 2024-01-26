@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bfb-upload
+  namespace: haloperidol
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bfb-upload
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bfb-upload
+        # These labels are needed to bypass the NetworkPolicy
+        app: cluster-manager
+        cluster-id: haloperidol
+        customer-id: haloperidol
+    spec:
+      terminationGracePeriodSeconds: 1
+      containers:
+      - name: bfb-upload
+        image: qdrant/bfb:latest
+        env:
+        - name: QDRANT_URL
+          value: http://qdrant-haloperidol.haloperidol.svc.cluster.local:6334
+        command:
+        - /scripts/run-bfb-upload.sh
+        volumeMounts:
+          - name: scripts
+            mountPath: /scripts/
+      volumes:
+      - name: scripts
+        configMap:
+          # This name must match the configMapGenerator. Kustomize will
+          # append a hash to this name based on the content of the scripts
+          name: scripts
+          defaultMode: 0777
