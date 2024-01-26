@@ -1,5 +1,6 @@
 resources:
 - bfb-search.yaml
+- bfb-upload.yaml
 - cronjobs.yaml
 - qdrantcluster.yaml
 - rbac.yaml
@@ -15,3 +16,4 @@ configMapGenerator:
   - scripts/run-snapshots.sh
   - scripts/run-kill-random-node.sh
   - scripts/run-bfb-search.sh
+  - scripts/wait-for-collection.sh

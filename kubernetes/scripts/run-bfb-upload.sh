@@ -7,7 +7,7 @@ BFB_PARAMETERS=" \
     --replication-factor 2 \
     --keywords 10 \
     --dim 768 \
-    -n 1000000000 \
+    -n 1000000 \
     --batch-size 50 \
     --threads 1 \
     --parallel 1 \
@@ -20,4 +20,7 @@ BFB_PARAMETERS=" \
     --delay 100 \
 "
 
-./bfb ${BFB_PARAMETERS}
+while true; do
+    ./bfb ${BFB_PARAMETERS}
+    sleep 10
+done

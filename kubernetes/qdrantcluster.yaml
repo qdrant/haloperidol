@@ -22,10 +22,12 @@ spec:
     host: qdrant-haloperidol
   tolerations:
     - key: dedicated
+      # When running locally, change this to "free-tier"
       value: general-purpose-small
       operator: Equal
       effect: NoSchedule
   nodeSelector:
+    # When running locally, change this to "free-tier"
     dedicated: general-purpose-small
   security:
     fsGroup: 3000

@@ -10,10 +10,13 @@ spec:
     spec:
       backoffLimit: 0
       template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: kill-random-node
         spec:
           serviceAccountName: haloperidol-sa
           containers:
-          - name: haloperidol
+          - name: kill-random-node
             image: bitnami/kubectl:latest
             command:
             - /scripts/run-kill-random-node.sh
@@ -42,14 +45,15 @@ spec:
       backoffLimit: 0
       template:
         metadata:
-          # These labels are needed to bypass the NetworkPolicy
           labels:
+            app.kubernetes.io/name: run-snapshots
+            # These labels are needed to bypass the NetworkPolicy
             app: cluster-manager
             cluster-id: haloperidol
             customer-id: haloperidol
         spec:
           containers:
-          - name: haloperidol
+          - name: run-snapshots
             image: nixery.dev/shell/curl/jq/busybox
             env:
             - name: QDRANT_URL
@@ -59,45 +63,6 @@ spec:
             volumeMounts:
               - name: scripts
                 mountPath: /scripts/
-          restartPolicy: Never
-          volumes:
-          - name: scripts
-            configMap:
-              # This name must match the configMapGenerator. Kustomize will
-              # append a hash to this name based on the content of the scripts
-              name: scripts
-              defaultMode: 0777
----
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: bfb-upload
-  namespace: haloperidol
-spec:
-  # Daily at 23:20 UTC
-  schedule: "20 23 * * *"
-  jobTemplate:
-    spec:
-      backoffLimit: 0
-      template:
-        metadata:
-          # These labels are needed to bypass the NetworkPolicy
-          labels:
-            app: cluster-manager
-            cluster-id: haloperidol
-            customer-id: haloperidol
-        spec:
-          containers:
-          - name: haloperidol
-            image: qdrant/bfb:latest
-            env:
-            - name: QDRANT_URL
-              value: http://qdrant-haloperidol.haloperidol.svc.cluster.local:6334
-            command:
-            - /scripts/run-bfb-upload.sh
-            volumeMounts:
-              - name: scripts
-                mountPath: /scripts
           restartPolicy: Never
           volumes:
           - name: scripts
