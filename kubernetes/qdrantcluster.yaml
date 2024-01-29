@@ -10,7 +10,7 @@ metadata:
     cluster-id: haloperidol
 spec:
   id: haloperidol
-  version: dev
+  version: v1.7.3
   size: 5
   distributed: true
   resources:
