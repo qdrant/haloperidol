@@ -19,7 +19,7 @@ spec:
     storage: "8Gi"
   ingress:
     type: host
-    host: qdrant-haloperidol
+    host: haloperidol.eu-central.aws.staging-cloud.qdrant.io
   tolerations:
     - key: dedicated
       # When running locally, change this to "free-tier"
