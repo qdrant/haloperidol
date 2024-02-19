@@ -1,4 +1,4 @@
-name: Check BFB Status
+name: Collect cluster stats
 
 on:
   repository_dispatch:
