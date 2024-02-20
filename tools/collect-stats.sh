@@ -10,7 +10,7 @@ function self {
 declare SELF="$(self)"
 declare ROOT="$(dirname "$SELF")"
 
-RUN_SCRIPT="$ROOT/local/collect-cluster-stats.sh"
+RUN_SCRIPT="$ROOT/local/collect-stats.sh"
 
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
