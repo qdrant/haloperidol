@@ -13,7 +13,7 @@ PSQL_QUERY="INSERT INTO chaos_testing (url, version, commit, num_vectors, measur
 for uri in "${QDRANT_URIS[@]}"; do
     echo "$uri"
 
-    root_api_response=$(curl --url "$uri/")
+    root_api_response=$(curl --url "$uri/" --header "api-key: $QDRANT_API_KEY")
 
     version=$(echo "$root_api_response" | jq '.version')
     # if crashes or version null, then skip
