@@ -43,6 +43,8 @@ for uri in "${QDRANT_URIS[@]}"; do
     fi
 
     PSQL_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, '$(date -u +"%Y-%m-%dT%H:%M:%SZ")')"
+
+    sleep 1
 done
 
 # Read search results from json file and upload it to postgres
@@ -61,7 +63,5 @@ if [ -z "$PSQL_VALUES" ]; then
     echo "No values to insert"
     exit 0
 fi
-
-ping "$POSTGRES_HOST" -c 1
 
 docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing (url, version, commit, num_vectors, measure_timestamp) VALUES $PSQL_VALUES;"
