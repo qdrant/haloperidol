@@ -2,7 +2,6 @@
 set -e
 
 export QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
-declare QDRANT_HOSTS=()
 export QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 
 # Need https for chaos-testing deployments
@@ -50,5 +49,7 @@ done
 #   num_vectors INT,
 # 	measure_timestamp TIMESTAMP
 # );
+
+# FIXME: What if there's no data?
 
 docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "$PSQL_QUERY;"
