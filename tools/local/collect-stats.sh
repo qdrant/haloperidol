@@ -42,7 +42,7 @@ for uri in "${QDRANT_URIS[@]}"; do
         PSQL_VALUES+=" ,"
     fi
 
-    PSQL_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, $(date -u +"%Y-%m-%dT%H:%M:%SZ"))"
+    PSQL_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, '$(date -u +"%Y-%m-%dT%H:%M:%SZ")')"
 done
 
 # Read search results from json file and upload it to postgres
