@@ -15,13 +15,13 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     root_api_response=$(curl --url "$uri/" --header "api-key: $QDRANT_API_KEY")
 
-    version=$(echo "$root_api_response" | jq '.version' | tr -d '"')
+    version=$(echo "$root_api_response" | jq -r '.version')
     # if crashes or version null, then skip
     if [ -z "$version" ] || [ "$version" == "null" ]; then
         continue
     fi
 
-    commit_id=$(echo "$root_api_response" | jq '.commit' | tr -d '"')
+    commit_id=$(echo "$root_api_response" | jq -r '.commit')
     # if crashes or commit id null, then skip
     # FIXME: Uncomment it once we start deploying 'dev' releases
     # if [ -z "$commit_id" ] || [ "$commit_id" == "null" ]; then
@@ -32,7 +32,7 @@ for uri in "${QDRANT_URIS[@]}"; do
         --url "$uri/collections/benchmark/points/count" \
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
-        --data '{"exact": true}' | jq '.result.count' | tr -d '"')
+        --data '{"exact": true}' | jq -r '.result.count')
     if [ -z "$num_vectors" ] || [ "$num_vectors" == "null" ]; then
         continue
     fi
