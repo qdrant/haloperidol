@@ -1,13 +1,13 @@
-name: Update BFB Search
+name: Collect cluster stats
 
 on:
   repository_dispatch:
   workflow_dispatch:
   schedule:
-    - cron: "10 23 * * *"
+    - cron: "25 * * * *"
 
 jobs:
-  update-bfb-search:
+  collect-stats:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -16,11 +16,12 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Install tools
         run: |
-          bash -x tools/ci/install-tools.sh
           bash -x tools/ci/install-hcloud.sh
-      - name: Update bfb
+      - name: Collect cluster stats and store in Postgres
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
           export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL }}
-          bash -x tools/run-bfb-search.sh
+          export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
+          bash -x tools/collect-stats.sh

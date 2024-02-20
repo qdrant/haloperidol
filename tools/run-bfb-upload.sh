@@ -13,9 +13,6 @@ declare SELF="$(self)"
 declare ROOT="$(dirname "$SELF")"
 declare RUN_REMOTE="$ROOT/run_remote.sh"
 
-declare HETZNER="$ROOT/clouds/hetzner"
-declare GET_PRIVATE_IP="$HETZNER/get_private_ip.sh"
-
 declare LOCAL="$ROOT/local"
 declare RUN_BFB_UPLOAD="$LOCAL/run-bfb-upload.sh"
 
@@ -23,10 +20,10 @@ declare RUN_BFB_UPLOAD="$LOCAL/run-bfb-upload.sh"
 declare QDRANT_HOSTS=()
 
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
+QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
 
-for IDX in $(seq 3)
-do
-    QDRANT_HOSTS+=( "$("$GET_PRIVATE_IP" qdrant-node-"$IDX")" )
+for IDX in {0..4}; do
+    QDRANT_HOSTS+=("node-${IDX}-${QDRANT_CLUSTER_URL}")
 done
 
 ENV_CONTEXT="${QDRANT_HOSTS[@]@A} ${QDRANT_API_KEY@A}" \
