@@ -23,9 +23,10 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     commit_id=$(echo "$root_api_response" | jq '.commit')
     # if crashes or commit id null, then skip
-    if [ -z "$commit_id" ] || [ "$commit_id" == "null" ]; then
-        continue
-    fi
+    # FIXME: Uncomment it once we start deploying 'dev' releases
+    # if [ -z "$commit_id" ] || [ "$commit_id" == "null" ]; then
+    #     continue
+    # fi
 
     num_vectors=$(curl --request POST \
         --url "$uri/collections/benchmark/points/count" \
