@@ -7,7 +7,7 @@ QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 
 QDRANT_COLLECTION_NAME=${QDRANT_COLLECTION_NAME:-"benchmark"}
 
-QDRANT_URL=${QDRANT_URL:-"http://localhost:6333"}
+QDRANT_URL="https://${QDRANT_CLUSTER_URL}:6333"
 
 function create_and_delete_snapshot() {
     curl -X POST -H "api-key: ${QDRANT_API_KEY}" "${QDRANT_URL}/collections/${QDRANT_COLLECTION_NAME}/snapshots"
