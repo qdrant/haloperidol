@@ -4,7 +4,7 @@ set -e
 export QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
 export QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 
-# Need https for chaos-testing deployments
+# https is important here
 QDRANT_URIS=( ${QDRANT_HOSTS[@]/#/https://} )
 QDRANT_URIS=( ${QDRANT_URIS[@]/%/:6333} )
 
