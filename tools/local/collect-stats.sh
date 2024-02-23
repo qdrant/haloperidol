@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 export QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
 export QDRANT_API_KEY=${QDRANT_API_KEY:-""}
@@ -37,12 +37,23 @@ for uri in "${QDRANT_URIS[@]}"; do
         continue
     fi
 
+    snapshot_names=$(curl --request GET \
+        --url "$uri/collections/benchmark/snapshots" \
+        --header "api-key: $QDRANT_API_KEY" \
+        --header 'content-type: application/json' \
+        | jq -r '.result[].name')
+
+    num_snapshots=0
+    if [ -n "$snapshot_names" ]; then
+        num_snapshots=$(echo "$snapshot_names" | wc -l)
+    fi
+
     if [ -n "$PSQL_VALUES" ]; then
         # If there are already values, add a comma
         PSQL_VALUES+=" ,"
     fi
 
-    PSQL_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, '$(date -u +"%Y-%m-%dT%H:%M:%SZ")')"
+    PSQL_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, $num_snapshots, '$(date -u +"%Y-%m-%dT%H:%M:%SZ")')"
 
     sleep 1
 done
@@ -55,6 +66,7 @@ done
 # 	version VARCHAR(255),
 #   commit CHAR(40),
 #   num_vectors INT,
+#   num_snapshots INT,
 # 	measure_timestamp TIMESTAMP
 # );
 
@@ -64,4 +76,4 @@ if [ -z "$PSQL_VALUES" ]; then
     exit 0
 fi
 
-docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing (url, version, commit, num_vectors, measure_timestamp) VALUES $PSQL_VALUES;"
+docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing (url, version, commit, num_vectors, num_snapshots, measure_timestamp) VALUES $PSQL_VALUES;"
