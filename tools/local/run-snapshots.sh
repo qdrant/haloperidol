@@ -26,4 +26,5 @@ function run_in_loop() {
 }
 
 
-run_in_loop 2>&1 | tee output-snapshots.log &
+run_in_loop > output-snapshots.log 2>&1 &
+
