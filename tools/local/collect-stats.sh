@@ -76,4 +76,4 @@ if [ -z "$PSQL_VALUES" ]; then
     exit 0
 fi
 
-docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing (url, version, commit, num_vectors, measure_timestamp) VALUES $PSQL_VALUES;"
+docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing (url, version, commit, num_vectors, num_snapshots, measure_timestamp) VALUES $PSQL_VALUES;"
