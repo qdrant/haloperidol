@@ -7,7 +7,6 @@ BFB_IMAGE_NAME="qdrant/bfb:latest"
 
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 
-# Need https for chaos-testing deployments
 QDRANT_URIS=( ${QDRANT_HOSTS[@]/#/https://} )
 QDRANT_URIS=( ${QDRANT_URIS[@]/%/:6334} )
 
