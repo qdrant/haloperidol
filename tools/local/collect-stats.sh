@@ -3,6 +3,7 @@ set -euo pipefail
 
 export QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
 export QDRANT_API_KEY=${QDRANT_API_KEY:-""}
+NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 # https is important here
 QDRANT_URIS=( ${QDRANT_HOSTS[@]/#/https://} )
@@ -56,7 +57,7 @@ for uri in "${QDRANT_URIS[@]}"; do
         PSQL_VALUES+=" ,"
     fi
 
-    PSQL_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, $num_snapshots, '$(date -u +"%Y-%m-%dT%H:%M:%SZ")')"
+    PSQL_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, $num_snapshots, '$NOW')"
 
     sleep 1
 done
