@@ -3,6 +3,7 @@ set -euo pipefail
 
 export QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
 export QDRANT_API_KEY=${QDRANT_API_KEY:-""}
+NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 # https is important here
 QDRANT_URIS=( ${QDRANT_HOSTS[@]/#/https://} )
@@ -14,6 +15,9 @@ for uri in "${QDRANT_URIS[@]}"; do
     echo "$uri"
 
     root_api_response=$(curl --url "$uri/" --header "api-key: $QDRANT_API_KEY")
+    if ! (echo "$root_api_response" | jq -e '.'); then
+        continue
+    fi
 
     version=$(echo "$root_api_response" | jq -r '.version')
     # if crashes or version null, then skip
@@ -53,7 +57,7 @@ for uri in "${QDRANT_URIS[@]}"; do
         PSQL_VALUES+=" ,"
     fi
 
-    PSQL_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, $num_snapshots, '$(date -u +"%Y-%m-%dT%H:%M:%SZ")')"
+    PSQL_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, $num_snapshots, '$NOW')"
 
     sleep 1
 done
