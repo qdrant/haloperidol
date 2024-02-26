@@ -14,7 +14,7 @@ for uri in "${QDRANT_URIS[@]}"; do
     echo "$uri"
 
     root_api_response=$(curl --url "$uri/" --header "api-key: $QDRANT_API_KEY")
-    if ! (echo "$root_api_response" | jq); then
+    if ! (echo "$root_api_response" | jq -e '.'); then
         continue
     fi
 
