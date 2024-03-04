@@ -44,11 +44,12 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     commit_id=$(echo "$root_api_response" | jq -r '.commit')
 
+    # jq '... // 0' sets default value to 0
     num_vectors=$(curl --request POST \
         --url "$uri/collections/benchmark/points/count" \
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
-        --data '{"exact": true}' | jq -r '.result.count')
+        --data '{"exact": true}' | jq -r '.result.count // 0')
 
     num_snapshots=$(curl --request GET \
         --url "$uri/collections/benchmark/snapshots" \
