@@ -15,42 +15,22 @@ for uri in "${QDRANT_URIS[@]}"; do
     echo "$uri"
 
     root_api_response=$(curl --url "$uri/" --header "api-key: $QDRANT_API_KEY")
-    if ! (echo "$root_api_response" | jq -e '.'); then
-        continue
-    fi
 
-    version=$(echo "$root_api_response" | jq -r '.version')
-    # if crashes or version null, then skip
-    if [ -z "$version" ] || [ "$version" == "null" ]; then
-        continue
-    fi
+    version=$(echo "$root_api_response" | jq -r '.version // "null"')
 
-    commit_id=$(echo "$root_api_response" | jq -r '.commit')
-    # if crashes or commit id null, then skip
-    # FIXME: Uncomment it once we start deploying 'dev' releases
-    # if [ -z "$commit_id" ] || [ "$commit_id" == "null" ]; then
-    #     continue
-    # fi
+    commit_id=$(echo "$root_api_response" | jq -r '.commit // "null"')
 
     num_vectors=$(curl --request POST \
         --url "$uri/collections/benchmark/points/count" \
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
-        --data '{"exact": true}' | jq -r '.result.count')
-    if [ -z "$num_vectors" ] || [ "$num_vectors" == "null" ]; then
-        continue
-    fi
+        --data '{"exact": true}' | jq -r '.result.count // 0')
 
-    snapshot_names=$(curl --request GET \
+    num_snapshots=$(curl --request GET \
         --url "$uri/collections/benchmark/snapshots" \
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
-        | jq -r '.result[].name')
-
-    num_snapshots=0
-    if [ -n "$snapshot_names" ]; then
-        num_snapshots=$(echo "$snapshot_names" | wc -l)
-    fi
+        | jq -r '.result[].name | length')
 
     if [ -n "$PSQL_VALUES" ]; then
         # If there are already values, add a comma
@@ -74,10 +54,5 @@ done
 # 	measure_timestamp TIMESTAMP
 # );
 
-
-if [ -z "$PSQL_VALUES" ]; then
-    echo "No values to insert"
-    exit 0
-fi
 
 docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing (url, version, commit, num_vectors, num_snapshots, measure_timestamp) VALUES $PSQL_VALUES;"
