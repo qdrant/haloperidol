@@ -4,7 +4,8 @@ on:
   repository_dispatch:
   workflow_dispatch:
   schedule:
-    - cron: "25 * * * *"
+    # Run every 10 minutes
+    - cron: "*/10 * * * *"
 
 jobs:
   collect-stats:
