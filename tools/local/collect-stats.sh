@@ -44,18 +44,19 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     commit_id=$(echo "$root_api_response" | jq -r '.commit')
 
-    # jq '... // 0' sets default value to 0
     num_vectors=$(curl --request POST \
         --url "$uri/collections/benchmark/points/count" \
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
-        --data '{"exact": true}' | jq -r '.result.count // 0')
+        --data '{"exact": true}' | jq -r '.result.count')
 
+    # jq '... // 0' sets default value to 0
+    # otherwise jq returns empty string which leads to invalid SQL
     num_snapshots=$(curl --request GET \
         --url "$uri/collections/benchmark/snapshots" \
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
-        | jq -r '.result[].name | length')
+        | jq -r '(.result[] | length) // 0')
 
 
     insert_to_psql_values "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" "$NOW"
