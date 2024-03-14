@@ -53,4 +53,4 @@ echo "upload_operational: $upload_operational, search_operational: $search_opera
 
 set -e
 
-docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO cluster_health (upload_operational, search_operational, measure_timestamp) VALUES ($upload_operational, $search_operational, '$NOW');"
+docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO bfb_health (upload_operational, search_operational, measure_timestamp) VALUES ($upload_operational, $search_operational, '$NOW');"
