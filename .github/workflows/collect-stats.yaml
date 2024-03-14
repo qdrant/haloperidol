@@ -18,11 +18,12 @@ jobs:
       - name: Install tools
         run: |
           bash -x tools/ci/install-hcloud.sh
-      - name: Collect cluster stats and store in Postgres
+      - name: Collect and store cluster and bfb status
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
           export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL }}
           export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
-          bash -x tools/collect-stats.sh
+          bash -x tools/check-bfb-health.sh
+          bash -x tools/collect-node-metrics.sh
