@@ -39,5 +39,5 @@ docker run \
     --name ${BFB_CONTAINER_NAME} \
     -e QDRANT_API_KEY=${QDRANT_API_KEY} \
     ${BFB_IMAGE_NAME} \
-    bash -c "while true; do ./bfb ${BFB_PARAMETERS}; sleep 10; done"
+    bash -c "while ./bfb ${BFB_PARAMETERS}; sleep 10; done"
 
