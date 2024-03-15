@@ -19,13 +19,13 @@ BFB_PARAMETERS=" \
     --parallel 1 \
     --quantization scalar \
     --timing-threshold 1 \
+    --timeout 10 \
     --skip-create \
     --skip-upload \
     --skip-wait-index \
     --search \
     --search-limit 10 \
     --quantization-rescore true \
-    --timeout 10
 "
 
 
