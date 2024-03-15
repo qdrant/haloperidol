@@ -25,7 +25,7 @@ BFB_PARAMETERS=" \
     --search \
     --search-limit 10 \
     --quantization-rescore true \
-    --timeout 10
+    --timeout 10 \ 
 "
 
 
