@@ -69,15 +69,18 @@ for uri in "${QDRANT_URIS[@]}"; do
         consistency_attempts_remaining=$((consistency_attempts_remaining - 1))
 
         if [ "$consistency_attempts_remaining" == "0" ]; then
+            echo "Data consistency check failed for $uri"
             is_data_consistent=false
             break
         fi
 
+        # Disable debug mode to make logs readable:
+        set +x
         fetched_points=$(curl --request POST \
             --url "$uri/collections/benchmark/points" \
             --header "api-key: $QDRANT_API_KEY" \
             --header 'content-type: application/json' \
-            --data "{\"ids\": $point_ids, \"with_vector\": true, \"with_payload\": true}" | jq -r '.result')
+            --data "{\"ids\": $point_ids, \"with_vector\": true, \"with_payload\": true}" | jq -rc '.result')
 
         # Check if data is consistent:
         # First node, no need to check:
@@ -93,6 +96,8 @@ for uri in "${QDRANT_URIS[@]}"; do
             echo "Data is inconsistent for $uri. Attempts remaining: $consistency_attempts_remaining / 3"
             sleep 1
         fi
+        # Enable debug mode again:
+        set -x
     done
 
     insert_to_psql_values "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" "$is_data_consistent" "$NOW"
