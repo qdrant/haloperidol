@@ -40,7 +40,7 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     if ! (echo "$root_api_response" | jq -e '.'); then
         # Node is down
-        insert_to_psql_values "$uri" "null" "null" 0 0 "$NOW"
+        insert_to_psql_values "$uri" "null" "null" 0 0 false "$NOW"
         continue
     fi
 
