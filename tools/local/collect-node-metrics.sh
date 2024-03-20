@@ -62,6 +62,11 @@ for uri in "${QDRANT_URIS[@]}"; do
         --header 'content-type: application/json' \
         | jq -r '(.result[] | length) // 0')
 
+    if [ "$num_vectors" -eq 0 ]; then
+        echo "$uri has no data. No need to check for data consistency"
+        insert_to_psql_values "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" false "$NOW"
+        continue
+    fi
 
     consistency_attempts_remaining=3
 
