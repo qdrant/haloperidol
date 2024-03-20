@@ -103,14 +103,14 @@ done
 # Read search results from json file and upload it to postgres
 # Assume table:
 # create table chaos_testing (
-# 	id SERIAL PRIMARY key,
+#   id SERIAL PRIMARY key,
 #   url VARCHAR(255),
-# 	version VARCHAR(255),
+#   version VARCHAR(255),
 #   commit CHAR(40),
 #   num_vectors INT,
 #   num_snapshots INT,
 #   is_data_consistent BOOLEAN,
-# 	measure_timestamp TIMESTAMP
+#   measure_timestamp TIMESTAMP
 # );
 
 
