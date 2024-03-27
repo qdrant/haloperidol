@@ -49,14 +49,34 @@ echo "Checking data consistency"
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
 
-# generate 100 random numbers between 0 and 20K and convert into JSON array:
+# generate 100 random numbers between 0 and 200K and convert into JSON array:
 num_points_to_check=100
-point_ids=$(shuf -i 0-20000 -n "$num_points_to_check" | jq -sc .)
+point_ids=$(shuf -i 0-200000 -n "$num_points_to_check" | jq -sc .)
 
 is_data_consistent=false
 first_node_points=""
 
 consistency_attempts_remaining=3
+
+function calculate_inconsistent_points() {
+    source_points=$1
+    target_points=$2
+
+    inconsistent_points=()
+    source_points_length=$(echo "$source_points" | jq '. | length')
+
+    for idx in $(seq 0 "$source_points_length"); do
+        source_vector=$(echo "$source_points" | jq -r ".[$idx] | .vector")
+        target_vector=$(echo "$target_points" | jq -r ".[$idx] | .vector")
+
+        if [ "$source_vector" != "$target_vector" ]; then
+            point_id=$(echo "$source_points" | jq -r ".[$idx] | .id")
+            inconsistent_points+=("$point_id")
+        fi
+    done
+
+    echo "${inconsistent_points[@]}"
+}
 
 while true; do
     # Disable debug mode to make logs readable. Vectors in response will bloat the log.
@@ -82,7 +102,6 @@ while true; do
             --header 'content-type: application/json' \
             --data "{\"ids\": $point_ids, \"with_vector\": true, \"with_payload\": true}")
         curl_exit_code=$?
-        echo "Got $num_points_to_check points from $uri"
         if [ "$curl_exit_code" -ne 0 ]; then
             echo "Failed to fetch points from $uri"
             is_data_consistent=false
@@ -91,6 +110,9 @@ while true; do
 
         # Sort by .result[].id
         fetched_points=$(echo "$points_response" | jq -rc '.result | sort_by(.id)')
+        fetched_points_count=$(echo "$fetched_points" | jq 'length')
+
+        echo "Got $fetched_points_count points from $uri"
 
         # Check if data is consistent:
         if [ "$first_node_points" == "" ]; then
@@ -100,7 +122,13 @@ while true; do
             echo "$uri data is consistent with node-0"
             is_data_consistent=true
         else
-            echo "$uri Data is inconsistent with node-0"
+            inconsistent_points=()
+            array_response=$(calculate_inconsistent_points "$first_node_points" "$fetched_points")
+            read -ra inconsistent_points <<< "$array_response"
+
+            # inconsistent_points is a bash array
+            echo "$uri data is inconsistent with node-0 by ${#inconsistent_points[@]} points"
+            echo "Inconsistent point IDs:" "${inconsistent_points[@]}"
             is_data_consistent=false
             break
         fi
@@ -109,12 +137,13 @@ while true; do
     # Enable debug mode again:
     set -x
 
+    consistency_attempts_remaining=$((consistency_attempts_remaining - 1))
+
     if [ "$is_data_consistent" == "true" ]; then
-        echo "Data consistency check succeeded"
+        echo "Data consistency check succeeded with $((3 - consistency_attempts_remaining)) attempt(s)"
         break
     else
         # is_data_consistent == false
-        consistency_attempts_remaining=$((consistency_attempts_remaining - 1))
         if [ "$consistency_attempts_remaining" == "0" ]; then
             echo "Data consistency check failed despite 3 attempts"
             break
