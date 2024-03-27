@@ -121,7 +121,7 @@ done
 # 	id SERIAL PRIMARY key,
 # 	upload_operational BOOLEAN,
 # 	search_operational BOOLEAN,
-#   is_data_consistent BOOLEAN,
+# 	is_data_consistent BOOLEAN,
 # 	measure_timestamp TIMESTAMP
 # );
 
