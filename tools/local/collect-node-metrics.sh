@@ -68,7 +68,6 @@ done
 #   commit CHAR(40),
 #   num_vectors INT,
 #   num_snapshots INT,
-#   is_data_consistent BOOLEAN,
 #   measure_timestamp TIMESTAMP
 # );
 
