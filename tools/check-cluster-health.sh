@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -uo pipefail
+set -x
 
 function self {
 	realpath "${BASH_SOURCE[0]}" || which "${BASH_SOURCE[0]}"
@@ -48,59 +49,68 @@ echo "Checking data consistency"
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
 
-for IDX in {0..4}; do
-    QDRANT_HOSTS+=("node-${IDX}-${QDRANT_CLUSTER_URL}")
-done
-
-# https is important here
-QDRANT_URIS=( "${QDRANT_HOSTS[@]/#/https://}" )
-QDRANT_URIS=( "${QDRANT_URIS[@]/%/:6333}" )
-
 # generate 100 random numbers between 0 and 20K and convert into JSON array:
-point_ids=$(shuf -i 0-20000 -n 100 | jq -sc .)
+num_points_to_check=100
+point_ids=$(shuf -i 0-20000 -n "$num_points_to_check" | jq -sc .)
+
 is_data_consistent=false
+first_node_points=""
 
 consistency_attempts_remaining=3
 
 while true; do
-    first_node_points=""
+    # Disable debug mode to make logs readable. Vectors in response will bloat the log.
+    set +x
+    num_nodes=$(curl -s --fail-with-body -X GET \
+        --url "https://${QDRANT_CLUSTER_URL}:6333/cluster" \
+        --header "api-key: $QDRANT_API_KEY" \
+        | jq -r '.result.peers | length')
+    echo "Number of nodes: $num_nodes"
+    QDRANT_HOSTS=()
+    for IDX in $(seq 0 $((num_nodes - 1))); do
+        QDRANT_HOSTS+=("node-${IDX}-${QDRANT_CLUSTER_URL}")
+    done
 
-    # Disable debug mode to make logs readable:
-    # set +x
+    # https is important here
+    QDRANT_URIS=( "${QDRANT_HOSTS[@]/#/https://}" )
+    QDRANT_URIS=( "${QDRANT_URIS[@]/%/:6333}" )
+
     for uri in "${QDRANT_URIS[@]}"; do
         points_response=$(curl -s --fail-with-body -X POST \
             --url "$uri/collections/benchmark/points" \
             --header "api-key: $QDRANT_API_KEY" \
             --header 'content-type: application/json' \
             --data "{\"ids\": $point_ids, \"with_vector\": true, \"with_payload\": true}")
-
         curl_exit_code=$?
+        echo "Got $num_points_to_check points from $uri"
         if [ "$curl_exit_code" -ne 0 ]; then
             echo "Failed to fetch points from $uri"
             is_data_consistent=false
             break
         fi
 
-        fetched_points=$(echo "$points_response" | jq -rc '.result')
+        # Sort by .result[].id
+        fetched_points=$(echo "$points_response" | jq -rc '.result | sort_by(.id)')
 
         # Check if data is consistent:
         if [ "$first_node_points" == "" ]; then
             # First node, no need to check:
             first_node_points="$fetched_points"
         elif [ "$fetched_points" == "$first_node_points" ]; then
-            echo "Data is consistent with node-0 for $uri"
+            echo "$uri data is consistent with node-0"
             is_data_consistent=true
         else
-            echo "Data is inconsistent with node-0 for $uri"
+            echo "$uri Data is inconsistent with node-0"
             is_data_consistent=false
             break
         fi
 
     done
     # Enable debug mode again:
-    # set -x
+    set -x
 
     if [ "$is_data_consistent" == "true" ]; then
+        echo "Data consistency check succeeded"
         break
     else
         # is_data_consistent == false
@@ -110,6 +120,8 @@ while true; do
             break
         else
             echo "Retrying data consistency check. Attempts remaining: $consistency_attempts_remaining / 3"
+            sleep 5 # node might be unavailable which caused curl to fail. give k8s some time to heal
+            first_node_points=""
             continue
         fi
     fi
