@@ -66,7 +66,7 @@ while true; do
     first_node_points=""
 
     # Disable debug mode to make logs readable:
-    set +x
+    # set +x
     for uri in "${QDRANT_URIS[@]}"; do
         points_response=$(curl -s --fail-with-body -X POST \
             --url "$uri/collections/benchmark/points" \
@@ -98,7 +98,7 @@ while true; do
 
     done
     # Enable debug mode again:
-    set -x
+    # set -x
 
     if [ "$is_data_consistent" == "true" ]; then
         break
