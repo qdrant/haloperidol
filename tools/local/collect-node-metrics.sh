@@ -17,7 +17,7 @@ function insert_to_psql_values {
     local commit_id=$3
     local num_vectors=$4
     local num_snapshots=$5
-    local measure_timestamp=$7
+    local measure_timestamp=$6
 
     if [ -n "$PSQL_VALUES" ]; then
         # If there are already values, add a comma
@@ -34,7 +34,7 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     if ! (echo "$root_api_response" | jq -e '.'); then
         # Node is down
-        insert_to_psql_values "$uri" "null" "null" 0 0 false "$NOW"
+        insert_to_psql_values "$uri" "null" "null" 0 0 "$NOW"
         continue
     fi
 
