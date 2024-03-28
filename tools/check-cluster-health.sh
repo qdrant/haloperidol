@@ -139,7 +139,7 @@ while true; do
             is_data_consistent=false
             break
         fi
-        node_counter+=$((node_counter + 1))
+        node_counter=$((node_counter + 1))
     done
     # Enable debug mode again:
     set -x
