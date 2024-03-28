@@ -16,7 +16,7 @@ BFB_PARAMETERS=" \
     --keywords 10 \
     --dim 768 \
     -n 1000000000 \
-    --batch-size 50 \
+    --batch-size 250 \
     --threads 1 \
     --parallel 1 \
     --wait-on-upsert \
