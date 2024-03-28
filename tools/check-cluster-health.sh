@@ -46,6 +46,8 @@ echo "upload_operational: $upload_operational, search_operational: $search_opera
 
 echo "Checking data consistency"
 
+mkdir -p /data/points-dump
+
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
 
