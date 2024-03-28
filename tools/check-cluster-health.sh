@@ -95,6 +95,8 @@ while true; do
     QDRANT_URIS=( "${QDRANT_HOSTS[@]/#/https://}" )
     QDRANT_URIS=( "${QDRANT_URIS[@]/%/:6333}" )
 
+    node_counter=0
+
     for uri in "${QDRANT_URIS[@]}"; do
         points_response=$(curl -s --fail-with-body -X POST \
             --url "$uri/collections/benchmark/points" \
@@ -114,6 +116,9 @@ while true; do
 
         echo "Got $fetched_points_count points from $uri"
 
+        attempt_number=$((3 - consistency_attempts_remaining))
+        echo "$fetched_points" > /data/points-dump/node-${node_counter}-attempt-${attempt_number}.json
+
         # Check if data is consistent:
         if [ "$first_node_points" == "" ]; then
             # First node, no need to check:
@@ -132,7 +137,7 @@ while true; do
             is_data_consistent=false
             break
         fi
-
+        node_counter+=$((node_counter + 1))
     done
     # Enable debug mode again:
     set -x
