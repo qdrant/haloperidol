@@ -46,7 +46,7 @@ echo "upload_operational: $upload_operational, search_operational: $search_opera
 
 echo "Checking data consistency"
 
-mkdir -p /data/points-dump
+mkdir -p data/points-dump
 
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
@@ -119,7 +119,7 @@ while true; do
         echo "Got $fetched_points_count points from $uri"
 
         attempt_number=$((3 - consistency_attempts_remaining))
-        echo "$fetched_points" > /data/points-dump/node-${node_counter}-attempt-${attempt_number}.json
+        echo "$fetched_points" > data/points-dump/node-${node_counter}-attempt-${attempt_number}.json
 
         # Check if data is consistent:
         if [ "$first_node_points" == "" ]; then
