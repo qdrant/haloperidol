@@ -25,3 +25,11 @@ jobs:
           export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL }}
           bash -x tools/run-bfb-upload.sh
 
+  keepalive-job:
+    name: Keepalive Workflow
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gautamkrishnar/keepalive-workflow@v2
