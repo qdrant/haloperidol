@@ -16,7 +16,7 @@ BFB_PARAMETERS=" \
     --keywords 10 \
     --dim 768 \
     -n 1000000000 \
-    --batch-size 250 \
+    --batch-size 100 \
     --threads 1 \
     --parallel 1 \
     --wait-on-upsert \
@@ -25,7 +25,7 @@ BFB_PARAMETERS=" \
     --timing-threshold 1 \
     --on-disk-vectors true \
     --max-id 200000 \
-    --delay 300 \
+    --delay 200 \
     --timeout 30
 "
 
