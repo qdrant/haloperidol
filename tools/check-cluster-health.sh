@@ -51,10 +51,6 @@ mkdir -p data/points-dump
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
 
-# generate 100 random numbers between 0 and 200K and convert into JSON array:
-num_points_to_check=100
-point_ids=$(shuf -i 0-200000 -n "$num_points_to_check" | jq -sc .)
-
 is_data_consistent=false
 first_node_points=""
 
@@ -80,6 +76,15 @@ function calculate_inconsistent_points() {
     echo "${inconsistent_points[@]}"
 }
 
+
+# generate 100 random numbers between 0 and 200K and convert into JSON array:
+num_points_to_check=100
+initial_point_ids=$(shuf -i 0-200000 -n "$num_points_to_check" | jq -sc .)
+point_ids_for_node=()
+for _ in $(seq 0 4); do
+    point_ids_for_node+=("$initial_point_ids")
+done
+
 while true; do
     # Disable debug mode to make logs readable. Vectors in response will bloat the log.
     set +x
@@ -92,7 +97,6 @@ while true; do
     for IDX in $(seq 0 $((num_nodes - 1))); do
         QDRANT_HOSTS+=("node-${IDX}-${QDRANT_CLUSTER_URL}")
     done
-
     # https is important here
     QDRANT_URIS=( "${QDRANT_HOSTS[@]/#/https://}" )
     QDRANT_URIS=( "${QDRANT_URIS[@]/%/:6333}" )
@@ -100,6 +104,7 @@ while true; do
     node_counter=0
 
     for uri in "${QDRANT_URIS[@]}"; do
+        point_ids="${point_ids_for_node[$node_counter]}"
         points_response=$(curl -s --fail-with-body -X POST \
             --url "$uri/collections/benchmark/points" \
             --header "api-key: $QDRANT_API_KEY" \
@@ -129,6 +134,7 @@ while true; do
             echo "$uri data is consistent with node-0"
             is_data_consistent=true
         else
+            echo "Found inconsistent data in $uri. Calulcating inconsistent points..."
             inconsistent_points=()
             array_response=$(calculate_inconsistent_points "$first_node_points" "$fetched_points")
             read -ra inconsistent_points <<< "$array_response"
@@ -136,6 +142,14 @@ while true; do
             # inconsistent_points is a bash array
             echo "$uri data is inconsistent with node-0 by ${#inconsistent_points[@]} points"
             echo "Inconsistent point IDs:" "${inconsistent_points[@]}"
+
+            # Query only inconsistent points in the next attempt:
+            join_by() { local IFS="$1"; shift; echo "$*"; }
+            point_ids="[$(join_by , "${inconsistent_points[@]}")]"
+            point_ids_for_node[$node_counter]="$point_ids"
+            echo "Will query only these points for the next attempt: $point_ids"
+            echo "Overall points to check:" "${point_ids_for_node[@]}"
+
             is_data_consistent=false
             break
         fi
