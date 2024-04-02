@@ -24,12 +24,3 @@ jobs:
           export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
           export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL }}
           bash -x tools/run-snapshots.sh
-
-  keepalive-job:
-    name: Keepalive Workflow
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: gautamkrishnar/keepalive-workflow@v2
