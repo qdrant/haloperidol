@@ -46,11 +46,17 @@ initial_point_ids = random.sample(range(200_001), num_points_to_check)
 point_ids_for_node = [initial_point_ids for _ in range(4)]  # node-0 to node-3
 
 while True:
-    num_nodes = requests.get(
+    cluster_response = requests.get(
         f"https://{QDRANT_CLUSTER_URL}:6333/cluster",
         headers={"api-key": QDRANT_API_KEY},
-    ).json()["result"]["peers"]
-    num_nodes = len(num_nodes)
+    )
+
+    if cluster_response.status_code != 200:
+        print(f"Non-200 response from /cluster API")
+        print("Error response:", cluster_response.text)
+        exit(1)
+
+    num_nodes = len(cluster_response.json()["result"]["peers"])
     print(f"Number of nodes: {num_nodes}")
 
     QDRANT_URIS = [
@@ -74,6 +80,7 @@ while True:
 
         if response.status_code != 200:
             print(f"Failed to fetch points from {uri}")
+            print("Error response:", response.text)
             is_data_consistent = False
             break
 
