@@ -61,6 +61,11 @@ while True:
 
     for uri in QDRANT_URIS:
         point_ids = point_ids_for_node[node_idx]
+
+        if len(point_ids) == 0:
+            is_data_consistent = True
+            continue
+
         response = requests.post(
             f"{uri}/collections/benchmark/points",
             headers={"api-key": QDRANT_API_KEY, "content-type": "application/json"},
@@ -87,6 +92,7 @@ while True:
             first_node_points = fetched_points
         elif fetched_points == first_node_points:
             print(f"{uri} data is consistent with node-0")
+            point_ids_for_node[node_idx] = []
             is_data_consistent = True
         else:
             print(f"Checking {uri}")
@@ -95,6 +101,7 @@ while True:
             )
             if len(inconsistent_points) == 0:
                 print(f"{uri} is consistent")
+                point_ids_for_node[node_idx] = []
                 is_data_consistent = True
                 continue
 
