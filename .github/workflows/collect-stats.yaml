@@ -26,8 +26,8 @@ jobs:
           export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL }}
           export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
-          bash -x tools/collect-node-metrics.sh
           bash -x tools/check-cluster-health.sh
+          bash -x tools/collect-node-metrics.sh
       - uses: actions/upload-artifact@v4
         with:
           name: points-dump
