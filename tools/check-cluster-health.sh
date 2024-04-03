@@ -70,4 +70,3 @@ if [ "$upload_operational" = false ] || [ "$search_operational" = false ] || [ "
 	echo "::set-output name=failed::true"
 fi
 
-echo "::set-output name=failed::true" # temporary for testing
