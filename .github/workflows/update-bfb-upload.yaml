@@ -24,4 +24,3 @@ jobs:
           export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
           export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL }}
           bash -x tools/run-bfb-upload.sh
-

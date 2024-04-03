@@ -36,5 +36,3 @@ jobs:
       - name: Fail job if any check failed
         if: steps.cluster_checks.outputs.failed == 'true'
         run: exit 1
-
-
