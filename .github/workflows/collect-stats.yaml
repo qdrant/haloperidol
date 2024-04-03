@@ -19,6 +19,7 @@ jobs:
         run: |
           bash -x tools/ci/install-hcloud.sh
       - name: Collect and store cluster and bfb status
+        id: cluster_checks
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
@@ -32,3 +33,6 @@ jobs:
           name: points-dump
           path: data/points-dump
           retention-days: 7
+      - name: Fail job if any check failed
+        if: steps.cluster_checks.outputs.failed == 'true'
+        run: exit 1
