@@ -67,7 +67,7 @@ fi
 docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO bfb_health (upload_operational, search_operational, is_data_consistent, measure_timestamp) VALUES ($upload_operational, $search_operational, $is_data_consistent, '$NOW');"
 
 if [ "$upload_operational" = false ] || [ "$search_operational" = false ] || [ "$is_data_consistent" = false ]; then
-	exit 1
+	echo "::set-output name=failed::true"
 fi
 
-exit 1 # temporary for testing
+echo "::set-output name=failed::true" # temporary for testing
