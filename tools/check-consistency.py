@@ -64,6 +64,7 @@ while True:
     ]
 
     node_idx = 0
+    first_node_points = []
 
     for uri in QDRANT_URIS:
         point_ids = point_ids_for_node[node_idx]
@@ -111,20 +112,12 @@ while True:
                 point_ids_for_node[node_idx] = []
                 is_data_consistent = True
                 continue
-
-            print(
-                f"Found inconsistent data in {uri}. Calculating inconsistent points..."
-            )
-
             print(
                 f"{uri} data is inconsistent with node-0 by {len(inconsistent_points)} points"
             )
-            print("Inconsistent point IDs:", inconsistent_points)
+            print("Inconsistent point IDs to be retried in next attempt:", inconsistent_points)
 
             point_ids_for_node[node_idx] = inconsistent_points
-            print(
-                f"Only query these for the next attempt of {uri}: {point_ids_for_node[node_idx]}"
-            )
 
             is_data_consistent = False
             break
