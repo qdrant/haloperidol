@@ -41,15 +41,13 @@ def calculate_inconsistent_points(source_points, target_points, point_ids):
 
 
 # Generate 100 random numbers between 0 and 200K and convert into JSON array
-num_points_to_check = 1000
+num_points_to_check = 100
 initial_point_ids = random.sample(range(200_001), num_points_to_check)
 point_ids_for_node = [initial_point_ids for _ in range(4)]  # node-0 to node-3
 
 while True:
-    url = f"https://{QDRANT_CLUSTER_URL}:6333/cluster"
-    print("url", url)
     cluster_response = requests.get(
-        url,
+        f"https://{QDRANT_CLUSTER_URL}:6333/cluster",
         headers={"api-key": QDRANT_API_KEY},
     )
 
