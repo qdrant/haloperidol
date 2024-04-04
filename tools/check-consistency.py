@@ -71,6 +71,8 @@ while True:
 
         if len(point_ids) == 0:
             is_data_consistent = True
+            print(f"Skipping node-{node_idx}")
+            node_idx += 1
             continue
 
         response = requests.post(
