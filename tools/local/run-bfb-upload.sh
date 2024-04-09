@@ -16,7 +16,7 @@ BFB_PARAMETERS=" \
     --shards 1
     --keywords 10 \
     --dim 768 \
-    -n 200000 \
+    -n 1000000000 \
     --batch-size 100 \
     --threads 1 \
     --parallel 1 \
@@ -25,6 +25,7 @@ BFB_PARAMETERS=" \
     --quantization scalar \
     --timing-threshold 1 \
     --on-disk-vectors true \
+    --max-id 20000 \
     --delay 200 \
     --timeout 30
 "
