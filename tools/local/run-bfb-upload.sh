@@ -12,8 +12,8 @@ QDRANT_URIS=( ${QDRANT_URIS[@]/%/:6334} )
 
 BFB_PARAMETERS=" \
     ${QDRANT_URIS[@]/#/--uri } \
-    --replication-factor 3 \
-    --shards 1
+    --replication-factor 2 \
+    --shards 3
     --keywords 10 \
     --dim 768 \
     -n 1000000000 \
