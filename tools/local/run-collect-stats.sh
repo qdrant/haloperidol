@@ -13,7 +13,8 @@ while true; do
     echo "Hosts str:" "$QDRANT_HOSTS"
     echo "Hosts:" "${QDRANT_HOSTS[@]}"
 
-    QDRANT_HOSTS_STR="${QDRANT_HOSTS[@]@Q}"
+    # Only required for bash arrays
+    export QDRANT_HOSTS_STR="${QDRANT_HOSTS[@]@Q}"
 
     tools/local/check-cluster-health.sh
     tools/local/collect-node-metrics.sh
