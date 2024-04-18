@@ -4,10 +4,7 @@ set -euo pipefail
 export QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-# Parse if $QDRANT_HOSTS_STR is not empty
-if [ -n "$QDRANT_HOSTS_STR" ]; then
-    QDRANT_HOSTS=( $QDRANT_HOSTS_STR )
-fi
+QDRANT_HOSTS=( $QDRANT_HOSTS_STR )
 # https is important here
 QDRANT_URIS=( "${QDRANT_HOSTS[@]/#/https://}" )
 QDRANT_URIS=( "${QDRANT_URIS[@]/%/:6333}" )
