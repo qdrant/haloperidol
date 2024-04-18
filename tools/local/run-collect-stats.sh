@@ -5,6 +5,7 @@ if [ ! -d "haloperidol" ]; then
 fi
 
 cd haloperidol || exit
+git pull
 
 while true; do
     echo "Collecting stats..."
