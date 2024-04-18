@@ -6,7 +6,8 @@ NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 QDRANT_HOSTS=${QDRANT_HOSTS:-""}
 if [ -z "$QDRANT_HOSTS" ]; then
-    QDRANT_HOSTS=( $QDRANT_HOSTS_STR )
+    # QDRANT_HOSTS=( $QDRANT_HOSTS_STR )
+    read -ar QDRANT_HOSTS <<< "$QDRANT_HOSTS_STR"
 fi
 # https is important here
 QDRANT_URIS=( "${QDRANT_HOSTS[@]/#/https://}" )
