@@ -9,6 +9,9 @@ git pull
 
 while true; do
     echo "Collecting stats..."
+    echo "Cluster URL:" "$QDRANT_CLUSTER_URL"
+    echo "Hosts str:" "$QDRANT_HOSTS"
+    echo "Hosts:" "${QDRANT_HOSTS[@]}"
 
     tools/local/check-cluster-health.sh
     tools/local/collect-node-metrics.sh
