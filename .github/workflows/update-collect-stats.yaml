@@ -1,0 +1,37 @@
+name: Update collect stats script on a remote server
+
+on:
+  push:
+    branches:
+      - master
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      server_name:
+          description: "Server to run the collect stats script on"
+          default: qdrant-manager
+  schedule:
+    - cron: "20 23 * * *"
+
+
+jobs:
+  update-collect-stats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Install tools
+        run: |
+          bash -x tools/ci/install-tools.sh
+          bash -x tools/ci/install-hcloud.sh
+      - name: Update collect stats script
+        run: |
+          export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
+          export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL }}
+          export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
+          export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
+          export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          export SERVER_NAME=${{ inputs.server_name }}
+          bash -x tools/run-collect-stats.sh
