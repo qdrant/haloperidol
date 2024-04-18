@@ -10,6 +10,8 @@ QDRANT_URIS=( "${QDRANT_URIS[@]/%/:6333}" )
 
 PSQL_VALUES=""
 
+echo URIs: "${QDRANT_URIS[@]}"
+
 # function to insert to PSQL_VALUES:
 function insert_to_psql_values {
     local uri=$1
