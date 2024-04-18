@@ -1,10 +1,12 @@
 #!/bin/bash
 
 set -e
+set -x
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 CLOUD_NAME=${CLOUD_NAME:-"hetzner"}
 
+BG_TASK_NAME=${BG_TASK_NAME:-""}
 
 RUN_SCRIPT=${RUN_SCRIPT:-""}
 SERVER_NAME=${SERVER_NAME:-""}
@@ -34,7 +36,11 @@ fi
 
 SERVER_IP=$(bash $SCRIPT_PATH/clouds/$CLOUD_NAME/get_public_ip.sh $SERVER_NAME)
 
-
-
-echo $ENV_CONTEXT | cat - "$RUN_SCRIPT" | ssh -oStrictHostKeyChecking=no "$SSH_USER@$SERVER_IP" sudo bash -x
-
+if [ -z "$BG_TASK_NAME" ]; then
+    echo "$ENV_CONTEXT" | cat - "$RUN_SCRIPT" | ssh -oStrictHostKeyChecking=no "$SSH_USER@$SERVER_IP" sudo bash -x
+else
+    # Could directly cat inside screen instead of using scp but it's better to persist the script for debugging purposes
+    scp -oStrictHostKeyChecking=no "$RUN_SCRIPT" "$SSH_USER@$SERVER_IP:/tmp/$BG_TASK_NAME.sh"
+    ssh -oStrictHostKeyChecking=no "$SSH_USER@$SERVER_IP" "screen -X -S $BG_TASK_NAME quit || true" # Kill existing screen session
+    ssh -oStrictHostKeyChecking=no "$SSH_USER@$SERVER_IP" "screen -dmS $BG_TASK_NAME bash -c 'eval $ENV_CONTEXT; bash -x /tmp/$BG_TASK_NAME.sh'"
+fi
