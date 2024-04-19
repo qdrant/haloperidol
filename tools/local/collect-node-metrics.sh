@@ -5,13 +5,9 @@ set -x
 export QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-# QDRANT_HOSTS=${QDRANT_HOSTS:-()}
-# if [ -z "$QDRANT_HOSTS" ]; then
-IFS=',' read -r -a QDRANT_HOSTS <<< "$QDRANT_HOSTS_STR"
-# fi
-
-echo "first" "$QDRANT_HOSTS"
-echo "arr" "$QDRANT_HOSTS[@]"
+if [ -n "$QDRANT_HOSTS_STR" ]; then
+    IFS=',' read -r -a QDRANT_HOSTS <<< "$QDRANT_HOSTS_STR"
+fi
 
 # https is important here
 QDRANT_URIS=( "${QDRANT_HOSTS[@]/#/https://}" )
