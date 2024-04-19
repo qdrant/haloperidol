@@ -5,10 +5,10 @@ set -x
 export QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-QDRANT_HOSTS=${QDRANT_HOSTS:-()}
-if [ -z "$QDRANT_HOSTS" ]; then
-    IFS=',' read -r -a QDRANT_HOSTS <<< "$QDRANT_HOSTS_STR"
-fi
+# QDRANT_HOSTS=${QDRANT_HOSTS:-()}
+# if [ -z "$QDRANT_HOSTS" ]; then
+IFS=',' read -r -a QDRANT_HOSTS <<< "$QDRANT_HOSTS_STR"
+# fi
 
 echo "first" "$QDRANT_HOSTS"
 echo "arr" "$QDRANT_HOSTS[@]"
