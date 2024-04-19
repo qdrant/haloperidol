@@ -1,13 +1,18 @@
 #!/bin/bash
 set -euo pipefail
+set -x
 
 export QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-QDRANT_HOSTS=${QDRANT_HOSTS:-""}
+QDRANT_HOSTS=${QDRANT_HOSTS:-()}
 if [ -z "$QDRANT_HOSTS" ]; then
-    QDRANT_HOSTS=( $QDRANT_HOSTS_STR )
+    IFS=',' read -r -a QDRANT_HOSTS <<< "$QDRANT_HOSTS_STR"
 fi
+
+echo "first" "$QDRANT_HOSTS"
+echo "arr" "$QDRANT_HOSTS[@]"
+
 # https is important here
 QDRANT_URIS=( "${QDRANT_HOSTS[@]/#/https://}" )
 QDRANT_URIS=( "${QDRANT_URIS[@]/%/:6333}" )

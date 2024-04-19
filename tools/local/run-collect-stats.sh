@@ -12,9 +12,10 @@ while true; do
     echo "Cluster URL:" "$QDRANT_CLUSTER_URL"
     echo "Hosts str:" "$QDRANT_HOSTS"
     echo "Hosts:" "${QDRANT_HOSTS[@]}"
+    echo "Host count: ${#QDRANT_HOSTS[@]}"
 
-    # Only required for bash arrays
-    export QDRANT_HOSTS_STR="${QDRANT_HOSTS[@]@Q}"
+    QDRANT_HOSTS_STR=$(IFS=, ; echo "${QDRANT_HOSTS[*]}")
+    export QDRANT_HOSTS_STR="$QDRANT_HOSTS_STR"
 
     tools/local/check-cluster-health.sh
     tools/local/collect-node-metrics.sh
