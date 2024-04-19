@@ -4,7 +4,8 @@ set -euo pipefail
 export QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-if [ -n "$QDRANT_HOSTS_STR" ]; then
+QDRANT_HOSTS_STR=${QDRANT_HOSTS_STR:""}
+if [ -z "$QDRANT_HOSTS_STR" ]; then
     IFS=',' read -r -a QDRANT_HOSTS <<< "$QDRANT_HOSTS_STR"
 fi
 
