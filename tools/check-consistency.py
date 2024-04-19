@@ -82,10 +82,10 @@ while True:
         )
 
         if response.status_code != 200:
-            if response.text == "Service Unavailable":
+            if response.text in ("Service Unavailable", "404 page not found"):
                 print(f"{uri} seems unavailable, skipping consistency check for this node")
                 continue
-
+            # Some other error:
             print(f"Failed to fetch points from {uri}")
             print("Error response:", response.text)
             is_data_consistent = False
