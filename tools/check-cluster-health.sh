@@ -15,44 +15,24 @@ NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 RUN_SCRIPT="$ROOT/local/check-docker-exit-code.sh"
 
 CONTAINER_NAME=bfb-upload
-
 RUN_SCRIPT=$RUN_SCRIPT \
 	ENV_CONTEXT="${CONTAINER_NAME@A}" \
 	SERVER_NAME=qdrant-manager \
 	bash -x "$ROOT/run_remote.sh"
-
-# check exit code:
-if [ $? -ne 0 ]; then
-	upload_operational=false
-else
-	upload_operational=true
-fi
+upload_operational=$([ $? -eq 0 ] && echo true || echo false)
 
 CONTAINER_NAME=bfb-search
-
 RUN_SCRIPT=$RUN_SCRIPT \
 	ENV_CONTEXT="${CONTAINER_NAME@A}" \
 	SERVER_NAME=qdrant-manager \
 	bash -x "$ROOT/run_remote.sh"
-
-# check exit code:
-if [ $? -ne 0 ]; then
-	search_operational=false
-else
-	search_operational=true
-fi
-
-echo "upload_operational: $upload_operational, search_operational: $search_operational, measure_timestamp: $NOW"
+search_operational=$([ $? -eq 0 ] && echo true || echo false)
 
 echo "Checking data consistency"
-
 python3 ./tools/check-consistency.py
+is_data_consistent=$([ $? -eq 0 ] && echo true || echo false)
 
-if [ $? -ne 0 ]; then
-    is_data_consistent=false
-else
-    is_data_consistent=true
-fi
+echo "upload_operational: $upload_operational, search_operational: $search_operational, is_data_consistent: $is_data_consistent, measure_timestamp: $NOW"
 
 # Assume table:
 # create table bfb_health (

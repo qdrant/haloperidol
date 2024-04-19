@@ -25,4 +25,3 @@ RUN_SCRIPT=$RUN_SCRIPT \
 	ENV_CONTEXT="${ENV_CONTEXT}" \
 	SERVER_NAME=qdrant-manager \
 	bash -x "$ROOT/run_remote.sh"
-
