@@ -23,7 +23,7 @@ POSTGRES_HOST=${POSTGRES_HOST:-""}
 POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-""}
 
 QDRANT_HOSTS=()
-for IDX in {0..4}; do
+for IDX in {0..3}; do
     QDRANT_HOSTS+=("node-${IDX}-${QDRANT_CLUSTER_URL}")
 done
 
