@@ -35,7 +35,7 @@ function insert_to_psql_values {
 for uri in "${QDRANT_URIS[@]}"; do
     echo "$uri"
 
-    root_api_response=$(curl --url "$uri/" --header "api-key: $QDRANT_API_KEY")
+    root_api_response=$(curl -s --url "$uri/" --header "api-key: $QDRANT_API_KEY")
 
     if ! (echo "$root_api_response" | jq -e '.'); then
         # Node is down
@@ -47,7 +47,7 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     commit_id=$(echo "$root_api_response" | jq -r '.commit')
 
-    num_vectors=$(curl --request POST \
+    num_vectors=$(curl -s --request POST \
         --url "$uri/collections/benchmark/points/count" \
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
@@ -55,7 +55,7 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     # jq '... // 0' sets default value to 0
     # otherwise jq returns empty string which leads to invalid SQL
-    num_snapshots=$(curl --request GET \
+    num_snapshots=$(curl -s --request GET \
         --url "$uri/collections/benchmark/snapshots" \
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
