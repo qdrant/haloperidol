@@ -82,7 +82,7 @@ while True:
         )
 
         if response.status_code != 200:
-            if response.text in ("Service Unavailable", "404 page not found"):
+            if response.text.strip() == "404 page not found":
                 print(f"{uri} seems unavailable, skipping consistency check for this node")
                 continue
             # Some other error:
