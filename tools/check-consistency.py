@@ -82,6 +82,10 @@ while True:
         )
 
         if response.status_code != 200:
+            if response.text == "Service Unavailable":
+                print(f"{uri} seems unavailable, skipping consistency check for this node")
+                continue
+
             print(f"Failed to fetch points from {uri}")
             print("Error response:", response.text)
             is_data_consistent = False
