@@ -1,6 +1,5 @@
 #!/bin/bash
 set -euo pipefail
-set -x
 
 export QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
