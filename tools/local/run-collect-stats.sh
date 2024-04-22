@@ -17,6 +17,6 @@ while true; do
     tools/local/check-cluster-health.sh
     tools/local/collect-node-metrics.sh
 
-    echo "Waiting for 15 minutes..."
-    sleep 900 # 15m
+    echo "Waiting for 1min..."
+    sleep 60 # 1m
 done
