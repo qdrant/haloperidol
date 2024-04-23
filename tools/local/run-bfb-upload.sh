@@ -27,7 +27,7 @@ BFB_PARAMETERS=" \
     --on-disk-vectors true \
     --max-id 200000 \
     --delay 200 \
-    --timeout 30 \
+    --timeout 30
 "
 
 docker stop -t 10 ${BFB_CONTAINER_NAME} || true
@@ -41,10 +41,10 @@ docker run \
     -d \
     --network host \
     --name ${BFB_CONTAINER_NAME} \
-    -v $PWD/bfb-logs:/bfb/logs \
     -e QDRANT_API_KEY=${QDRANT_API_KEY} \
+    -v $(pwd)/bfb.log:/bfb/upload.log \
     ${BFB_IMAGE_NAME} \
-    bash -c "mkdir -p /bfb/logs; ./bfb ${BFB_PARAMETERS} 2>&1 | tee >(awk '{print strftime(\"[%Y-%m-%d %H:%M:%S]\"), \$0 >> \"/bfb/logs/upload.log\"}')"
+    sh -c "exec > >(tee /bfb/upload.log | ts) 2>&1 && ./bfb ${BFB_PARAMETERS}"
 
 sleep 5
 
