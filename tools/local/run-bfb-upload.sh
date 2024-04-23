@@ -44,7 +44,7 @@ docker run \
     -v $PWD/bfb-logs:/bfb \
     -e QDRANT_API_KEY=${QDRANT_API_KEY} \
     ${BFB_IMAGE_NAME} \
-    bash -c "./bfb ${BFB_PARAMETERS} 2>&1 | tee /bfb/upload.log | awk '{print strftime(\"[%Y-%m-%d %H:%M:%S]\"), \$0 >> \"/bfb/upload.log\"}'"
+    bash -c "/bfb/bfb ${BFB_PARAMETERS} 2>&1 | tee /bfb/upload.log | awk '{print strftime(\"[%Y-%m-%d %H:%M:%S]\"), \$0 >> \"/bfb/upload.log\"}'"
 
 sleep 5
 
