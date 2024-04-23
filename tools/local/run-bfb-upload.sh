@@ -45,7 +45,7 @@ docker run \
     -e QDRANT_API_KEY=${QDRANT_API_KEY} \
     -v $(pwd)/bfb-upload.log:/bfb/upload.log \
     ${BFB_IMAGE_NAME} \
-    sh -c "./bfb ${BFB_PARAMETERS} | tee >(echo \"\$(date +\"%d-%m-%y %H_%M_%S\") - \$(cat)\" | tee -a /bfb/upload.log) > /dev/null"
+    sh -c "./bfb ${BFB_PARAMETERS} | tee -a >(echo "$(date +"%d-%m-%y %H_%M_%S") - $(cat)" >> /bfb/upload.log)"
 
 sleep 5
 
