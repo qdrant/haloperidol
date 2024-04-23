@@ -4,7 +4,8 @@ on:
   repository_dispatch:
   workflow_dispatch:
   schedule:
-    - cron: "10 23 * * *"
+    # At 10th minute of every hour
+    - cron: "10 * * * *"
 
 jobs:
   update-bfb-search:
