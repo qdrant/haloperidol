@@ -33,11 +33,14 @@ docker stop -t 10 ${BFB_CONTAINER_NAME} || true
 
 docker rm ${BFB_CONTAINER_NAME} || true
 
+touch bfb-search-error.log
+
 docker run \
     -d \
     --network host \
     --name ${BFB_CONTAINER_NAME} \
     -e QDRANT_API_KEY=${QDRANT_API_KEY} \
+    -v $(pwd)/bfb-search-error.log:/bfb/search-error.log \
     ${BFB_IMAGE_NAME} \
-    bash -c "while ./bfb ${BFB_PARAMETERS}; do sleep 10; done"
+    bash -c "while true; ./bfb ${BFB_PARAMETERS} 2>> /bfb/search-error.log; do sleep 10; done"
 

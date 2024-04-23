@@ -27,7 +27,7 @@ BFB_PARAMETERS=" \
     --on-disk-vectors true \
     --max-id 200000 \
     --delay 200 \
-    --timeout 30
+    --timeout 30 \
 "
 
 docker stop -t 10 ${BFB_CONTAINER_NAME} || true
@@ -36,14 +36,16 @@ docker rm ${BFB_CONTAINER_NAME} || true
 
 docker rmi -f ${BFB_IMAGE_NAME} || true
 
+touch bfb-upload-error.log
 
 docker run \
     -d \
     --network host \
     --name ${BFB_CONTAINER_NAME} \
     -e QDRANT_API_KEY=${QDRANT_API_KEY} \
+    -v $(pwd)/bfb-upload-error.log:/bfb/upload-error.log \
     ${BFB_IMAGE_NAME} \
-    ./bfb ${BFB_PARAMETERS}
+    sh -c "./bfb ${BFB_PARAMETERS} 2>> /bfb/upload-error.log"
 
 sleep 5
 
