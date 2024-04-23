@@ -36,6 +36,7 @@ docker rm ${BFB_CONTAINER_NAME} || true
 
 docker rmi -f ${BFB_IMAGE_NAME} || true
 
+touch bfb-upload.log
 
 docker run \
     -d \
