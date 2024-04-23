@@ -27,7 +27,7 @@ BFB_PARAMETERS=" \
     --on-disk-vectors true \
     --max-id 200000 \
     --delay 200 \
-    --timeout 30
+    --timeout 30 \
 "
 
 docker stop -t 10 ${BFB_CONTAINER_NAME} || true
