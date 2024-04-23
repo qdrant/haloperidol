@@ -37,7 +37,7 @@ touch bfb-search-error.log
 
 docker run \
     -d \
-    --network none \
+    --network host \
     --name ${BFB_CONTAINER_NAME} \
     -e QDRANT_API_KEY=${QDRANT_API_KEY} \
     -v $(pwd)/bfb-search-error.log:/bfb/search-error.log \
