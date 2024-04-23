@@ -41,10 +41,10 @@ docker run \
     -d \
     --network host \
     --name ${BFB_CONTAINER_NAME} \
-    -v $PWD/bfb-logs:/bfb-logs \
+    -v $PWD/bfb-logs:/bfb \
     -e QDRANT_API_KEY=${QDRANT_API_KEY} \
     ${BFB_IMAGE_NAME} \
-    ./bfb ${BFB_PARAMETERS} 2>&1 | tee >(awk '{print strftime("[%Y-%m-%d %H:%M:%S]"), $0}' >> /bfb-logs/upload.log)
+    ./bfb ${BFB_PARAMETERS} 2>&1 | tee >(awk '{print strftime("[%Y-%m-%d %H:%M:%S]"), $0}' >> /bfb/upload.log)
 
 sleep 5
 
