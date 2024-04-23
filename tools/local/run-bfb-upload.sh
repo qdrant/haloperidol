@@ -40,7 +40,7 @@ touch bfb-upload-error.log
 
 docker run \
     -d \
-    --network no-internet \
+    --network none \
     --name ${BFB_CONTAINER_NAME} \
     -e QDRANT_API_KEY=${QDRANT_API_KEY} \
     -v $(pwd)/bfb-upload-error.log:/bfb/upload-error.log \
