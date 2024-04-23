@@ -43,9 +43,9 @@ docker run \
     --network host \
     --name ${BFB_CONTAINER_NAME} \
     -e QDRANT_API_KEY=${QDRANT_API_KEY} \
-    -v $(pwd)/bfb-upload.log:/bfb/upload.log \
+    -v $(pwd)/bfb-upload-error.log:/bfb/upload-error.log \
     ${BFB_IMAGE_NAME} \
-    sh -c "./bfb ${BFB_PARAMETERS} >> /bfb/upload.log"
+    sh -c "./bfb ${BFB_PARAMETERS} 2> /bfb/upload-error.log"
 
 sleep 5
 
