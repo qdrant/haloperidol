@@ -45,5 +45,5 @@ docker run \
     -e QDRANT_API_KEY=${QDRANT_API_KEY} \
     -v $(pwd)/bfb-search.log:/bfb/search.log \
     ${BFB_IMAGE_NAME} \
-    bash -c "while true; ${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} 2>> /bfb/search.log; do sleep 10; done"
+    bash -c "while true; ${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} | tee /bfb/search.log; do sleep 10; done"
 
