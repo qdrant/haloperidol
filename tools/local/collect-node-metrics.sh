@@ -165,7 +165,7 @@ docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PAS
 # create table chaos_testing_shards (
 #   id SERIAL PRIMARY key,
 #   url VARCHAR(255),
-#   peer_id INT,
+#   peer_id bigint,
 #   shard_id INT,
 #   points_count INT,
 #   state VARCHAR(255),
@@ -182,7 +182,7 @@ fi
 # create table chaos_testing_transfers (
 #   id SERIAL PRIMARY key,
 #   url VARCHAR(255),
-#   peer_id INT,
+#   peer_id bigint,
 #   shard_id INT,
 #   from_peer INT,
 #   to_peer INT,
