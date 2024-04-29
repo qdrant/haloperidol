@@ -109,14 +109,14 @@ for uri in "${QDRANT_URIS[@]}"; do
     )
 
     peer_id=$(echo "$collection_cluster_response" | jq -r '.peer_id')
-    local_shards=$(echo "$collection_cluster_response" | jq -rc '.local_shards[]') # [{"shard_id": 1, "point_count": .., "state": Active}, ...]
+    local_shards=$(echo "$collection_cluster_response" | jq -rc '.local_shards[]') # [{"shard_id": 1, "points_count": .., "state": Active}, ...]
 
     echo "$local_shards" | while read -r shard; do
         shard_id=$(echo "$shard" | jq -r '.shard_id')
-        point_count=$(echo "$shard" | jq -r '.point_count')
+        points_count=$(echo "$shard" | jq -r '.points_count')
         state=$(echo "$shard" | jq -r '.state')
 
-        insert_to_chaos_testing_shards_table "$uri" "$peer_id" "$shard_id" "$point_count" "$state" "$NOW"
+        insert_to_chaos_testing_shards_table "$uri" "$peer_id" "$shard_id" "$points_count" "$state" "$NOW"
     done
     shard_transfers=$(echo "$collection_cluster_response" | jq -rc '.shard_transfers[]')
 
@@ -173,7 +173,11 @@ docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PAS
 #   measure_timestamp TIMESTAMP
 # );
 
-docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_shards (url, peer_id, shard_id, points_count, state, measure_timestamp) VALUES $CHAOS_TESTING_SHARD_VALUES;"
+if [ -n "$CHAOS_TESTING_SHARD_VALUES" ]; then
+    docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_shards (url, peer_id, shard_id, points_count, state, measure_timestamp) VALUES $CHAOS_TESTING_SHARD_VALUES;"
+else
+    echo "No shards found"
+fi
 
 # Assume table:
 # create table chaos_testing_transfers (
@@ -190,4 +194,8 @@ docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PAS
 #   measure_timestamp TIMESTAMP
 # );
 
-docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_transfers (url, peer_id, shard_id, from_peer, to_peer, method, comment, progress_transfer, total_to_transfer, measure_timestamp) VALUES $CHAOS_TESTING_TRANSFER_VALUES;"
+if [ -n "$CHAOS_TESTING_TRANSFER_VALUES" ]; then
+    docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_transfers (url, peer_id, shard_id, from_peer, to_peer, method, comment, progress_transfer, total_to_transfer, measure_timestamp) VALUES $CHAOS_TESTING_TRANSFER_VALUES;"
+else
+    echo "No transfers found"
+fi
