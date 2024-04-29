@@ -107,20 +107,23 @@ for uri in "${QDRANT_URIS[@]}"; do
         --header 'content-type: application/json' \
         | jq -r '.result'
     )
+    insert_to_chaos_testing_table "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" "$NOW"
 
     peer_id=$(echo "$collection_cluster_response" | jq -r '.peer_id')
     local_shards=$(echo "$collection_cluster_response" | jq -rc '.local_shards[]') # [{"shard_id": 1, "points_count": .., "state": Active}, ...]
 
-    echo "$local_shards" | while read -r shard; do
+    # Note: Using echo "$local_shards" | while read -r shard; ... done creates a subshell which leads to global var
+    # not being set.
+    while read -r shard; do
         shard_id=$(echo "$shard" | jq -r '.shard_id')
         points_count=$(echo "$shard" | jq -r '.points_count')
         state=$(echo "$shard" | jq -r '.state')
 
         insert_to_chaos_testing_shards_table "$uri" "$peer_id" "$shard_id" "$points_count" "$state" "$NOW"
-    done
-    shard_transfers=$(echo "$collection_cluster_response" | jq -rc '.shard_transfers[]')
+    done <<< "$local_shards"
 
-    echo "$shard_transfers" | while read -r transfer; do
+    shard_transfers=$(echo "$collection_cluster_response" | jq -rc '.shard_transfers[]')
+    while read -r transfer; do
         #  {
         #     "shard_id": 2,
         #     "from": 8023376283398464,
@@ -141,11 +144,7 @@ for uri in "${QDRANT_URIS[@]}"; do
         progress_transfer=$( echo "$comment" | grep -oP '(?<=\()\d+' )
         total_to_transfer=$( echo "$comment" | grep -oP '(?<=/)\d+(?=\))' )
         insert_to_chaos_testing_transfer_table "$uri" "$peer_id" "$shard_id" "$from_peer" "$to_peer" "$method" "$comment" "$progress_transfer" "$total_to_transfer" "$NOW"
-    done
-
-    insert_to_chaos_testing_table "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" "$NOW"
-
-
+    done <<< "$shard_transfers"
 done
 
 # Read search results from json file and upload it to postgres
