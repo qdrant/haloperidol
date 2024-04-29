@@ -132,17 +132,21 @@ for uri in "${QDRANT_URIS[@]}"; do
         #     "method": "stream_records",
         #     "comment": "Transferring records (8100/8149), started 1s ago, ETA: 0.00s"
         # }
-        comment=$(echo "$transfer" | jq -r '.comment')
-        if [ -z "$comment" ]; then
-            continue
-        fi
 
         shard_id=$(echo "$transfer" | jq -r '.shard_id')
         from_peer=$(echo "$transfer" | jq -r '.from')
         to_peer=$(echo "$transfer" | jq -r '.to')
         method=$(echo "$transfer" | jq -r '.method')
-        progress_transfer=$( echo "$comment" | grep -oP '(?<=\()\d+' )
-        total_to_transfer=$( echo "$comment" | grep -oP '(?<=/)\d+(?=\))' )
+
+        comment=$(echo "$transfer" | jq -r '.comment')
+        if [ "$comment" == "null" ]; then
+            progress_transfer=0
+            total_to_transfer=0
+        else
+            progress_transfer=$( echo "$comment" | grep -oP '(?<=\()\d+' )
+            total_to_transfer=$( echo "$comment" | grep -oP '(?<=/)\d+(?=\))' )
+        fi
+
         insert_to_chaos_testing_transfer_table "$uri" "$peer_id" "$shard_id" "$from_peer" "$to_peer" "$method" "$comment" "$progress_transfer" "$total_to_transfer" "$NOW"
     done <<< "$shard_transfers"
 done
