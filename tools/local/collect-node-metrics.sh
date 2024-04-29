@@ -132,6 +132,9 @@ for uri in "${QDRANT_URIS[@]}"; do
         #     "method": "stream_records",
         #     "comment": "Transferring records (8100/8149), started 1s ago, ETA: 0.00s"
         # }
+        if [ "$transfer" == "" ]; then
+            continue;
+        fi
 
         shard_id=$(echo "$transfer" | jq -r '.shard_id')
         from_peer=$(echo "$transfer" | jq -r '.from')
