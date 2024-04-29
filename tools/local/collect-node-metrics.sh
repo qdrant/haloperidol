@@ -13,10 +13,12 @@ fi
 QDRANT_URIS=( "${QDRANT_HOSTS[@]/#/https://}" )
 QDRANT_URIS=( "${QDRANT_URIS[@]/%/:6333}" )
 
-PSQL_VALUES=""
+CHAOS_TESTING_VALUES=""
+CHAOS_TESTING_SHARD_VALUES=""
+CHAOS_TESTING_TRANSFER_VALUES=""
 
-# function to insert to PSQL_VALUES:
-function insert_to_psql_values {
+# function to insert to CHAOS_TESTING_VALUES:
+function insert_to_chaos_testing_table {
     local uri=$1
     local version=$2
     local commit_id=$3
@@ -24,12 +26,50 @@ function insert_to_psql_values {
     local num_snapshots=$5
     local measure_timestamp=$6
 
-    if [ -n "$PSQL_VALUES" ]; then
+    if [ -n "$CHAOS_TESTING_VALUES" ]; then
         # If there are already values, add a comma
-        PSQL_VALUES+=" ,"
+        CHAOS_TESTING_VALUES+=" ,"
     fi
 
-    PSQL_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, $num_snapshots, '$measure_timestamp')"
+    CHAOS_TESTING_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, $num_snapshots, '$measure_timestamp')"
+}
+
+# function to insert to CHAOS_TESTING_SHARD_VALUES:
+function insert_to_chaos_testing_shards_table {
+    local uri=$1
+    local peer_id=$2
+    local shard_id=$3
+    local points_count=$4
+    local state=$5
+    local measure_timestamp=$6
+
+    if [ -n "$CHAOS_TESTING_SHARD_VALUES" ]; then
+        # If there are already values, add a comma
+        CHAOS_TESTING_SHARD_VALUES+=" ,"
+    fi
+
+    CHAOS_TESTING_SHARD_VALUES+=" ('$uri', $peer_id, $shard_id, $points_count, '$state', '$measure_timestamp')"
+}
+
+# function to insert to CHAOS_TESTING_TRANSFER_VALUES:
+function insert_to_chaos_testing_transfer_table {
+    local uri=$1
+    local peer_id=$2
+    local shard_id=$3
+    local from_peer=$4
+    local to_peer=$5
+    local method=$6
+    local comment=$7
+    local progress_transfer=$8
+    local total_to_transfer=$9
+    local measure_timestamp=${10}
+
+    if [ -n "$CHAOS_TESTING_TRANSFER_VALUES" ]; then
+        # If there are already values, add a comma
+        CHAOS_TESTING_TRANSFER_VALUES+=" ,"
+    fi
+
+    CHAOS_TESTING_TRANSFER_VALUES+=" ('$uri', $peer_id, $shard_id, $from_peer, $to_peer, '$method', '$comment', $progress_transfer, $total_to_transfer, '$measure_timestamp')"
 }
 
 for uri in "${QDRANT_URIS[@]}"; do
@@ -39,7 +79,7 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     if ! (echo "$root_api_response" | jq -e '.'); then
         # Node is down
-        insert_to_psql_values "$uri" "null" "null" 0 0 "$NOW"
+        insert_to_chaos_testing_table "$uri" "null" "null" 0 0 "$NOW"
         continue
     fi
 
@@ -61,7 +101,51 @@ for uri in "${QDRANT_URIS[@]}"; do
         --header 'content-type: application/json' \
         | jq -r '(.result[] | length) // 0')
 
-    insert_to_psql_values "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" "$NOW"
+    collection_cluster_response=$(curl -s --request GET \
+        --url "$uri/collections/benchmark/cluster" \
+        --header "api-key: $QDRANT_API_KEY" \
+        --header 'content-type: application/json' \
+        | jq -r '.result'
+    )
+
+    peer_id=$(echo "$collection_cluster_response" | jq -r '.peer_id')
+    local_shards=$(echo "$collection_cluster_response" | jq -rc '.local_shards[]') # [{"shard_id": 1, "point_count": .., "state": Active}, ...]
+
+    echo "$local_shards" | while read -r shard; do
+        shard_id=$(echo "$shard" | jq -r '.shard_id')
+        point_count=$(echo "$shard" | jq -r '.point_count')
+        state=$(echo "$shard" | jq -r '.state')
+
+        insert_to_chaos_testing_shards_table "$uri" "$peer_id" "$shard_id" "$point_count" "$state" "$NOW"
+    done
+    shard_transfers=$(echo "$collection_cluster_response" | jq -rc '.shard_transfers[]')
+
+    echo "$shard_transfers" | while read -r transfer; do
+        #  {
+        #     "shard_id": 2,
+        #     "from": 8023376283398464,
+        #     "to": 364905008605704,
+        #     "sync": true,
+        #     "method": "stream_records",
+        #     "comment": "Transferring records (8100/8149), started 1s ago, ETA: 0.00s"
+        # }
+        comment=$(echo "$transfer" | jq -r '.comment')
+        if [ -z "$comment" ]; then
+            continue
+        fi
+
+        shard_id=$(echo "$transfer" | jq -r '.shard_id')
+        from_peer=$(echo "$transfer" | jq -r '.from')
+        to_peer=$(echo "$transfer" | jq -r '.to')
+        method=$(echo "$transfer" | jq -r '.method')
+        progress_transfer=$( echo "$comment" | grep -oP '(?<=\()\d+' )
+        total_to_transfer=$( echo "$comment" | grep -oP '(?<=/)\d+(?=\))' )
+        insert_to_chaos_testing_transfer_table "$uri" "$peer_id" "$shard_id" "$from_peer" "$to_peer" "$method" "$comment" "$progress_transfer" "$total_to_transfer" "$NOW"
+    done
+
+    insert_to_chaos_testing_table "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" "$NOW"
+
+
 done
 
 # Read search results from json file and upload it to postgres
@@ -76,5 +160,34 @@ done
 #   measure_timestamp TIMESTAMP
 # );
 
+docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing (url, version, commit, num_vectors, num_snapshots, measure_timestamp) VALUES $CHAOS_TESTING_VALUES;"
 
-docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing (url, version, commit, num_vectors, num_snapshots, measure_timestamp) VALUES $PSQL_VALUES;"
+# Assume table:
+# create table chaos_testing_shards (
+#   id SERIAL PRIMARY key,
+#   url VARCHAR(255),
+#   peer_id INT,
+#   shard_id INT,
+#   points_count INT,
+#   state VARCHAR(255),
+#   measure_timestamp TIMESTAMP
+# );
+
+docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_shards (url, peer_id, shard_id, points_count, state, measure_timestamp) VALUES $CHAOS_TESTING_SHARD_VALUES;"
+
+# Assume table:
+# create table chaos_testing_transfers (
+#   id SERIAL PRIMARY key,
+#   url VARCHAR(255),
+#   peer_id INT,
+#   shard_id INT,
+#   from_peer INT,
+#   to_peer INT,
+#   method VARCHAR(255),
+#   comment VARCHAR(255),
+#   progress_transfer INT,
+#   total_to_transfer INT,
+#   measure_timestamp TIMESTAMP
+# );
+
+docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_transfers (url, peer_id, shard_id, from_peer, to_peer, method, comment, progress_transfer, total_to_transfer, measure_timestamp) VALUES $CHAOS_TESTING_TRANSFER_VALUES;"
