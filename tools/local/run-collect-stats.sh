@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Redirect stdout (1) and stderr (2) to a log file
+exec >/var/log/collect-stats.log 2>&1
+
 # Clone repo if not exists:
 if [ ! -d "haloperidol" ]; then
     git clone https://github.com/qdrant/haloperidol.git
