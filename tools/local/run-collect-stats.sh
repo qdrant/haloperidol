@@ -6,7 +6,7 @@ log_with_timestamp() {
     done
 }
 # Redirect stdout (1) and stderr (2) to a log file
-exec > >(log_with_timestamp >> /var/log/collect-stats.log) 2>&1
+exec > >(log_with_timestamp >> /var/log/collect-stats-cron.log) 2>&1
 
 # Clone repo if not exists:
 if [ ! -d "haloperidol" ]; then
