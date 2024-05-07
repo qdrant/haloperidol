@@ -2,7 +2,7 @@
 
 log_with_timestamp() {
     while IFS= read -r line; do
-        echo "$(date --iso-8601=seconds) $line"
+        echo "$(date --rfc-3339=seconds --utc) $line"
     done
 }
 # Redirect stdout (1) and stderr (2) to a log file
