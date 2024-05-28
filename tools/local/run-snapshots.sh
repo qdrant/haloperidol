@@ -31,13 +31,12 @@ function run_in_loop() {
     # Create snapshots
     for url in "${QDRANT_URIS[@]}"; do
         create_snapshot "$url" || true
-        sleep 60
     done
 
     # Delete snapshots
     for url in "${QDRANT_URIS[@]}"; do
         delete_snapshots "$url" || true
-        sleep 60
+        sleep 10
         snapshot_count=$(get_snapshot_count "$url" || "-1")
         if [ "$snapshot_count" -ne 0 ]; then
             echo "ERROR: Snapshot count is $snapshot_count (!= 0)"
