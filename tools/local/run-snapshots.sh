@@ -29,7 +29,7 @@ function delete_snapshots() {
 }
 
 function get_snapshot_count() {
-    curl -X GET -H "api-key: ${QDRANT_API_KEY}" "$1/collections/${QDRANT_COLLECTION_NAME}/snapshots" -s \
+    curl -s --fail-with-body -X GET -H "api-key: ${QDRANT_API_KEY}" "$1/collections/${QDRANT_COLLECTION_NAME}/snapshots" -s \
     | jq -r ".result[].name" \
     | wc -l
 }
