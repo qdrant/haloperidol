@@ -11,6 +11,14 @@ QDRANT_COLLECTION_NAME=${QDRANT_COLLECTION_NAME:-"benchmark"}
 QDRANT_URIS=( ${QDRANT_HOSTS[@]/#/https://} )
 QDRANT_URIS=( ${QDRANT_URIS[@]/%/:6333} )
 
+log_with_timestamp() {
+    while IFS= read -r line; do
+        echo "$(date --rfc-3339=seconds --utc) $line"
+    done
+}
+# Redirect stdout (1) and stderr (2) to a log file
+exec > >(log_with_timestamp >> /var/log/run-snapshots-cron.log) 2>&1
+
 function create_snapshot() {
     snapshot_count=$(get_snapshot_count "$1")
     if [ "$snapshot_count" -gt 0 ]; then
