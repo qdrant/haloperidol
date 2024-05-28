@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+set -x
+
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 
 QDRANT_COLLECTION_NAME=${QDRANT_COLLECTION_NAME:-"benchmark"}
@@ -44,4 +46,4 @@ function run_in_loop() {
     done
 }
 
-run_in_loop > output-snapshots.log 2>&1 &
+run_in_loop # > output-snapshots.log 2>&1 &
