@@ -19,11 +19,12 @@ declare RUN_SNAPSHOTS_PROCESS="$LOCAL/run-snapshots.sh"
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
 
-for IDX in {0..4}; do
+for IDX in {0..3}; do
     QDRANT_HOSTS+=("node-${IDX}-${QDRANT_CLUSTER_URL}")
 done
 
-ENV_CONTEXT="${QDRANT_HOSTS[@]@A} ${QDRANT_API_KEY@A}" \
+ENV_CONTEXT="${QDRANT_API_KEY@A} ${QDRANT_HOSTS[@]@A}" \
 RUN_SCRIPT="$RUN_SNAPSHOTS_PROCESS" \
+BG_TASK_NAME="run-snapshots" \
 SERVER_NAME=qdrant-manager \
 bash -x "$RUN_REMOTE"
