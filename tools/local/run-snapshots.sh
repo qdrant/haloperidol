@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-set -x
-
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 
 QDRANT_COLLECTION_NAME=${QDRANT_COLLECTION_NAME:-"benchmark"}
