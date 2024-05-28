@@ -12,6 +12,13 @@ QDRANT_URIS=( ${QDRANT_HOSTS[@]/#/https://} )
 QDRANT_URIS=( ${QDRANT_URIS[@]/%/:6333} )
 
 function create_snapshot() {
+    snapshot_count=$(get_snapshot_count "$1")
+    if [ "$snapshot_count" -gt 0 ]; then
+        # This exists to avoid OOD errors
+        echo "There are already $snapshot_count snapshots on $1, skipping..."
+        return
+    fi
+
     curl -s --fail-with-body -X POST -H "api-key: ${QDRANT_API_KEY}" "$1/collections/${QDRANT_COLLECTION_NAME}/snapshots"
 }
 
