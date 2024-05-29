@@ -65,6 +65,8 @@ while true; do
   echo "Creating snapshot..."
 
   run_in_loop # > output-snapshots.log 2>&1 &
-  echo "Sleeping for 1hr"
-  sleep 3600 # 1hr
+  # generate a time (seconds) between 30mins and 1 hour:
+  delay=$((RANDOM % 1800 + 30 * 60))
+  echo "Sleeping for ${delay}s"
+  sleep $delay # 1hr
 done
