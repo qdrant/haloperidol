@@ -2,7 +2,7 @@
 
 set -uo pipefail
 
-set -x
+# set -x
 
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 
