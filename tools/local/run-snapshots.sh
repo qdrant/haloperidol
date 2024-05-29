@@ -23,12 +23,12 @@ function create_snapshot() {
     snapshot_count=$(get_snapshot_count "$1")
     if [ "$snapshot_count" -gt 0 ]; then
         # This exists to avoid OOD errors
-        echo "operation=create_snapshot action=skip msg=\"already $snapshot_count snapshots\" url=$1"
+        echo "msg=\"snapshots already exist\" operation=create_snapshot action=skip snapshot_count=$snapshot_count url=$1"
         return
     fi
 
     snapshot=$(curl -s --fail-with-body -X POST -H "api-key: ${QDRANT_API_KEY}" "$1/collections/${QDRANT_COLLECTION_NAME}/snapshots" | jq -r ".result.name")
-    echo "operation=create_snapshot action=create msg=\"created snapshot $snapshot\" url=$1"
+    echo "msg=\"created snapshot\" operation=create_snapshot action=create snapshot_name=\"$snapshot\" url=$1"
 }
 
 function delete_snapshots() {
@@ -56,6 +56,7 @@ function run_in_loop() {
         delete_snapshots "$url" || true
         sleep 10
         snapshot_count=$(get_snapshot_count "$url" || "-1")
+        echo "operation=get_snapshot_count snapshot_count=$snapshot_count"
         if [ "$snapshot_count" -ne 0 ]; then
             echo "ERROR: Snapshot count is $snapshot_count (!= 0)"
             echo "::set-output name=failed::true"
@@ -65,11 +66,12 @@ function run_in_loop() {
 
 while true; do
   echo "==================="
-  echo "Creating snapshot..."
+  echo "msg=\"Starting snapshot cron\""
 
   run_in_loop # > output-snapshots.log 2>&1 &
   # generate a time (seconds) between 30mins and 1 hour:
   delay=$((RANDOM % 1800 + 30 * 60))
-  echo "Sleeping for ${delay}s"
-  sleep $delay # 1hr
+  # Convert to minutes:
+  echo "msg=\"Sleeping\" duration_m=$(( delay / 60 ))"
+  sleep $delay
 done
