@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -uo pipefail
 
 set -x
 
@@ -13,7 +13,7 @@ QDRANT_URIS=( ${QDRANT_URIS[@]/%/:6333} )
 
 log_with_timestamp() {
     while IFS= read -r line; do
-        echo "$(date --rfc-3339=seconds --utc) $line"
+        echo "timestamp=$(date --rfc-3339=seconds --utc) $line"
     done
 }
 # Redirect stdout (1) and stderr (2) to a log file
@@ -23,17 +23,20 @@ function create_snapshot() {
     snapshot_count=$(get_snapshot_count "$1")
     if [ "$snapshot_count" -gt 0 ]; then
         # This exists to avoid OOD errors
-        echo "There are already $snapshot_count snapshots on $1, skipping..."
+        echo "operation=create_snapshot action=skip msg=\"already $snapshot_count snapshots\" url=$1"
         return
     fi
 
-    curl -s --fail-with-body -X POST -H "api-key: ${QDRANT_API_KEY}" "$1/collections/${QDRANT_COLLECTION_NAME}/snapshots"
+    snapshot=$(curl -s --fail-with-body -X POST -H "api-key: ${QDRANT_API_KEY}" "$1/collections/${QDRANT_COLLECTION_NAME}/snapshots" | jq -r ".result.name")
+    echo "operation=create_snapshot action=create msg=\"created snapshot $snapshot\" url=$1"
 }
 
 function delete_snapshots() {
-    curl -s --fail-with-body -X GET  -H "api-key: ${QDRANT_API_KEY}" "$1/collections/${QDRANT_COLLECTION_NAME}/snapshots" -s \
-        | jq -r ".result[].name" \
-        | xargs -I {} curl -X DELETE -H "api-key: ${QDRANT_API_KEY}" "$1/collections/${QDRANT_COLLECTION_NAME}/snapshots/{}"
+    snapshot_names=$(curl -s --fail-with-body -X GET  -H "api-key: ${QDRANT_API_KEY}" "$1/collections/${QDRANT_COLLECTION_NAME}/snapshots" -s \
+        | jq -r ".result[].name")
+    echo "operation=delete_snapshots action=fetch_snapshots snapshots=\"$snapshot_names\" url=$1"
+    echo "$snapshot_names" | xargs -I {} curl -s --fail-with-body -X DELETE -H "api-key: ${QDRANT_API_KEY}" "$1/collections/${QDRANT_COLLECTION_NAME}/snapshots/{}"
+    echo "operation=delete_snapshots action=delete snapshots=$snapshot_names url=$1"
 }
 
 function get_snapshot_count() {
