@@ -60,4 +60,11 @@ function run_in_loop() {
     done
 }
 
-run_in_loop # > output-snapshots.log 2>&1 &
+while true; do
+  echo "==================="
+  echo "Creating snapshot..."
+
+  run_in_loop # > output-snapshots.log 2>&1 &
+  echo "Sleeping for 1hr"
+  sleep 3600 # 1hr
+done
