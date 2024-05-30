@@ -56,7 +56,7 @@ function run_in_loop() {
         delete_snapshots "$url" || true
         sleep 10
         snapshot_count=$(get_snapshot_count "$url" || "-1")
-        echo "operation=get_snapshot_count snapshot_count=$snapshot_count"
+        echo "operation=get_snapshot_count snapshot_count=$snapshot_count url=$url"
         if [ "$snapshot_count" -ne 0 ]; then
             echo "ERROR: Snapshot count is $snapshot_count (!= 0)"
             echo "::set-output name=failed::true"
