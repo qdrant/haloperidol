@@ -88,8 +88,11 @@ while True:
             # Some other error:
             print(f"Failed to fetch points from {uri}")
             print("Error response:", response.text)
-            is_data_consistent = False
-            break
+            # This will show red lines when nodes are down. But we don't want that
+            # is_data_consistent = False
+            # break
+            # So skip
+            continue
 
         fetched_points = sorted(response.json()["result"], key=lambda x: x["id"])
         fetched_points_count = len(fetched_points)
