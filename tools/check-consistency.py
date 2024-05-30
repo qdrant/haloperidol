@@ -82,17 +82,14 @@ while True:
         )
 
         if response.status_code != 200:
-            if response.text.strip() == "404 page not found":
+            if response.text.strip() in ("404 page not found", "Service Unavailable"):
                 print(f"{uri} seems unavailable, skipping consistency check for this node")
                 continue
-            # Some other error:
+            # Some unknown error:
             print(f"Failed to fetch points from {uri}")
             print("Error response:", response.text)
-            # This will show red lines when nodes are down. But we don't want that
-            # is_data_consistent = False
-            # break
-            # So skip
-            continue
+            is_data_consistent = False
+            break
 
         fetched_points = sorted(response.json()["result"], key=lambda x: x["id"])
         fetched_points_count = len(fetched_points)
