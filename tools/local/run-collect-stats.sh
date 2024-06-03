@@ -1,4 +1,5 @@
 #!/bin/bash
+set -xeuo pipefail
 
 log_with_timestamp() {
     while IFS= read -r line; do
@@ -13,8 +14,9 @@ if [ ! -d "haloperidol" ]; then
     git clone https://github.com/qdrant/haloperidol.git
 fi
 
+echo "haloperidol repo is at $PWD"
 cd haloperidol || exit
-git pull
+git pull # this can fail if repo is touched
 
 while true; do
     echo "==================="
