@@ -43,7 +43,7 @@ def calculate_inconsistent_points(source_points, target_points, point_ids):
 # Generate 100 random numbers between 0 and 200K and convert into JSON array
 num_points_to_check = 100
 initial_point_ids = random.sample(range(200_001), num_points_to_check)
-point_ids_for_node = [initial_point_ids for _ in range(4)]  # node-0 to node-3
+point_ids_for_node = [initial_point_ids for _ in range(4)]  # point ids to check for node-0 to node-3
 
 while True:
     cluster_response = requests.get(
@@ -53,7 +53,7 @@ while True:
 
     if cluster_response.status_code != 200:
         print(f"Non-200 response from /cluster API")
-        print("Error response:", cluster_response.text)
+        print("Error response from /cluster API:", cluster_response.text)
         exit(1)
 
     num_nodes = len(cluster_response.json()["result"]["peers"])
@@ -82,14 +82,18 @@ while True:
         )
 
         if response.status_code != 200:
-            if response.text.strip() in ("404 page not found", "Service Unavailable"):
+            error_msg = response.text.strip()
+            if error_msg in ("404 page not found", "Service Unavailable"):
                 print(f"{uri} seems unavailable, skipping consistency check for this node")
+                # point_ids_for_node[node_idx] = []
+                node_idx += 1
                 continue
-            # Some unknown error:
-            print(f"Failed to fetch points from {uri}")
-            print("Error response:", response.text)
-            is_data_consistent = False
-            break
+            else:
+                # Some unknown error:
+                print(f"Failed to fetch points from {uri}")
+                print(f"Error response: '{error_msg}'")
+                is_data_consistent = False
+                break
 
         fetched_points = sorted(response.json()["result"], key=lambda x: x["id"])
         fetched_points_count = len(fetched_points)
