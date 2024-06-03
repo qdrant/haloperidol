@@ -6,7 +6,7 @@ import requests
 import random
 import time
 
-print("Checking data consistency")
+print('level=INFO msg="Checking data consistency"')
 
 # Ensure the data/points-dump directory exists
 os.makedirs("data/points-dump", exist_ok=True)
@@ -43,7 +43,9 @@ def calculate_inconsistent_points(source_points, target_points, point_ids):
 # Generate 100 random numbers between 0 and 200K and convert into JSON array
 num_points_to_check = 100
 initial_point_ids = random.sample(range(200_001), num_points_to_check)
-point_ids_for_node = [initial_point_ids for _ in range(4)]  # point ids to check for node-0 to node-3
+point_ids_for_node = [
+    initial_point_ids for _ in range(4)
+]  # point ids to check for node-0 to node-3
 
 while True:
     cluster_response = requests.get(
@@ -52,15 +54,16 @@ while True:
     )
 
     if cluster_response.status_code != 200:
-        print(f"Non-200 response from /cluster API")
-        print("Error response from /cluster API:", cluster_response.text)
+        print(
+            f'level=ERROR msg="Got error in response" status_code={cluster_response.status_code} api="/cluster" response="{cluster_response.text}"'
+        )
         exit(1)
 
-    num_nodes = len(cluster_response.json()["result"]["peers"])
-    print(f"Number of nodes: {num_nodes}")
+    num_peers = len(cluster_response.json()["result"]["peers"])
+    print(f'level=INFO msg="Fetched cluster peers" num_peers={num_peers}')
 
     QDRANT_URIS = [
-        f"https://node-{idx}-{QDRANT_CLUSTER_URL}:6333" for idx in range(num_nodes)
+        f"https://node-{idx}-{QDRANT_CLUSTER_URL}:6333" for idx in range(num_peers)
     ]
 
     node_idx = 0
@@ -71,7 +74,9 @@ while True:
 
         if len(point_ids) == 0:
             is_data_consistent = True
-            print(f"Skipping node-{node_idx}")
+            print(
+                f'level=INFO msg="Skipping because no check required for node" node={node_idx}'
+            )
             node_idx += 1
             continue
 
@@ -84,21 +89,26 @@ while True:
         if response.status_code != 200:
             error_msg = response.text.strip()
             if error_msg in ("404 page not found", "Service Unavailable"):
-                print(f"{uri} seems unavailable, skipping consistency check for this node")
+                print(
+                    f'level=WARN msg="Node unreachable, skipping consistency check" uri="{uri}" status_code={response.status_code} err="{error_msg}"'
+                )
                 # point_ids_for_node[node_idx] = []
                 node_idx += 1
                 continue
             else:
                 # Some unknown error:
-                print(f"Failed to fetch points from {uri}")
-                print(f"Error response: '{error_msg}'")
+                print(
+                    f'level=ERROR msg="Failed to fetch points" uri="{uri}" status_code={response.status_code} err="{error_msg}"'
+                )
                 is_data_consistent = False
                 break
 
         fetched_points = sorted(response.json()["result"], key=lambda x: x["id"])
         fetched_points_count = len(fetched_points)
 
-        print(f"Got {fetched_points_count} points from {uri}")
+        print(
+            f'level=INFO msg="Fetched points" num_points={fetched_points_count} uri="{uri}"'
+        )
 
         attempt_number = CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining
         with open(
@@ -109,23 +119,22 @@ while True:
         if len(first_node_points) == 0:
             first_node_points = fetched_points
         elif fetched_points == first_node_points:
-            print(f"{uri} data is consistent with node-0")
+            print(f'level=INFO msg="Node is consistent with node-0" uri="{uri}"')
             point_ids_for_node[node_idx] = []
             is_data_consistent = True
         else:
-            print(f"Checking {uri}")
+            print(f'level=INFO msg="Checking points of node" uri="{uri}"')
             inconsistent_points = calculate_inconsistent_points(
                 first_node_points, fetched_points, point_ids
             )
             if len(inconsistent_points) == 0:
-                print(f"{uri} is consistent")
+                print(f'level=INFO msg="Node is consistent" uri="{uri}"')
                 point_ids_for_node[node_idx] = []
                 is_data_consistent = True
                 continue
             print(
-                f"{uri} data is inconsistent with node-0 by {len(inconsistent_points)} points"
+                f'level=WARN msg="Node might be inconsistent. Need to retry" compared_to="node-0" uri="{uri}" inconsistent_count={len(inconsistent_points)} inconsistent_point_ids="{inconsistent_points}"'
             )
-            print("Inconsistent point IDs to be retried in next attempt:", inconsistent_points)
 
             point_ids_for_node[node_idx] = inconsistent_points
 
@@ -138,18 +147,18 @@ while True:
 
     if is_data_consistent:
         print(
-            f"Data consistency check succeeded with {CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} attempt(s)"
+            f'level=INFO msg="Data consistency check succeeded" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining}'
         )
         break
     else:
         if consistency_attempts_remaining == 0:
             print(
-                f"Data consistency check failed despite {CONSISTENCY_ATTEMPTS_TOTAL} attempts"
+                f'level=ERROR msg="Data consistency check failed" remaining_attempts={0} total_attempts={CONSISTENCY_ATTEMPTS_TOTAL}'
             )
             break
         else:
             print(
-                f"Retrying data consistency check. Attempts remaining: {consistency_attempts_remaining} / {CONSISTENCY_ATTEMPTS_TOTAL}"
+                f'level=WARN msg="Retrying data consistency check" remaining_attempts={consistency_attempts_remaining} total_attempts={CONSISTENCY_ATTEMPTS_TOTAL}'
             )
             # Node might be unavailable which caused request to fail. Give some time to heal
             time.sleep(5)
