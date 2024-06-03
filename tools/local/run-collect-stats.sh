@@ -25,6 +25,7 @@ while true; do
 
     tools/local/check-cluster-health.sh
     tools/local/collect-node-metrics.sh
+    tools/local/check-ps.sh
 
     echo "Waiting for 1min..."
     sleep 60 # 1m
