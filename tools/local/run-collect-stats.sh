@@ -1,4 +1,5 @@
 #!/bin/bash
+PS4='ts=$(date "+%Y-%m-%dT%H:%M:%SZ") level=DEBUG line=$LINENO '
 set -xeuo pipefail
 
 log_with_timestamp() {
