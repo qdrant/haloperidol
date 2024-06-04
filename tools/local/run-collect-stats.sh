@@ -4,8 +4,8 @@ set -xeuo pipefail
 
 log_with_timestamp() {
     while IFS= read -r line; do
-        ts=$(date "+%Y-%m-%dT%H:%M:%SZ")
-        echo "ts=$ts $line"
+        # ts=$(date "+%Y-%m-%dT%H:%M:%SZ") # ts=$ts
+        echo "$line"
     done
 }
 # Redirect stdout (1) and stderr (2) to a log file
