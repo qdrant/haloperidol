@@ -6,7 +6,7 @@ import requests
 import random
 import time
 
-print('level=INFO msg="Checking data consistency"')
+print('level=INFO msg="Starting data consistency check script"')
 
 # Ensure the data/points-dump directory exists
 os.makedirs("data/points-dump", exist_ok=True)
@@ -153,12 +153,12 @@ while True:
     else:
         if consistency_attempts_remaining == 0:
             print(
-                f'level=ERROR msg="Data consistency check failed" remaining_attempts={0} total_attempts={CONSISTENCY_ATTEMPTS_TOTAL}'
+                f'level=ERROR msg="Data consistency check failed" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining}'
             )
             break
         else:
             print(
-                f'level=WARN msg="Retrying data consistency check" remaining_attempts={consistency_attempts_remaining} total_attempts={CONSISTENCY_ATTEMPTS_TOTAL}'
+                f'level=WARN msg="Retrying data consistency check" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} remaining_attempts={consistency_attempts_remaining}'
             )
             # Node might be unavailable which caused request to fail. Give some time to heal
             time.sleep(5)
