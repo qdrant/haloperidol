@@ -74,7 +74,7 @@ function insert_to_chaos_testing_transfer_table {
 }
 
 for uri in "${QDRANT_URIS[@]}"; do
-    echo "$uri"
+    echo "level=INFO msg=\"Checking node\" uri=$uri"
 
     root_api_response=$(curl -s --url "$uri/" --header "api-key: $QDRANT_API_KEY")
 
