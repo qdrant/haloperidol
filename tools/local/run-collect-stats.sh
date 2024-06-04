@@ -4,7 +4,7 @@ set -xeuo pipefail
 
 log_with_timestamp() {
     while IFS= read -r line; do
-        echo "$(date --rfc-3339=seconds --utc) $line"
+        echo "ts=$(date --rfc-3339=seconds --utc) $line"
     done
 }
 # Redirect stdout (1) and stderr (2) to a log file
@@ -15,13 +15,11 @@ if [ ! -d "haloperidol" ]; then
     git clone https://github.com/qdrant/haloperidol.git
 fi
 
-echo "haloperidol repo is at $PWD"
 cd haloperidol || exit
 git pull # this can fail if repo is touched
 
 while true; do
-    echo "==================="
-    echo "Collecting stats..."
+    echo "level=INFO msg=\"Collect stats script triggered\""
 
     QDRANT_HOSTS_STR=$(IFS=, ; echo "${QDRANT_HOSTS[*]}")
     export QDRANT_HOSTS_STR
@@ -29,6 +27,6 @@ while true; do
     tools/local/check-cluster-health.sh
     tools/local/collect-node-metrics.sh
 
-    echo "Waiting for 1min..."
+    echo "level=INFO msg=\"Sleeping for 1m\""
     sleep 60 # 1m
 done
