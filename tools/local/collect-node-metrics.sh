@@ -18,6 +18,17 @@ CHAOS_TESTING_VALUES=""
 CHAOS_TESTING_SHARD_VALUES=""
 CHAOS_TESTING_TRANSFER_VALUES=""
 
+function handle_error() {
+    local error_code=$?
+    local error_line=$BASH_LINENO
+    local error_command=$BASH_COMMAND
+    local timestamp=$(date +"%Y-%m-%d %H:%M:%S" --utc)
+    echo "ts=\"$timestamp\" line=$error_line cmd=\"$error_command\" exit_code=$error_code"
+}
+
+# Trap ERR signal and call handle_error function
+trap 'handle_error' ERR
+
 # function to insert to CHAOS_TESTING_VALUES:
 function insert_to_chaos_testing_table {
     local uri=$1
