@@ -11,7 +11,7 @@ search_operational=$([ $? -eq 0 ] && echo true || echo false)
 tools/check-consistency.py
 is_data_consistent=$([ $? -eq 0 ] && echo true || echo false)
 
-echo "upload_operational=$upload_operational search_operational=$search_operational is_data_consistent=$is_data_consistent measure_timestamp=\"$NOW\""
+echo "level=INFO msg=\"Checked chaos-testing components\" upload_operational=$upload_operational search_operational=$search_operational is_data_consistent=$is_data_consistent measure_timestamp=\"$NOW\""
 
 # Assume table:
 # create table bfb_health (
