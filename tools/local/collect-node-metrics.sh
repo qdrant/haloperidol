@@ -136,6 +136,10 @@ for uri in "${QDRANT_URIS[@]}"; do
         else
           insert_to_chaos_testing_shards_table "$uri" "$peer_id" "$shard_id" "$points_count" "$state" "$NOW"  
         fi
+
+        if [ "$state" == "Dead" ]; then
+            echo "level=WARN msg=\"Shard is dead\" shard_id=$shard_id peer_id=$peer_id uri=\"$uri\""
+        fi
     done <<< "$local_shards"
 
     shard_transfers=$(echo "$collection_cluster_response" | jq -rc '.shard_transfers[]')
