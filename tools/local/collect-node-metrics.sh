@@ -187,7 +187,7 @@ docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PAS
 if [ -n "$CHAOS_TESTING_SHARD_VALUES" ]; then
     docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_shards (url, peer_id, shard_id, points_count, state, measure_timestamp) VALUES $CHAOS_TESTING_SHARD_VALUES;"
 else
-    echo "No shards found"
+    echo "level=ERROR msg=\"No shards found\""
 fi
 
 # Assume table:
@@ -208,5 +208,5 @@ fi
 if [ -n "$CHAOS_TESTING_TRANSFER_VALUES" ]; then
     docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_transfers (url, peer_id, shard_id, from_peer, to_peer, method, comment, progress_transfer, total_to_transfer, measure_timestamp) VALUES $CHAOS_TESTING_TRANSFER_VALUES;"
 else
-    echo "No transfers found"
+    echo "level=INFO msg=\"No transfers found\""
 fi
