@@ -23,7 +23,7 @@ function handle_error() {
     local error_line=$BASH_LINENO
     local error_command=$BASH_COMMAND
     local timestamp=$(date +"%Y-%m-%d %H:%M:%S" --utc)
-    echo "ts=\"$timestamp\" level=ERROR line=$error_line cmd=\"$error_command\" exit_code=$error_code"
+    echo "ts=$timestamp level=ERROR line=$error_line cmd=\"$error_command\" exit_code=$error_code"
 }
 
 # Trap ERR signal and call handle_error function
