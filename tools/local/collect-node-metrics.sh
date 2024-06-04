@@ -78,7 +78,7 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     root_api_response=$(curl -s --url "$uri/" --header "api-key: $QDRANT_API_KEY")
 
-    if ! (echo "$root_api_response" | jq -e '.'); then
+    if ! (echo "$root_api_response" | jq -ec); then
         # Node is down
         insert_to_chaos_testing_table "$uri" "null" "null" 0 0 "$NOW"
         continue
