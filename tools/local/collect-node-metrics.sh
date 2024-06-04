@@ -106,7 +106,7 @@ for uri in "${QDRANT_URIS[@]}"; do
         --url "$uri/collections/benchmark/cluster" \
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
-        | jq -r '.result'
+        | jq -rc '.result'
     )
     insert_to_chaos_testing_table "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" "$NOW"
 
