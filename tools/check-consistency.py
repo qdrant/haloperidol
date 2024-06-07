@@ -93,6 +93,7 @@ while True:
             )
         except requests.exceptions.Timeout as e:
             print(f'level=WARN msg="Request timed out after 10s, skipping consistency check for node" uri="{uri}" api="/collections/benchmark/points"')
+            node_idx += 1
             continue
 
         if response.status_code != 200:
