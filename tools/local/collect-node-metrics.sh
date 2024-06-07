@@ -1,6 +1,6 @@
 #!/bin/bash
 PS4='ts=$(date "+%Y-%m-%dT%H:%M:%SZ") level=DEBUG line=$LINENO ' # Replace + with more meaningful debug trace logs
-set -xeuo pipefail
+set -xuo pipefail
 
 export QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
