@@ -26,6 +26,10 @@ function handle_error() {
     echo "ts=$timestamp level=ERROR line=$error_line cmd=\"$error_command\" exit_code=$error_code"
 }
 
+function is_valid_json() {
+  echo "$1" | jq -e . > /dev/null 2>&1
+}
+
 # Trap ERR signal and call handle_error function
 trap 'handle_error' ERR
 
@@ -89,7 +93,7 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     root_api_response=$(curl -s --url "$uri/" --header "api-key: $QDRANT_API_KEY")
 
-    if ! (echo "$root_api_response" | jq -ec); then
+    if !(is_valid_json "$root_api_response"); then
         # Node is down
         insert_to_chaos_testing_table "$uri" "null" "null" 0 0 "$NOW"
         continue
