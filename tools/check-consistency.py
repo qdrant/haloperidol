@@ -65,7 +65,7 @@ while True:
         exit(1)
 
     num_peers = len(cluster_response.json()["result"]["peers"])
-    if num_peers < 4:
+    if num_peers < 5:
         print(f'level=INFO msg="Fetched cluster peers" num_peers={num_peers}')
     else:
         print(f'level=CRITICAL msg="Found too many peers" num_peers={num_peers}')
