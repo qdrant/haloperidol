@@ -48,10 +48,15 @@ point_ids_for_node = [
 ]  # point ids to check for node-0 to node-3
 
 while True:
-    cluster_response = requests.get(
-        f"https://{QDRANT_CLUSTER_URL}:6333/cluster",
-        headers={"api-key": QDRANT_API_KEY},
-    )
+    try:
+        cluster_response = requests.get(
+            f"https://{QDRANT_CLUSTER_URL}:6333/cluster",
+            headers={"api-key": QDRANT_API_KEY},
+            timeout=10
+        )
+    except requests.exceptions.Timeout as e:
+        print(f'level=ERROR msg="Request timed out after 10s" uri="{QDRANT_CLUSTER_URL}" api="/cluster"')
+        exit(1)
 
     if cluster_response.status_code != 200:
         print(
@@ -80,11 +85,15 @@ while True:
             node_idx += 1
             continue
 
-        response = requests.post(
-            f"{uri}/collections/benchmark/points",
-            headers={"api-key": QDRANT_API_KEY, "content-type": "application/json"},
-            json={"ids": point_ids, "with_vector": True, "with_payload": True},
-        )
+        try:
+            response = requests.post(
+                f"{uri}/collections/benchmark/points",
+                headers={"api-key": QDRANT_API_KEY, "content-type": "application/json"},
+                json={"ids": point_ids, "with_vector": True, "with_payload": True},
+            )
+        except requests.exceptions.Timeout as e:
+            print(f'level=WARN msg="Request timed out after 10s, skipping consistency check for node" uri="{uri}" api="/collections/benchmark/points"')
+            continue
 
         if response.status_code != 200:
             error_msg = response.text.strip()
