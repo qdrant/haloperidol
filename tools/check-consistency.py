@@ -78,7 +78,7 @@ while True:
     first_node_points = []
 
     for uri in QDRANT_URIS:
-        if node_idx not in point_ids_for_node:
+        if node_idx >= len(point_ids_for_node):
             print(f'level=CRITICAL msg="Unexpected node index found. Breaking loop" node_idx={node_idx}')
             break
 
