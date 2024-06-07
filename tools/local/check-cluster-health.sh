@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PS4='ts=$(date "+%Y-%m-%dT%H:%M:%SZ") level=DEBUG line=$LINENO '
-set -e
+set -x
 
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
