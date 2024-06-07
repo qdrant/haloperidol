@@ -65,7 +65,10 @@ while True:
         exit(1)
 
     num_peers = len(cluster_response.json()["result"]["peers"])
-    print(f'level=INFO msg="Fetched cluster peers" num_peers={num_peers}')
+    if num_peers < 4:
+        print(f'level=INFO msg="Fetched cluster peers" num_peers={num_peers}')
+    else:
+        print(f'level=CRITICAL msg="Found too many peers" num_peers={num_peers}')
 
     QDRANT_URIS = [
         f"https://node-{idx}-{QDRANT_CLUSTER_URL}:6333" for idx in range(num_peers)
@@ -75,6 +78,10 @@ while True:
     first_node_points = []
 
     for uri in QDRANT_URIS:
+        if node_idx not in point_ids_for_node:
+            print(f'level=CRITICAL msg="Unexpected node index found. Breaking loop" node_idx={node_idx}')
+            break
+
         point_ids = point_ids_for_node[node_idx]
 
         if len(point_ids) == 0:
