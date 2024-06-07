@@ -1,5 +1,8 @@
 #!/bin/bash
 
+PS4='ts=$(date "+%Y-%m-%dT%H:%M:%SZ") level=DEBUG line=$LINENO '
+set -e
+
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 CONTAINER_NAME=bfb-upload tools/local/check-docker-exit-code.sh
