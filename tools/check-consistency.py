@@ -14,7 +14,7 @@ os.makedirs("data/points-dump", exist_ok=True)
 # Environment variables with default values if not set
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", "")
 QDRANT_CLUSTER_URL = os.getenv("QDRANT_CLUSTER_URL", "")
-CONSISTENCY_ATTEMPTS_TOTAL = 5
+CONSISTENCY_ATTEMPTS_TOTAL = 10
 
 is_data_consistent = False
 first_node_points = []
