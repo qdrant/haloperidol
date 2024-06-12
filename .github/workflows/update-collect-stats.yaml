@@ -10,6 +10,9 @@ on:
       server_name:
           description: "Server to run the collect stats script on"
           default: qdrant-manager
+      bg_task_name:
+          description: "Unique name for the background task"
+          default: collect-stats
   schedule:
     - cron: "20 23 * * *"
 
@@ -34,4 +37,5 @@ jobs:
           export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
           export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           export SERVER_NAME=${{ inputs.server_name }}
+          export BG_TASK_NAME=${{ inputs.bg_task_name }}
           bash -x tools/run-collect-stats.sh
