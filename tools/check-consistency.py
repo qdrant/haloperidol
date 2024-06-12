@@ -22,22 +22,35 @@ consistency_attempts_remaining = CONSISTENCY_ATTEMPTS_TOTAL
 
 
 def calculate_inconsistent_points(source_points, target_points, point_ids):
-    source_point_idx_to_vector = {
-        point["id"]: point["vector"] for point in source_points
+    source_point_idx_to_point = {
+        point["id"]: (point["vector"], point["payload"]) for point in source_points
     }
-    target_point_idx_to_vector = {
-        point["id"]: point["vector"] for point in target_points
+    target_point_idx_to_point = {
+        point["id"]: (point["vector"], point["payload"]) for point in target_points
     }
 
-    inconsistent_point_ids = []
+    # Mismatching or missing points
+    inconsistent_point_ids_by_vector = []
+    inconsistent_point_ids_by_payload = []
+
     for point_id in point_ids:
-        if source_point_idx_to_vector.get(point_id) != target_point_idx_to_vector.get(
-            point_id
-        ):
-            # Mismatching or missing points
-            inconsistent_point_ids.append(point_id)
+        source_vector, source_payload = source_point_idx_to_point.get(
+            point_id, (None, None)
+        )
+        target_vector, target_payload = target_point_idx_to_point.get(
+            point_id, (None, None)
+        )
 
-    return inconsistent_point_ids
+        if source_vector != target_vector:
+            inconsistent_point_ids_by_vector.append(point_id)
+
+        if source_payload != target_payload:
+            inconsistent_point_ids_by_payload.append(point_id)
+
+    return (
+        inconsistent_point_ids_by_vector,
+        inconsistent_point_ids_by_payload,
+    )
 
 
 # Generate 100 random numbers between 0 and 200K and convert into JSON array
@@ -52,10 +65,12 @@ while True:
         cluster_response = requests.get(
             f"https://{QDRANT_CLUSTER_URL}:6333/cluster",
             headers={"api-key": QDRANT_API_KEY},
-            timeout=10
+            timeout=10,
         )
     except requests.exceptions.Timeout as e:
-        print(f'level=ERROR msg="Request timed out after 10s" uri="{QDRANT_CLUSTER_URL}" api="/cluster"')
+        print(
+            f'level=ERROR msg="Request timed out after 10s" uri="{QDRANT_CLUSTER_URL}" api="/cluster"'
+        )
         exit(1)
 
     if cluster_response.status_code != 200:
@@ -79,7 +94,9 @@ while True:
 
     for uri in QDRANT_URIS:
         if node_idx >= len(point_ids_for_node):
-            print(f'level=CRITICAL msg="Unexpected node index found. Breaking loop" node_idx={node_idx}')
+            print(
+                f'level=CRITICAL msg="Unexpected node index found. Breaking loop" node_idx={node_idx}'
+            )
             break
 
         point_ids = point_ids_for_node[node_idx]
@@ -99,7 +116,9 @@ while True:
                 json={"ids": point_ids, "with_vector": True, "with_payload": True},
             )
         except requests.exceptions.Timeout as e:
-            print(f'level=WARN msg="Request timed out after 10s, skipping consistency check for node" uri="{uri}" api="/collections/benchmark/points"')
+            print(
+                f'level=WARN msg="Request timed out after 10s, skipping consistency check for node" uri="{uri}" api="/collections/benchmark/points"'
+            )
             node_idx += 1
             continue
 
@@ -141,19 +160,27 @@ while True:
             is_data_consistent = True
         else:
             print(f'level=INFO msg="Checking points of node" uri="{uri}"')
-            inconsistent_points = calculate_inconsistent_points(
-                first_node_points, fetched_points, point_ids
+            inconsistent_ids_by_vector, inconsistent_ids_by_payload = (
+                calculate_inconsistent_points(
+                    first_node_points, fetched_points, point_ids
+                )
             )
-            if len(inconsistent_points) == 0:
+            if (
+                len(inconsistent_ids_by_vector) == 0
+                and len(inconsistent_ids_by_payload) == 0
+            ):
                 print(f'level=INFO msg="Node is consistent" uri="{uri}"')
                 point_ids_for_node[node_idx] = []
                 is_data_consistent = True
                 continue
+            inconsistent_point_ids = list(
+                set(inconsistent_ids_by_vector).union(inconsistent_ids_by_payload)
+            )
             print(
-                f'level=WARN msg="Node might be inconsistent. Need to retry" compared_to="node-0" uri="{uri}" inconsistent_count={len(inconsistent_points)} inconsistent_point_ids="{inconsistent_points}"'
+                f'level=WARN msg="Node might be inconsistent compared to node-0. Need to retry" uri="{uri}" inconsistent_count={len(inconsistent_point_ids)} inconsistent_by_vector="{inconsistent_ids_by_vector}" inconsistent_by_payload="{inconsistent_ids_by_payload}" inconsistent_points="{inconsistent_point_ids}"'
             )
 
-            point_ids_for_node[node_idx] = inconsistent_points
+            point_ids_for_node[node_idx] = inconsistent_point_ids
 
             is_data_consistent = False
             break
