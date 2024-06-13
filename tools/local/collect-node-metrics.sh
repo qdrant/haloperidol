@@ -103,6 +103,15 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     commit_id=$(echo "$root_api_response" | jq -r '.commit')
 
+    # This isn't stored in DB but is important for debugging
+    cluster_response=$(curl -s $uri/cluster -H "api-key: $QDRANT_API_KEY")
+    peer_id=$(echo "$cluster_response" | jq '.result.peer_id')
+    peer_count=$(echo "$cluster_response" | jq '.result.peers | length')
+    echo "level=INFO msg=\"Checked cluster\" peer_id=$peer_id uri=\"$uri\" cluster_response=\"$cluster_response\""
+    if [ "$peer_count" -gt 4 ]; then
+        echo "level=CRITICAL msg=\"Cluster has too many peers\" peer_count=$peer_count peer_id=$peer_id uri=\"$uri\" cluster_response=\"$cluster_response\""
+    fi
+
     num_vectors=$(curl -s --request POST \
         --url "$uri/collections/benchmark/points/count" \
         --header "api-key: $QDRANT_API_KEY" \
