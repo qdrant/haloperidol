@@ -26,6 +26,7 @@ done
 
 for pid in "${pids[@]}"; do
   wait $pid
+  echo "level=\"Process finished\" pid=$pid"
   if [ $? -ne 0 ]; then
     is_data_consistent=false
     break

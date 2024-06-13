@@ -6,6 +6,14 @@ import requests
 import random
 import time
 
+import os
+import builtins
+pid = os.getpid()
+
+def print(*args, **kwargs):
+    new_args = args + (f"pid={pid}",)
+    builtins.print(*new_args, **kwargs)
+
 print('level=INFO msg="Starting data consistency check script"')
 
 # Ensure the data/points-dump directory exists
