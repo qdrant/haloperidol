@@ -24,8 +24,9 @@ for i in {1..5}; do
   pids+=($!)
 done
 
+wait
+
 for pid in "${pids[@]}"; do
-  wait $pid
   echo "level=\"Process finished\" pid=$pid"
   if [ $? -ne 0 ]; then
     is_data_consistent=false
