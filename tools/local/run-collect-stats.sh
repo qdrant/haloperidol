@@ -1,6 +1,6 @@
 #!/bin/bash
 PS4='ts=$(date "+%Y-%m-%dT%H:%M:%SZ") level=DEBUG line=$LINENO '
-set -xeuo pipefail
+set -x
 
 log_with_timestamp() {
     while IFS= read -r line; do
@@ -11,6 +11,8 @@ log_with_timestamp() {
 # Redirect stdout (1) and stderr (2) to a log file
 exec > >(log_with_timestamp >> /var/log/collect-stats-cron.log) 2>&1
 
+# Fail on error:
+set -e
 # Clone repo if not exists:
 if [ ! -d "haloperidol" ]; then
     git clone https://github.com/qdrant/haloperidol.git
@@ -18,6 +20,7 @@ fi
 
 cd haloperidol || exit
 git pull # this can fail if repo is touched
+set +e
 
 while true; do
     echo "level=INFO msg=\"Collect stats script triggered\""
