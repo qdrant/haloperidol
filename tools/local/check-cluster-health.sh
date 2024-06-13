@@ -11,8 +11,28 @@ upload_operational=$([ $? -eq 0 ] && echo true || echo false)
 CONTAINER_NAME=bfb-search tools/local/check-docker-exit-code.sh
 search_operational=$([ $? -eq 0 ] && echo true || echo false)
 
-tools/check-consistency.py
-is_data_consistent=$([ $? -eq 0 ] && echo true || echo false)
+is_data_consistent=true
+pids=()
+
+for i in {1..5}; do
+  (
+    tools/check-consistency.py
+    if [ $? -ne 0 ]; then
+      exit 1
+    fi
+  ) &
+  pids+=($!)
+done
+
+wait
+
+for pid in "${pids[@]}"; do
+  echo "level=\"Process finished\" pid=$pid"
+  if [ $? -ne 0 ]; then
+    is_data_consistent=false
+    break
+  fi
+done
 
 echo "level=INFO msg=\"Checked chaos-testing components\" upload_operational=$upload_operational search_operational=$search_operational is_data_consistent=$is_data_consistent measure_timestamp=\"$NOW\""
 
