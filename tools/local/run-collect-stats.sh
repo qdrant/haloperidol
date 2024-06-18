@@ -41,6 +41,7 @@ while true; do
 
     tools/local/check-cluster-health.sh
     tools/local/collect-node-metrics.sh
+    tools/local/check-ps.sh
 
     echo "level=INFO msg=\"Sleeping for 1m\""
     sleep 60 # 1m
