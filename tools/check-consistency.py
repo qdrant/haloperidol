@@ -56,8 +56,8 @@ def calculate_inconsistent_points(source_points, target_points, point_ids):
             inconsistent_point_ids_by_payload.append(point_id)
 
     return (
-        inconsistent_point_ids_by_vector,
-        inconsistent_point_ids_by_payload,
+        (inconsistent_point_ids_by_vector, inconsistent_point_ids_by_payload)
+        (source_point_idx_to_point, target_point_idx_to_point)
     )
 
 
@@ -168,7 +168,7 @@ while True:
             is_data_consistent = True
         else:
             print(f'level=INFO msg="Checking points of node" uri="{uri}"')
-            inconsistent_ids_by_vector, inconsistent_ids_by_payload = (
+            (inconsistent_ids_by_vector, inconsistent_ids_by_payload), (first_node_points_map, fetched_node_points_map)  = (
                 calculate_inconsistent_points(
                     first_node_points, fetched_points, point_ids
                 )
@@ -207,6 +207,21 @@ while True:
             print(
                 f'level=ERROR msg="Data consistency check failed" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining}'
             )
+            try:
+                if inconsistent_point_ids:
+                    first_node_inconsistent_points = []
+                    last_fetched_node_inconsistent_points = []
+                    
+                    for point_id in inconsistent_point_ids:
+                        first_node_inconsistent_points.append(first_node_points_map[point_id])
+                        last_fetched_node_inconsistent_points.append(fetched_node_points_map[point_id])
+
+                    print('level=ERROR msg="collected inconsistent points"')
+                    print('first node', first_node_inconsistent_points)
+                    print('fetched node', last_fetched_node_inconsistent_points)
+            except Exception as e:
+                print(f'level=ERROR msg="Failed while printing inconsistent points" err={e}')
+            
             break
         else:
             print(
