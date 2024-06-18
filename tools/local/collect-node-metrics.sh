@@ -145,13 +145,13 @@ for uri in "${QDRANT_URIS[@]}"; do
         state=$(echo "$shard" | jq -r '.state')
 
         if [ "$shard_id" == "" ]; then
-            echo "level=WARN msg=\"Shard not found\" peer_id=$peer_id uri=\"$uri\" "
+            echo "level=CRITICAL msg=\"Shard not found\" peer_id=$peer_id uri=\"$uri\" "
         else
           insert_to_chaos_testing_shards_table "$uri" "$peer_id" "$shard_id" "$points_count" "$state" "$NOW"  
         fi
 
         if [ "$state" == "Dead" ]; then
-            echo "level=WARN msg=\"Shard is dead\" shard_id=$shard_id peer_id=$peer_id uri=\"$uri\""
+            echo "level=CRITICAL msg=\"Shard is dead\" shard_id=$shard_id peer_id=$peer_id uri=\"$uri\""
         fi
     done <<< "$local_shards"
 
