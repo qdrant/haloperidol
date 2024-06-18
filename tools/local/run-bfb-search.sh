@@ -3,7 +3,7 @@
 set -euo pipefail
 
 BFB_CONTAINER_NAME="bfb-search"
-BFB_IMAGE_NAME="qdrant/bfb:latest"
+BFB_IMAGE_NAME="qdrant/bfb:dev"
 
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 
