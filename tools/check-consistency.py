@@ -208,20 +208,19 @@ while True:
                 f'level=ERROR msg="Data consistency check failed" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining}'
             )
             try:
-                if inconsistent_point_ids:
-                    first_node_inconsistent_points = []
-                    last_fetched_node_inconsistent_points = []
-                    
-                    for point_id in inconsistent_point_ids:
-                        first_node_inconsistent_points.append(first_node_points_map[point_id])
-                        last_fetched_node_inconsistent_points.append(fetched_node_points_map[point_id])
+                first_node_inconsistent_points = []
+                last_fetched_node_inconsistent_points = []
+                
+                for point_id in inconsistent_point_ids:
+                    first_node_inconsistent_points.append(first_node_points_map[point_id])
+                    last_fetched_node_inconsistent_points.append(fetched_node_points_map[point_id])
 
-                    print('level=ERROR msg="collected inconsistent points"')
-                    print('first node', first_node_inconsistent_points)
-                    print('fetched node', last_fetched_node_inconsistent_points)
+                print('level=ERROR msg="collected inconsistent points"')
+                print('first node', first_node_inconsistent_points)
+                print('fetched node', last_fetched_node_inconsistent_points)
             except Exception as e:
                 print(f'level=ERROR msg="Failed while printing inconsistent points" err={e}')
-            
+
             break
         else:
             print(
