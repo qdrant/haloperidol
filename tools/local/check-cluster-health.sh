@@ -15,12 +15,7 @@ is_data_consistent=true
 pids=()
 
 for i in {1..5}; do
-  (
-    tools/check-consistency.py
-    if [ $? -ne 0 ]; then
-      exit 1
-    fi
-  ) &
+  tools/check-consistency.py &
   pids+=($!)
 done
 
