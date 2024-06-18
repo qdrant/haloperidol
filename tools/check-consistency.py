@@ -56,7 +56,7 @@ def calculate_inconsistent_points(source_points, target_points, point_ids):
             inconsistent_point_ids_by_payload.append(point_id)
 
     return (
-        (inconsistent_point_ids_by_vector, inconsistent_point_ids_by_payload)
+        (inconsistent_point_ids_by_vector, inconsistent_point_ids_by_payload),
         (source_point_idx_to_point, target_point_idx_to_point)
     )
 
