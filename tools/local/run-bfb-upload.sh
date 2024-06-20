@@ -26,7 +26,7 @@ BFB_PARAMETERS=" \
     --timing-threshold 1 \
     --on-disk-vectors true \
     --max-id 200000 \
-    --delay 200 \
+    --delay 1000 \
     --timeout 30 \
     --retry 4 \
     --retry-interval 1 \
