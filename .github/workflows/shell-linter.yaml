@@ -1,0 +1,19 @@
+name: Shell linter
+
+on:
+  push:
+    branches: [ master ]
+  repository_dispatch:
+  workflow_dispatch:
+  pull_request:
+    branches: [ '**' ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+      - name: Run ShellCheck
+        uses: azohra/shell-linter@latest
+
