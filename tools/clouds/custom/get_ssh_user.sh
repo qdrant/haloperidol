@@ -12,6 +12,6 @@ set -e
 SCRIPT=$(realpath "$0")
 SCRIPTPATH=$(dirname "$SCRIPT")
 
-SSH_USER=$(jq ".[\"${1}\"].user" -r $SCRIPTPATH/data.json)
+SSH_USER=$(jq ".[\"${1}\"].user" -r "$SCRIPTPATH/data.json")
 
 echo "${SSH_USER}"

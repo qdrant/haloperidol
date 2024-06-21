@@ -8,9 +8,10 @@ function self {
     return "$?"
 }
 
-declare SELF="$(self)"
+declare SELF ROOT
+SELF="$(self)"
+ROOT="$(dirname "$SELF")"
 
-declare ROOT="$(dirname "$SELF")"
 declare RUN_REMOTE="$ROOT/run_remote.sh"
 
 declare LOCAL="$ROOT/local"

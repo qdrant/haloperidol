@@ -7,8 +7,10 @@ function self {
 	return "$?"
 }
 
-declare SELF="$(self)"
-declare ROOT="$(dirname "$SELF")"
+
+declare SELF ROOT
+SELF="$(self)"
+ROOT="$(dirname "$SELF")"
 
 RUN_SCRIPT="$ROOT/local/collect-node-metrics.sh"
 

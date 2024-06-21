@@ -17,6 +17,6 @@ POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-}
 RUN_SCRIPT="${SCRIPT_PATH}/local/install-postgres.sh" \
     ENV_CONTEXT="${POSTGRES_PASSWORD@A}" \
     SERVER_NAME=${SERVER_NAME} \
-    bash -x $SCRIPT_PATH/run_remote.sh
+    bash -x "$SCRIPT_PATH/run_remote.sh"
 
 

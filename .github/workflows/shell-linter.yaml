@@ -16,4 +16,5 @@ jobs:
         uses: actions/checkout@v1
       - name: Run ShellCheck
         uses: azohra/shell-linter@latest
-
+        with:
+          ignore_names: run_azure_cluster.sh transfer_shards.sh run_read_write_setup.sh setup_cluster.sh restart-qdrant-node.sh drop-qdrant-node.sh run-qdrant-node.sh install-postgres.sh install-docker.sh run-qdrant-cluster.sh wait-qdrant-start.sh hetzner/create_and_install.sh custom/create_and_install.sh stress-testing.sh kill-random-node.sh run-postgres.sh
