@@ -21,9 +21,11 @@ for IDX in {0..4}; do
     QDRANT_HOSTS+=("node-${IDX}-${QDRANT_CLUSTER_URL}")
 done
 
+# shellcheck disable=SC2124
 ENV_CONTEXT="${QDRANT_HOSTS[@]@A} ${QDRANT_API_KEY@A} ${POSTGRES_PASSWORD@A} ${POSTGRES_HOST@A}" \
 
 RUN_SCRIPT=$RUN_SCRIPT \
 	ENV_CONTEXT="${ENV_CONTEXT}" \
 	SERVER_NAME=qdrant-manager \
 	bash -x "$ROOT/run_remote.sh"
+

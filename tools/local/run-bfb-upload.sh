@@ -7,9 +7,12 @@ BFB_IMAGE_NAME="qdrant/bfb:dev"
 
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 
+# shellcheck disable=SC2206
 QDRANT_URIS=( ${QDRANT_HOSTS[@]/#/https://} )
+# shellcheck disable=SC2206
 QDRANT_URIS=( ${QDRANT_URIS[@]/%/:6334} )
 
+# shellcheck disable=SC2124
 BFB_PARAMETERS=" \
     ${QDRANT_URIS[@]/#/--uri } \
     --replication-factor 2 \

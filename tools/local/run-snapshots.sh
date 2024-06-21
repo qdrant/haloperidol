@@ -8,7 +8,9 @@ QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 
 QDRANT_COLLECTION_NAME=${QDRANT_COLLECTION_NAME:-"benchmark"}
 
+# shellcheck disable=SC2206
 QDRANT_URIS=( ${QDRANT_HOSTS[@]/#/https://} )
+# shellcheck disable=SC2206
 QDRANT_URIS=( ${QDRANT_URIS[@]/%/:6333} )
 
 log_with_timestamp() {
