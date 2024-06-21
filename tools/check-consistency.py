@@ -215,7 +215,7 @@ while True:
                     first_node_inconsistent_points.append(first_node_points_map[point_id])
                     last_fetched_node_inconsistent_points.append(fetched_node_points_map[point_id])
 
-                print('level=ERROR msg="collected inconsistent points"')
+                print(f'level=ERROR msg="Inconsistent points despite retries" inconsistent_count={len(inconsistent_point_ids)} inconsistent_by_vector="{inconsistent_ids_by_vector}" inconsistent_by_payload="{inconsistent_ids_by_payload}" inconsistent_points="{inconsistent_point_ids}"')
                 print('first node', first_node_inconsistent_points)
                 print('fetched node', last_fetched_node_inconsistent_points)
             except Exception as e:
