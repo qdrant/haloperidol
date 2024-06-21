@@ -204,10 +204,10 @@ while True:
         break
     else:
         if consistency_attempts_remaining == 0:
-            print(
-                f'level=ERROR msg="Data consistency check failed" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining}'
-            )
             try:
+                print(
+                    f'level=ERROR msg="Data consistency check failed" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} inconsistent_count={len(inconsistent_point_ids)} inconsistent_by_vector="{inconsistent_ids_by_vector}" inconsistent_by_payload="{inconsistent_ids_by_payload}" inconsistent_points="{inconsistent_point_ids}"'
+                )
                 first_node_inconsistent_points = []
                 last_fetched_node_inconsistent_points = []
                 
@@ -215,9 +215,8 @@ while True:
                     first_node_inconsistent_points.append(first_node_points_map[point_id])
                     last_fetched_node_inconsistent_points.append(fetched_node_points_map[point_id])
 
-                print(f'level=ERROR msg="Inconsistent points despite retries" inconsistent_count={len(inconsistent_point_ids)} inconsistent_by_vector="{inconsistent_ids_by_vector}" inconsistent_by_payload="{inconsistent_ids_by_payload}" inconsistent_points="{inconsistent_point_ids}"')
-                print('first node', first_node_inconsistent_points)
-                print('fetched node', last_fetched_node_inconsistent_points)
+                print(f'level=ERROR msg="Dumping inconsistent points compared to node-0" node="node-{node_idx}" expected_points="{first_node_inconsistent_points}" fetched_points={last_fetched_node_inconsistent_points}')
+
             except Exception as e:
                 print(f'level=ERROR msg="Failed while printing inconsistent points" err={e}')
 
