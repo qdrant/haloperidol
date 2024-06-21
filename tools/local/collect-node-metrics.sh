@@ -19,11 +19,12 @@ CHAOS_TESTING_SHARD_VALUES=""
 CHAOS_TESTING_TRANSFER_VALUES=""
 
 function handle_error() {
-    local error_code=$?
-    local error_line=$BASH_LINENO
-    local error_command=$BASH_COMMAND
-    local timestamp=$(date +"%Y-%m-%d %H:%M:%S" --utc)
-    echo "ts=$timestamp level=ERROR line=$error_line cmd=\"$error_command\" exit_code=$error_code"
+    local error_code error_line error_command ts
+    error_code=$?
+    error_line=${BASH_LINENO[0]}
+    error_command=$BASH_COMMAND
+    ts=$(date +"%Y-%m-%d %H:%M:%S" --utc)
+    echo "ts=$ts level=ERROR line=$error_line cmd=\"$error_command\" exit_code=$error_code"
 }
 
 function is_valid_json() {
@@ -93,7 +94,7 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     root_api_response=$(curl -s --url "$uri/" --header "api-key: $QDRANT_API_KEY")
 
-    if !(is_valid_json "$root_api_response"); then
+    if ! (is_valid_json "$root_api_response"); then
         # Node is down
         insert_to_chaos_testing_table "$uri" "null" "null" 0 0 "$NOW"
         continue
@@ -104,7 +105,7 @@ for uri in "${QDRANT_URIS[@]}"; do
     commit_id=$(echo "$root_api_response" | jq -r '.commit')
 
     # This isn't stored in DB but is important for debugging
-    cluster_response=$(curl -s $uri/cluster -H "api-key: $QDRANT_API_KEY")
+    cluster_response=$(curl -s "$uri/cluster" -H "api-key: $QDRANT_API_KEY")
     peer_id=$(echo "$cluster_response" | jq '.result.peer_id')
     peer_count=$(echo "$cluster_response" | jq '.result.peers | length')
     echo "level=INFO msg=\"Checked cluster\" peer_id=$peer_id uri=\"$uri\" cluster_response=\"$cluster_response\""
@@ -147,7 +148,7 @@ for uri in "${QDRANT_URIS[@]}"; do
         if [ "$shard_id" == "" ]; then
             echo "level=CRITICAL msg=\"Shard not found\" peer_id=$peer_id uri=\"$uri\" "
         else
-          insert_to_chaos_testing_shards_table "$uri" "$peer_id" "$shard_id" "$points_count" "$state" "$NOW"  
+          insert_to_chaos_testing_shards_table "$uri" "$peer_id" "$shard_id" "$points_count" "$state" "$NOW"
         fi
 
         if [ "$state" == "Dead" ]; then

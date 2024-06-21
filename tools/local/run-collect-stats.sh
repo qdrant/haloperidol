@@ -12,11 +12,12 @@ log_with_timestamp() {
 exec > >(log_with_timestamp >> /var/log/collect-stats-cron.log) 2>&1
 
 function handle_error() {
-    local error_code=$?
-    local error_line=$BASH_LINENO
-    local error_command=$BASH_COMMAND
-    local timestamp=$(date +"%Y-%m-%d %H:%M:%S" --utc)
-    echo "ts=$timestamp level=ERROR line=$error_line cmd=\"$error_command\" exit_code=$error_code"
+    local error_code error_line error_command ts
+    error_code=$?
+    error_line=${BASH_LINENO[0]}
+    error_command=$BASH_COMMAND
+    ts=$(date +"%Y-%m-%d %H:%M:%S" --utc)
+    echo "ts=$ts level=ERROR line=$error_line cmd=\"$error_command\" exit_code=$error_code"
 }
 
 # Trap ERR signal and call handle_error function

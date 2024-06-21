@@ -12,6 +12,6 @@ set -e
 SCRIPT=$(realpath "$0")
 SCRIPTPATH=$(dirname "$SCRIPT")
 
-SERVER_IP=$(jq ".[\"${1}\"].public_ip" -r $SCRIPTPATH/data.json)
+SERVER_IP=$(jq ".[\"${1}\"].public_ip" -r "$SCRIPTPATH/data.json")
 
 echo "${SERVER_IP}"

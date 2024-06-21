@@ -40,7 +40,7 @@ ssh-keygen -f "$HOME/.ssh/known_hosts" -R "${SERVER_IP}" || true
 
 # Wait for server to be ready
 
-while ! ssh -oStrictHostKeyChecking=no root@${SERVER_IP} echo "Server is ready"; do
+while ! ssh -oStrictHostKeyChecking=no "root@${SERVER_IP}" echo "Server is ready"; do
     sleep 1
 done
 

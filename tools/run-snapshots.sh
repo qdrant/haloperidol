@@ -8,9 +8,10 @@ function self {
     return "$?"
 }
 
-declare SELF="$(self)"
+declare SELF ROOT
+SELF="$(self)"
+ROOT="$(dirname "$SELF")"
 
-declare ROOT="$(dirname "$SELF")"
 declare RUN_REMOTE="$ROOT/run_remote.sh"
 
 declare LOCAL="$ROOT/local"
@@ -23,6 +24,7 @@ for IDX in {0..3}; do
     QDRANT_HOSTS+=("node-${IDX}-${QDRANT_CLUSTER_URL}")
 done
 
+# shellcheck disable=SC2124
 ENV_CONTEXT="${QDRANT_API_KEY@A} ${QDRANT_HOSTS[@]@A}" \
 RUN_SCRIPT="$RUN_SNAPSHOTS_PROCESS" \
 BG_TASK_NAME="run-snapshots" \

@@ -9,8 +9,9 @@ function self {
 	return "$?"
 }
 
-declare SELF="$(self)"
-declare ROOT="$(dirname "$SELF")"
+declare SELF ROOT
+SELF="$(self)"
+ROOT="$(dirname "$SELF")"
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 RUN_SCRIPT="$ROOT/local/check-docker-exit-code.sh"
@@ -20,18 +21,21 @@ RUN_SCRIPT=$RUN_SCRIPT \
 	ENV_CONTEXT="${CONTAINER_NAME@A}" \
 	SERVER_NAME=qdrant-manager \
 	bash -x "$ROOT/run_remote.sh"
-upload_operational=$([ $? -eq 0 ] && echo true || echo false)
+exit_code=$?
+upload_operational=$([ $exit_code -eq 0 ] && echo true || echo false)
 
 CONTAINER_NAME=bfb-search
 RUN_SCRIPT=$RUN_SCRIPT \
 	ENV_CONTEXT="${CONTAINER_NAME@A}" \
 	SERVER_NAME=qdrant-manager \
 	bash -x "$ROOT/run_remote.sh"
-search_operational=$([ $? -eq 0 ] && echo true || echo false)
+exit_code=$?
+search_operational=$([ $exit_code -eq 0 ] && echo true || echo false)
 
 echo "Checking data consistency"
 python3 ./tools/check-consistency.py
-is_data_consistent=$([ $? -eq 0 ] && echo true || echo false)
+exit_code=$?
+is_data_consistent=$([ $exit_code -eq 0 ] && echo true || echo false)
 
 echo "upload_operational: $upload_operational, search_operational: $search_operational, is_data_consistent: $is_data_consistent, measure_timestamp: $NOW"
 

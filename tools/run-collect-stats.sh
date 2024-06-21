@@ -8,9 +8,10 @@ function self {
     return "$?"
 }
 
-declare SELF="$(self)"
+declare SELF ROOT
+SELF="$(self)"
+ROOT="$(dirname "$SELF")"
 
-declare ROOT="$(dirname "$SELF")"
 declare RUN_REMOTE="$ROOT/run_remote.sh"
 
 declare LOCAL="$ROOT/local"
@@ -30,6 +31,7 @@ done
 
 SERVER_NAME=${SERVER_NAME:-"qdrant-manager"}
 
+# shellcheck disable=SC2124
 ENV_CONTEXT="${HCLOUD_TOKEN@A} ${QDRANT_CLUSTER_URL@A} ${QDRANT_API_KEY@A} ${POSTGRES_HOST@A} ${POSTGRES_PASSWORD@A} ${QDRANT_HOSTS[@]@A}" \
 RUN_SCRIPT="$RUN_COLLECT_STATS" \
 SERVER_NAME="$SERVER_NAME" \

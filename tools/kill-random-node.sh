@@ -14,6 +14,6 @@ SERVER_IDX=$(( ( RANDOM % 3 )  + 1 ))
 SERVER_NAME="qdrant-node-${SERVER_IDX}"
 
 
-RUN_SCRIPT="${SCRIPT_PATH}/local/restart-qdrant-node.sh" SERVER_NAME=${SERVER_NAME} bash -x $SCRIPT_PATH/run_remote.sh
+RUN_SCRIPT="${SCRIPT_PATH}/local/restart-qdrant-node.sh" SERVER_NAME=${SERVER_NAME} bash -x "$SCRIPT_PATH/run_remote.sh"
 
 

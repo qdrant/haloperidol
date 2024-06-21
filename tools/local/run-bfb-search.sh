@@ -7,9 +7,12 @@ BFB_IMAGE_NAME="qdrant/bfb:dev"
 
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 
+# shellcheck disable=SC2206
 QDRANT_URIS=( ${QDRANT_HOSTS[@]/#/https://} )
+# shellcheck disable=SC2206
 QDRANT_URIS=( ${QDRANT_URIS[@]/%/:6334} )
 
+# shellcheck disable=SC2124
 BFB_PARAMETERS=" \
     ${QDRANT_URIS[@]/#/--uri } \
     --keywords 10 \
@@ -41,9 +44,9 @@ touch bfb-search.log
 docker run \
     -d \
     --network host \
-    --name ${BFB_CONTAINER_NAME} \
-    -e QDRANT_API_KEY=${QDRANT_API_KEY} \
-    -v $(pwd)/bfb-search.log:/bfb/search.log \
+    --name "$BFB_CONTAINER_NAME" \
+    -e "QDRANT_API_KEY=$QDRANT_API_KEY" \
+    -v "$(pwd)/bfb-search.log:/bfb/search.log" \
     ${BFB_IMAGE_NAME} \
     bash -c "while true; ${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} | tee /bfb/search.log; do sleep 10; done"
 

@@ -6,22 +6,24 @@ set -x
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 CONTAINER_NAME=bfb-upload tools/local/check-docker-exit-code.sh
-upload_operational=$([ $? -eq 0 ] && echo true || echo false)
+exit_code=$?
+upload_operational=$([ $exit_code -eq 0 ] && echo true || echo false)
 
 CONTAINER_NAME=bfb-search tools/local/check-docker-exit-code.sh
-search_operational=$([ $? -eq 0 ] && echo true || echo false)
+exit_code=$?
+search_operational=$([ $exit_code -eq 0 ] && echo true || echo false)
 
 is_data_consistent=true
 pids=()
 
-for i in {1..5}; do
+for _ in {1..5}; do
   tools/check-consistency.py &
   pids+=($!)
 done
 
 
 for pid in "${pids[@]}"; do
-  wait $pid
+  wait "$pid"
   exit_code=$?
   echo "level=\"Process finished\" pid=$pid exit_code=$exit_code"
   if [ $exit_code -ne 0 ]; then

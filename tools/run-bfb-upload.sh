@@ -8,9 +8,10 @@ function self {
     return "$?"
 }
 
-declare SELF="$(self)"
+declare SELF ROOT
+SELF="$(self)"
+ROOT="$(dirname "$SELF")"
 
-declare ROOT="$(dirname "$SELF")"
 declare RUN_REMOTE="$ROOT/run_remote.sh"
 
 declare LOCAL="$ROOT/local"
@@ -24,6 +25,7 @@ QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
 
 QDRANT_HOSTS+=("${QDRANT_CLUSTER_URL}")
 
+# shellcheck disable=SC2124
 ENV_CONTEXT="${QDRANT_HOSTS[@]@A} ${QDRANT_API_KEY@A}" \
 RUN_SCRIPT="$RUN_BFB_UPLOAD" \
 SERVER_NAME=qdrant-manager \
