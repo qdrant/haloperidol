@@ -200,6 +200,7 @@ done
 #   measure_timestamp TIMESTAMP
 # );
 
+echo "level=INFO msg=\"Storing collect nodes in db\" data=$CHAOS_TESTING_VALUES"
 docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing (url, version, commit, num_vectors, num_snapshots, measure_timestamp) VALUES $CHAOS_TESTING_VALUES;"
 
 # Assume table:
