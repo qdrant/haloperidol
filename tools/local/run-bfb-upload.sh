@@ -18,6 +18,7 @@ BFB_PARAMETERS=" \
     --replication-factor 2 \
     --shards 3 \
     --keywords 10 \
+    --timestamp-payload \
     --dim 768 \
     -n 1000000000 \
     --batch-size 100 \
