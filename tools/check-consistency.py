@@ -155,31 +155,6 @@ while True:
             f'level=INFO msg="Fetched points" num_points={fetched_points_count} uri="{uri}"'
         )
 
-        # Count empty payload points without affecting rest of the consistency check
-        try:
-            response = requests.post(
-                f"{uri}/collections/benchmark/points/count",
-                headers={"api-key": QDRANT_API_KEY, "content-type": "application/json"},
-                json={
-                    "filter": {
-                        "must": {
-                        "is_empty": {"key": "timestamp"}
-                        }
-                    }
-                },
-                timeout=10,
-            )
-            response.raise_for_status()
-            empty_payload_points_count = response.json()["result"]["count"]
-            if empty_payload_points_count > 0:
-                print(
-                    f'level=CRITICAL msg="Found empty payload points" num_points={empty_payload_points_count} uri="{uri}"'
-                )
-        except (requests.RequestException, requests.HTTPError) as e:
-            print(
-                f'level=WARN msg="Request failed" uri="{uri}" api="/collections/benchmark/points/count" e={e}'
-            )
-
         attempt_number = CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining
         with open(
             f"data/points-dump/node-{node_idx}-attempt-{attempt_number}.json", "w"
