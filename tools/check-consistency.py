@@ -122,6 +122,7 @@ while True:
                 f"{uri}/collections/benchmark/points",
                 headers={"api-key": QDRANT_API_KEY, "content-type": "application/json"},
                 json={"ids": point_ids, "with_vector": True, "with_payload": True},
+                timeout=10,
             )
         except requests.exceptions.Timeout as e:
             print(
@@ -153,6 +154,31 @@ while True:
         print(
             f'level=INFO msg="Fetched points" num_points={fetched_points_count} uri="{uri}"'
         )
+
+        # Count empty payload points without affecting rest of the consistency check
+        try:
+            response = requests.post(
+                f"{uri}/collections/benchmark/points/count",
+                headers={"api-key": QDRANT_API_KEY, "content-type": "application/json"},
+                json={
+                    "filter": {
+                        "must": {
+                        "is_empty": {"key": "timestamp"}
+                        }
+                    }
+                },
+                timeout=10,
+            )
+            response.raise_for_status()
+            empty_payload_points_count = response.json()["result"]["count"]
+            if empty_payload_points_count > 0:
+                print(
+                    f'level=CRITICAL msg="Found empty payload points" num_points={empty_payload_points_count} uri="{uri}"'
+                )
+        except (requests.RequestException, requests.HTTPError) as e:
+            print(
+                f'level=WARN msg="Request failed" uri="{uri}" api="/collections/benchmark/points/count" e={e}'
+            )
 
         attempt_number = CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining
         with open(
@@ -210,7 +236,7 @@ while True:
                 )
                 first_node_inconsistent_points = []
                 last_fetched_node_inconsistent_points = []
-                
+
                 for point_id in inconsistent_point_ids:
                     first_node_inconsistent_points.append(first_node_points_map[point_id])
                     last_fetched_node_inconsistent_points.append(fetched_node_points_map[point_id])
