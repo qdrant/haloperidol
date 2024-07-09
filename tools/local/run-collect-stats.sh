@@ -41,6 +41,7 @@ while true; do
     export QDRANT_HOSTS_STR
 
     tools/local/check-cluster-health.sh
+    python3 tools/check-empty-payload.py
     tools/local/collect-node-metrics.sh
 
     echo "level=INFO msg=\"Sleeping for 1m\""
