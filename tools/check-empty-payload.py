@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+
+# Not in use
 import os
 import requests
 

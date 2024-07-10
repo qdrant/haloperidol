@@ -41,14 +41,15 @@ function insert_to_chaos_testing_table {
     local commit_id=$3
     local num_vectors=$4
     local num_snapshots=$5
-    local measure_timestamp=$6
+    local missing_payload_point_ids=$6
+    local measure_timestamp=$7
 
     if [ -n "$CHAOS_TESTING_VALUES" ]; then
         # If there are already values, add a comma
         CHAOS_TESTING_VALUES+=" ,"
     fi
 
-    CHAOS_TESTING_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, $num_snapshots, '$measure_timestamp')"
+    CHAOS_TESTING_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, $num_snapshots, '$missing_payload_point_ids', '$measure_timestamp')"
 }
 
 # function to insert to CHAOS_TESTING_SHARD_VALUES:
@@ -89,6 +90,21 @@ function insert_to_chaos_testing_transfer_table {
     CHAOS_TESTING_TRANSFER_VALUES+=" ('$uri', $peer_id, $shard_id, $from_peer, $to_peer, '$method', '$comment', $progress_transfer, $total_to_transfer, '$measure_timestamp')"
 }
 
+# function to insert to CHAOS_TESTING_VALUES:
+function insert_to_chaos_testing_missing_payload_points_table {
+    local uri=$1
+    local missing_payload_point_ids=$2
+    local measure_timestamp=$3
+
+    if [ -n "$CHAOS_TESTING_MISSING_PAYLOAD_POINT_VALUES" ]; then
+        # If there are already values, add a comma
+        CHAOS_TESTING_MISSING_PAYLOAD_POINT_VALUES+=" ,"
+    fi
+
+    CHAOS_TESTING_MISSING_PAYLOAD_POINT_VALUES+=" ('$uri', '$missing_payload_point_ids' '$measure_timestamp')"
+}
+
+
 for uri in "${QDRANT_URIS[@]}"; do
     echo "level=INFO msg=\"Checking node\" uri=$uri"
 
@@ -96,7 +112,7 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     if ! (is_valid_json "$root_api_response"); then
         # Node is down
-        insert_to_chaos_testing_table "$uri" "null" "null" 0 0 "$NOW"
+        insert_to_chaos_testing_table "$uri" "null" "null" 0 0 "null" "$NOW"
         continue
     fi
 
@@ -133,7 +149,14 @@ for uri in "${QDRANT_URIS[@]}"; do
         --header 'content-type: application/json' \
         | jq -rc '.result'
     )
-    insert_to_chaos_testing_table "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" "$NOW"
+
+    missing_payload_point_ids=$(curl -s --request POST \
+        --url "$uri/collections/benchmark/points/scroll" \
+        --header "api-key: $QDRANT_API_KEY" \
+        --header 'content-type: application/json' \
+        --data '{"filter": {"must": {"is_empty": {"key": "a"}}}, "limit": 100, "with_payload": false}' | jq -rc '[.result.points[].id]')
+
+    insert_to_chaos_testing_table "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" "$missing_payload_point_ids" "$NOW"
 
     peer_id=$(echo "$collection_cluster_response" | jq -r '.peer_id')
     local_shards=$(echo "$collection_cluster_response" | jq -rc '.local_shards[]') # [{"shard_id": 1, "points_count": .., "state": Active}, ...]
