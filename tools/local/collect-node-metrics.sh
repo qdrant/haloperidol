@@ -90,20 +90,6 @@ function insert_to_chaos_testing_transfer_table {
     CHAOS_TESTING_TRANSFER_VALUES+=" ('$uri', $peer_id, $shard_id, $from_peer, $to_peer, '$method', '$comment', $progress_transfer, $total_to_transfer, '$measure_timestamp')"
 }
 
-# function to insert to CHAOS_TESTING_VALUES:
-function insert_to_chaos_testing_missing_payload_points_table {
-    local uri=$1
-    local missing_payload_point_ids=$2
-    local measure_timestamp=$3
-
-    if [ -n "$CHAOS_TESTING_MISSING_PAYLOAD_POINT_VALUES" ]; then
-        # If there are already values, add a comma
-        CHAOS_TESTING_MISSING_PAYLOAD_POINT_VALUES+=" ,"
-    fi
-
-    CHAOS_TESTING_MISSING_PAYLOAD_POINT_VALUES+=" ('$uri', '$missing_payload_point_ids' '$measure_timestamp')"
-}
-
 
 for uri in "${QDRANT_URIS[@]}"; do
     echo "level=INFO msg=\"Checking node\" uri=$uri"
