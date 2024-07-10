@@ -220,6 +220,7 @@ done
 #   commit CHAR(40),
 #   num_vectors INT,
 #   num_snapshots INT,
+#   missing_payload_point_ids JSONB,
 #   measure_timestamp TIMESTAMP
 # );
 
