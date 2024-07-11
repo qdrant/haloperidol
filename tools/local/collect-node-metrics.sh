@@ -140,7 +140,7 @@ for uri in "${QDRANT_URIS[@]}"; do
         --url "$uri/collections/benchmark/points/scroll" \
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
-        --data '{"filter": {"must": {"is_empty": {"key": "a"}}}, "limit": 100, "with_payload": false}' | jq -rc '[.result.points[].id]')
+        --data '{"filter": {"must": {"is_empty": {"key": "a"}}}, "limit": 1000, "with_payload": false}' | jq -rc '[.result.points[].id]')
 
     insert_to_chaos_testing_table "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" "$missing_payload_point_ids" "$NOW"
 
