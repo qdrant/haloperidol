@@ -36,7 +36,7 @@ BFB_PARAMETERS=" \
     --retry-interval 1 \
 "
 
-BFB_ENV_VARS="RUST_LOG=debug,h2=info,tower=info,h2::proto=debug"
+BFB_ENV_VARS="RUST_BACKTRACE=full RUST_LOG=debug,h2=info,tower=info,h2::proto=debug"
 
 docker stop -t 10 ${BFB_CONTAINER_NAME} || true
 
@@ -44,7 +44,7 @@ docker rm ${BFB_CONTAINER_NAME} || true
 
 docker rmi -f ${BFB_IMAGE_NAME} || true
 
-touch bfb-upload.log
+touch bfb-upload.log # create file so that docker doesn't create a dir instead
 
 docker run \
     -d \
@@ -53,7 +53,7 @@ docker run \
     -e "QDRANT_API_KEY=$QDRANT_API_KEY" \
     -v "$(pwd)/bfb-upload.log:/bfb/upload.log" \
     ${BFB_IMAGE_NAME} \
-    sh -c "${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} | tee /bfb/upload.log"
+    sh -c "${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} 2>&1 | tee /bfb/upload.log"
 
 sleep 5
 
