@@ -86,12 +86,13 @@ while True:
             f'level=ERROR msg="Got error in response" status_code={cluster_response.status_code} api="/cluster" response="{cluster_response.text}"'
         )
         exit(1)
-
-    num_peers = len(cluster_response.json()["result"]["peers"])
+    result = cluster_response.json()['result']
+    num_peers = len(result["peers"])
+    peer_id = result['peer_id']
     if num_peers < 5:
         print(f'level=INFO msg="Fetched cluster peers" num_peers={num_peers}')
     else:
-        print(f'level=CRITICAL msg="Found too many peers" num_peers={num_peers}')
+        print(f'level=CRITICAL msg="Found too many peers" num_peers={num_peers} peer_id={peer_id} response={result}')
 
     QDRANT_URIS = [
         f"https://node-{idx}-{QDRANT_CLUSTER_URL}:6333" for idx in range(num_peers)
