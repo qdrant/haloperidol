@@ -146,6 +146,7 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     peer_id=$(echo "$collection_cluster_response" | jq -r '.peer_id')
     local_shards=$(echo "$collection_cluster_response" | jq -rc '.local_shards[]') # [{"shard_id": 1, "points_count": .., "state": Active}, ...]
+    remote_shards=$(echo "$collection_cluster_response" | jq -rc '.remote_shards[]')
 
     # Note: Using echo "$local_shards" | while read -r shard; ... done creates a subshell which leads to global var
     # not being set.
@@ -164,6 +165,16 @@ for uri in "${QDRANT_URIS[@]}"; do
             echo "level=CRITICAL msg=\"Shard is dead\" shard_id=$shard_id peer_id=$peer_id uri=\"$uri\""
         fi
     done <<< "$local_shards"
+
+    while read -r shard; do
+      shard_id=$(echo "$shard" | jq -r '.shard_id')
+      peer_id=$(echo "$shard" | jq -r '.peer_id')
+      state=$(echo "$shard" | jq -r '.state')
+
+      if [ "$state" == "Dead" ]; then
+        echo "level=CRITICAL msg=\"Remote Shard is dead\" shard_id=$shard_id peer_id=$peer_id uri=\"$uri\""
+      fi
+    done <<< "$remote_shards"
 
     shard_transfers=$(echo "$collection_cluster_response" | jq -rc '.shard_transfers[]')
     while read -r transfer; do
