@@ -48,5 +48,5 @@ docker run \
     -e "QDRANT_API_KEY=$QDRANT_API_KEY" \
     -v "$(pwd)/bfb-search.log:/bfb/search.log" \
     ${BFB_IMAGE_NAME} \
-    bash -c "set -e; while true; ${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} | tee /bfb/search.log; do sleep 10; done"
+    bash -c "set -e; while true; do ${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} | tee /bfb/search.log; if [ $? -ne 0 ]; then echo \"bfb command crashed. Exiting loop.\"; break; fi; sleep 10; done"
 
