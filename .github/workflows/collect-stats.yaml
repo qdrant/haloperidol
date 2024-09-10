@@ -8,21 +8,8 @@ on:
     - cron: "*/15 * * * *"
 
 jobs:
-  generate-matrix:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-cluster-urls.outputs.matrix }}
-    steps:
-      - id: set-cluster-urls
-        run: |
-          echo "matrix={\"url\":[\"${{ secrets.QDRANT_CLUSTER_URL }}\",\"${{ secrets.QDRANT_CLUSTER_URL_2 }}\"]}" >> $GITHUB_OUTPUT
-
   collect-stats:
-    needs: generate-matrix
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        url: ${{fromJson(needs.generate-matrix.outputs.matrix)}}
     steps:
       - uses: actions/checkout@v3
       - uses: webfactory/ssh-agent@v0.8.0
@@ -36,8 +23,37 @@ jobs:
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
-          export QDRANT_CLUSTER_URL=${{ matrix.cluster_url }}
-          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~https://([^.]+)\..*~\1~')"
+          export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL }}
+          export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
+          bash -x tools/check-cluster-health.sh
+          bash -x tools/collect-node-metrics.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: points-dump
+          path: data/points-dump
+          retention-days: 7
+      - name: Fail job if any check failed
+        if: steps.cluster_checks.outputs.failed == 'true'
+        run: exit 1
+
+  collect-stats-debug-cluster:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Install tools
+        run: |
+          bash -x tools/ci/install-hcloud.sh
+      - name: Collect and store cluster and bfb status
+        id: cluster_checks
+        run: |
+          export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
+          export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
+          export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL_2 }}
+          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~https://([^.]+)\..*~\1~')"          
           export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
           bash -x tools/check-cluster-health.sh

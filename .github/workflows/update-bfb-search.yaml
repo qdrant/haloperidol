@@ -8,21 +8,8 @@ on:
     - cron: "10 */3 * * *"
 
 jobs:
-  generate-matrix:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-cluster-urls.outputs.matrix }}
-    steps:
-      - id: set-cluster-urls
-        run: |
-          echo "matrix={\"url\":[\"${{ secrets.QDRANT_CLUSTER_URL }}\",\"${{ secrets.QDRANT_CLUSTER_URL_2 }}\"]}" >> $GITHUB_OUTPUT
-
   update-bfb-search:
-    needs: generate-matrix
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        url: ${{fromJson(needs.generate-matrix.outputs.matrix)}}
     steps:
       - uses: actions/checkout@v3
       - uses: webfactory/ssh-agent@v0.8.0
@@ -36,5 +23,23 @@ jobs:
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
-          export QDRANT_CLUSTER_URL=${{ matrix.cluster_url }}
+          export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL }}
+          bash -x tools/run-bfb-search.sh
+
+  update-bfb-search-debug-cluster:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Install tools
+        run: |
+          bash -x tools/ci/install-tools.sh
+          bash -x tools/ci/install-hcloud.sh
+      - name: Update bfb
+        run: |
+          export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
+          export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
+          export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL_2 }}
           bash -x tools/run-bfb-search.sh
