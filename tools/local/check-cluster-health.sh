@@ -5,6 +5,8 @@ set -x
 
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
+QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
+
 CONTAINER_NAME=bfb-upload tools/local/check-docker-exit-code.sh
 exit_code=$?
 upload_operational=$([ $exit_code -eq 0 ] && echo true || echo false)
@@ -32,7 +34,7 @@ for pid in "${pids[@]}"; do
   fi
 done
 
-echo "level=INFO msg=\"Checked chaos-testing components\" upload_operational=$upload_operational search_operational=$search_operational is_data_consistent=$is_data_consistent measure_timestamp=\"$NOW\""
+echo "level=INFO msg=\"Checked chaos-testing components\" upload_operational=$upload_operational search_operational=$search_operational is_data_consistent=$is_data_consistent measure_timestamp=\"$NOW\" cluster_name=$QC_NAME"
 
 # Assume table:
 # create table bfb_health (
@@ -44,4 +46,4 @@ echo "level=INFO msg=\"Checked chaos-testing components\" upload_operational=$up
 # );
 
 # TODO: Rename table as cluster_health
-docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO bfb_health (upload_operational, search_operational, is_data_consistent, measure_timestamp) VALUES ($upload_operational, $search_operational, $is_data_consistent, '$NOW');"
+docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO bfb_health (upload_operational, search_operational, is_data_consistent, measure_timestamp, cluster_name) VALUES ($upload_operational, $search_operational, $is_data_consistent, '$NOW', '$QC_NAME');"
