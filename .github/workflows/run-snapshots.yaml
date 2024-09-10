@@ -7,11 +7,21 @@ on:
     - cron: "30 22 * * *"
 
 jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-cluster-urls.outputs.matrix }}
+    steps:
+      - id: set-cluster-urls
+        run: |
+          echo "matrix={\"url\":[\"${{ secrets.QDRANT_CLUSTER_URL }}\",\"${{ secrets.QDRANT_CLUSTER_URL_2 }}\"]}" >> $GITHUB_OUTPUT
+
   run-snapshots:
+    needs: generate-matrix
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        cluster_url: [${{ secrets.QDRANT_CLUSTER_URL }}, ${{ secrets.QDRANT_CLUSTER_URL_2 }}]
+        url: ${{fromJson(needs.generate-matrix.outputs.matrix)}}
     steps:
       - uses: actions/checkout@v3
       - uses: webfactory/ssh-agent@v0.8.0
@@ -26,7 +36,7 @@ jobs:
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
-          export QDRANT_CLUSTER_URL=${{ matrix.cluster_url }}
+          export QDRANT_CLUSTER_URL=${{ matrix.url }}
           bash -x tools/run-snapshots.sh
       - name: Fail job if any check failed
         if: steps.run_snapshots.outputs.failed == 'true'
