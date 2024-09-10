@@ -16,8 +16,15 @@ def print(*args, **kwargs):
 
 print('level=INFO msg="Starting data consistency check script"')
 
+QC_NAME = os.getenv("QC_NAME", "qdrant-chaos-testing")
+
+if QC_NAME == "qdrant-chaos-testing":
+    POINTS_DIR = "data/points-dump"
+else:
+    POINTS_DIR = "data/points-dump-debug"
+
 # Ensure the data/points-dump directory exists
-os.makedirs("data/points-dump", exist_ok=True)
+os.makedirs(POINTS_DIR, exist_ok=True)
 
 # Environment variables with default values if not set
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", "")
@@ -158,7 +165,7 @@ while True:
 
         attempt_number = CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining
         with open(
-            f"data/points-dump/node-{node_idx}-attempt-{attempt_number}.json", "w"
+            f"{POINTS_DIR}/node-{node_idx}-attempt-{attempt_number}.json", "w"
         ) as f:
             json.dump(fetched_points, f)
 
