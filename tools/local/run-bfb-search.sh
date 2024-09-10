@@ -10,6 +10,7 @@ elif [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
     BFB_CONTAINER_NAME="bfb-search-debug"
 else
     echo "Unexpected QdrantCluster $QC_NAME"
+    exit 1
 fi
 
 BFB_IMAGE_NAME="qdrant/bfb:dev"
