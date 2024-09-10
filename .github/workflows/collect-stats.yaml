@@ -38,9 +38,7 @@ jobs:
         run: exit 1
 
   collect-stats-debug-cluster:
-    env:
-        check_secret: ${{ secrets.QDRANT_CLUSTER_URL_2 }}
-    if: ${{ env.check_secret != '' }}
+    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' }}
     needs: collect-stats
     runs-on: ubuntu-latest
     steps:
