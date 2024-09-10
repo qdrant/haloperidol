@@ -63,8 +63,8 @@ jobs:
           bash -x tools/collect-node-metrics.sh
       - uses: actions/upload-artifact@v4
         with:
-          name: points-dump
-          path: data/points-dump
+          name: points-dump-debug
+          path: data/points-dump-debug
           retention-days: 7
       - name: Fail job if any check failed
         if: steps.cluster_checks.outputs.failed == 'true'

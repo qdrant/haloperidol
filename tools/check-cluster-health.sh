@@ -18,7 +18,14 @@ RUN_SCRIPT="$ROOT/local/check-docker-exit-code.sh"
 
 QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
 
-CONTAINER_NAME=bfb-upload
+if [ "$QC_NAME" == "qdrant-chaos-testing" ]; then
+    CONTAINER_NAME="bfb-upload"
+elif [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
+    CONTAINER_NAME="bfb-upload-debug"
+else
+    echo "Unexpected QdrantCluster $QC_NAME"
+    exit 1
+fi
 RUN_SCRIPT=$RUN_SCRIPT \
 	ENV_CONTEXT="${CONTAINER_NAME@A}" \
 	SERVER_NAME=qdrant-manager \
@@ -26,7 +33,14 @@ RUN_SCRIPT=$RUN_SCRIPT \
 exit_code=$?
 upload_operational=$([ $exit_code -eq 0 ] && echo true || echo false)
 
-CONTAINER_NAME=bfb-search
+if [ "$QC_NAME" == "qdrant-chaos-testing" ]; then
+    CONTAINER_NAME="bfb-search"
+elif [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
+    CONTAINER_NAME="bfb-search-debug"
+else
+    echo "Unexpected QdrantCluster $QC_NAME"
+    exit 1
+fi
 RUN_SCRIPT=$RUN_SCRIPT \
 	ENV_CONTEXT="${CONTAINER_NAME@A}" \
 	SERVER_NAME=qdrant-manager \

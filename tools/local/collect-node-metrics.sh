@@ -224,6 +224,7 @@ done
 #   num_snapshots INT,
 #   missing_payload_point_ids JSONB,
 #   measure_timestamp TIMESTAMP
+#   cluster_name VARCHAR(255)
 # );
 
 echo "level=INFO msg=\"Storing collect nodes in db\" data=$CHAOS_TESTING_VALUES"
@@ -238,6 +239,7 @@ docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PAS
 #   points_count INT,
 #   state VARCHAR(255),
 #   measure_timestamp TIMESTAMP
+#   cluster_name VARCHAR(255)
 # );
 
 if [ -n "$CHAOS_TESTING_SHARD_VALUES" ]; then
@@ -259,6 +261,7 @@ fi
 #   progress_transfer INT,
 #   total_to_transfer INT,
 #   measure_timestamp TIMESTAMP
+#   cluster_name VARCHAR(255)
 # );
 
 if [ -n "$CHAOS_TESTING_TRANSFER_VALUES" ]; then
