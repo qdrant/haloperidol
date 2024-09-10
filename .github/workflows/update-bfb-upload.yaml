@@ -24,6 +24,7 @@ jobs:
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
           export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL }}
+          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"
           bash -x tools/run-bfb-upload.sh
 
   update-bfb-upload-debug-cluster:
