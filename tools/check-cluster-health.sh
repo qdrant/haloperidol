@@ -51,7 +51,7 @@ echo "upload_operational: $upload_operational, search_operational: $search_opera
 # );
 
 # TODO: Rename table as cluster_health
-docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO bfb_health (upload_operational, search_operational, is_data_consistent, measure_timestamp, cluster_name) VALUES ($upload_operational, $search_operational, $is_data_consistent, '$NOW', $QC_NAME);"
+docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO bfb_health (upload_operational, search_operational, is_data_consistent, measure_timestamp, cluster_name) VALUES ($upload_operational, $search_operational, $is_data_consistent, '$NOW', '$QC_NAME');"
 
 if [ "$upload_operational" = false ] || [ "$search_operational" = false ] || [ "$is_data_consistent" = false ]; then
 	echo "::set-output name=failed::true"
