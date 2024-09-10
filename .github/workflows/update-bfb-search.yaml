@@ -10,6 +10,9 @@ on:
 jobs:
   update-bfb-search:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cluster_url: [${{ secrets.QDRANT_CLUSTER_URL }}, ${{ secrets.QDRANT_CLUSTER_URL_2 }}]
     steps:
       - uses: actions/checkout@v3
       - uses: webfactory/ssh-agent@v0.8.0
@@ -23,5 +26,5 @@ jobs:
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
-          export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL }}
+          export QDRANT_CLUSTER_URL=${{ matrix.cluster_url }}
           bash -x tools/run-bfb-search.sh

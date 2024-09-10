@@ -10,6 +10,9 @@ on:
 jobs:
   collect-stats:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cluster_url: [${{ secrets.QDRANT_CLUSTER_URL }}, ${{ secrets.QDRANT_CLUSTER_URL_2 }}]
     steps:
       - uses: actions/checkout@v3
       - uses: webfactory/ssh-agent@v0.8.0
@@ -23,7 +26,8 @@ jobs:
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
-          export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL }}
+          export QDRANT_CLUSTER_URL=${{ matrix.cluster_url }}
+          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~https://([^.]+)\..*~\1~')"
           export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
           bash -x tools/check-cluster-health.sh
