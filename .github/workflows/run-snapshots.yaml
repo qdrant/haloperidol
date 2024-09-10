@@ -30,6 +30,9 @@ jobs:
         run: exit 1
 
   run-snapshots-debug-cluster:
+    env:
+        check_secret: ${{ secrets.QDRANT_CLUSTER_URL_2 }}
+    if: ${{ env.check_secret != '' }}
     needs: run-snapshots
     runs-on: ubuntu-latest
     steps:

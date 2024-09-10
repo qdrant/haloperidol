@@ -27,6 +27,9 @@ jobs:
           bash -x tools/run-bfb-upload.sh
 
   update-bfb-upload-debug-cluster:
+    env:
+        check_secret: ${{ secrets.QDRANT_CLUSTER_URL_2 }}
+    if: ${{ env.check_secret != '' }}
     needs: update-bfb-upload
     runs-on: ubuntu-latest
     steps:
