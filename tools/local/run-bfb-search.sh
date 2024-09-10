@@ -2,7 +2,16 @@
 
 set -euo pipefail
 
-BFB_CONTAINER_NAME="bfb-search"
+QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
+
+if [ "$QC_NAME" == "qdrant-chaos-testing" ]; then
+    BFB_CONTAINER_NAME="bfb-search"
+elif [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
+    BFB_CONTAINER_NAME="bfb-search-debug"
+else
+    echo "Unexpected QdrantCluster $QC_NAME"
+fi
+
 BFB_IMAGE_NAME="qdrant/bfb:dev"
 
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
@@ -39,14 +48,14 @@ docker stop -t 10 ${BFB_CONTAINER_NAME} || true
 
 docker rm ${BFB_CONTAINER_NAME} || true
 
-touch bfb-search.log
+touch "$BFB_CONTAINER_NAME.log"
 
 docker run \
     -d \
     --network host \
     --name "$BFB_CONTAINER_NAME" \
     -e "QDRANT_API_KEY=$QDRANT_API_KEY" \
-    -v "$(pwd)/bfb-search.log:/bfb/search.log" \
+    -v "$(pwd)/$BFB_CONTAINER_NAME.log:/bfb/search.log" \
     ${BFB_IMAGE_NAME} \
     bash -c "set -e; while true; do ${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} | tee /bfb/search.log; if [ $? -ne 0 ]; then echo \"bfb command crashed. Exiting loop.\"; break; fi; sleep 10; done"
 
