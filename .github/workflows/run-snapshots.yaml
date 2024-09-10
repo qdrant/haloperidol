@@ -30,6 +30,7 @@ jobs:
         run: exit 1
 
   run-snapshots-debug-cluster:
+    needs: run-snapshots
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
