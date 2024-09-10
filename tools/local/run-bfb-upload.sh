@@ -2,7 +2,17 @@
 
 set -euo pipefail
 
-BFB_CONTAINER_NAME="bfb-upload"
+QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
+
+if [ "$QC_NAME" == "qdrant-chaos-testing" ]; then
+    BFB_CONTAINER_NAME="bfb-upload"
+elif [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
+    BFB_CONTAINER_NAME="bfb-upload-debug"
+else
+    echo "Unexpected QdrantCluster $QC_NAME"
+    exit 1
+fi
+
 BFB_IMAGE_NAME="qdrant/bfb:dev"
 
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
@@ -44,14 +54,14 @@ docker rm ${BFB_CONTAINER_NAME} || true
 
 docker rmi -f ${BFB_IMAGE_NAME} || true
 
-touch bfb-upload.log # create file so that docker doesn't create a dir instead
+touch "$BFB_CONTAINER_NAME.log" # create file so that docker doesn't create a dir instead
 
 docker run \
     -d \
     --network host \
     --name "$BFB_CONTAINER_NAME" \
     -e "QDRANT_API_KEY=$QDRANT_API_KEY" \
-    -v "$(pwd)/bfb-upload.log:/bfb/upload.log" \
+    -v "$(pwd)/$BFB_CONTAINER_NAME.log:/bfb/upload.log" \
     ${BFB_IMAGE_NAME} \
     sh -c "${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} 2>&1 | tee /bfb/upload.log"
 

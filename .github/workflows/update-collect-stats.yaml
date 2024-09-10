@@ -33,7 +33,7 @@ jobs:
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL }}
-          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~https://([^.]+)\..*~\1~')"
+          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"
           export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
           export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
           export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
@@ -58,7 +58,7 @@ jobs:
         run: |
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL_2 }}
-          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~https://([^.]+)\..*~\1~')"
+          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"
           export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
           export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
           export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
