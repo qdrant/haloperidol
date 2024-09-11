@@ -18,8 +18,9 @@ log_with_timestamp() {
         echo "timestamp=$(date --rfc-3339=seconds --utc) $line"
     done
 }
+QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
 # Redirect stdout (1) and stderr (2) to a log file
-exec > >(log_with_timestamp >> /var/log/run-snapshots-cron.log) 2>&1
+exec > >(log_with_timestamp >> "/var/log/$QC_NAME-run-snapshots-cron.log") 2>&1
 
 function create_snapshot() {
     snapshot_count=$(get_snapshot_count "$1")
