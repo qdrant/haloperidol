@@ -8,8 +8,10 @@ log_with_timestamp() {
         echo "$line"
     done
 }
+
+QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
 # Redirect stdout (1) and stderr (2) to a log file
-exec > >(log_with_timestamp >> /var/log/collect-stats-cron.log) 2>&1
+exec > >(log_with_timestamp >> "/var/log/${QC_NAME}-collect-stats-cron.log") 2>&1
 
 function handle_error() {
     local error_code error_line error_command ts
