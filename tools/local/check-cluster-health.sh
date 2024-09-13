@@ -14,7 +14,7 @@ if [ "$QC_NAME" == "qdrant-chaos-testing" ]; then
 elif [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
     UPLOAD_CONTAINER_NAME="bfb-upload-debug"
     SEARCH_CONTAINER_NAME="bfb-search-debug"
-    POSTGRES_CLIENT_CONTAINER_NAME="$POSTGRES_CLIENT_CONTAINER_NAME-debug"
+    POSTGRES_CLIENT_CONTAINER_NAME="postgres-client-debug"
 else
     echo "Unexpected QdrantCluster $QC_NAME"
     exit 1
