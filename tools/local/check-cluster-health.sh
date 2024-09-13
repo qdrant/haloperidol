@@ -7,11 +7,22 @@ NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
 
-CONTAINER_NAME=bfb-upload tools/local/check-docker-exit-code.sh
+if [ "$QC_NAME" == "qdrant-chaos-testing" ]; then
+    UPLOAD_CONTAINER_NAME="bfb-upload"
+    SEARCH_CONTAINER_NAME="bfb-search"
+elif [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
+    UPLOAD_CONTAINER_NAME="bfb-upload-debug"
+    SEARCH_CONTAINER_NAME="bfb-search-debug"
+else
+    echo "Unexpected QdrantCluster $QC_NAME"
+    exit 1
+fi
+
+CONTAINER_NAME=$UPLOAD_CONTAINER_NAME tools/local/check-docker-exit-code.sh
 exit_code=$?
 upload_operational=$([ $exit_code -eq 0 ] && echo true || echo false)
 
-CONTAINER_NAME=bfb-search tools/local/check-docker-exit-code.sh
+CONTAINER_NAME=$SEARCH_CONTAINER_NAME tools/local/check-docker-exit-code.sh
 exit_code=$?
 search_operational=$([ $exit_code -eq 0 ] && echo true || echo false)
 
