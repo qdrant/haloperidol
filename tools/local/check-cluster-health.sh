@@ -10,9 +10,11 @@ QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
 if [ "$QC_NAME" == "qdrant-chaos-testing" ]; then
     UPLOAD_CONTAINER_NAME="bfb-upload"
     SEARCH_CONTAINER_NAME="bfb-search"
+    POSTGRES_CLIENT_CONTAINER_NAME="postgres-client"
 elif [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
     UPLOAD_CONTAINER_NAME="bfb-upload-debug"
     SEARCH_CONTAINER_NAME="bfb-search-debug"
+    POSTGRES_CLIENT_CONTAINER_NAME="$POSTGRES_CLIENT_CONTAINER_NAME-debug"
 else
     echo "Unexpected QdrantCluster $QC_NAME"
     exit 1
@@ -57,4 +59,4 @@ echo "level=INFO msg=\"Checked chaos-testing components\" upload_operational=$up
 # );
 
 # TODO: Rename table as cluster_health
-docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO bfb_health (upload_operational, search_operational, is_data_consistent, measure_timestamp, cluster_name) VALUES ($upload_operational, $search_operational, $is_data_consistent, '$NOW', '$QC_NAME');"
+docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO bfb_health (upload_operational, search_operational, is_data_consistent, measure_timestamp, cluster_name) VALUES ($upload_operational, $search_operational, $is_data_consistent, '$NOW', '$QC_NAME');"

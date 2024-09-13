@@ -12,6 +12,11 @@ fi
 
 QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
 
+POSTGRES_CLIENT_CONTAINER_NAME="postgres-client"
+if [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
+    POSTGRES_CLIENT_CONTAINER_NAME="$POSTGRES_CLIENT_CONTAINER_NAME-debug"
+fi
+
 # https is important here
 QDRANT_URIS=( "${QDRANT_HOSTS[@]/#/https://}" )
 QDRANT_URIS=( "${QDRANT_URIS[@]/%/:6333}" )
@@ -228,7 +233,7 @@ done
 # );
 
 echo "level=INFO msg=\"Storing collect nodes in db\" data=$CHAOS_TESTING_VALUES"
-docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing (url, version, commit, num_vectors, num_snapshots, missing_payload_point_ids, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_VALUES;"
+docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME  jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing (url, version, commit, num_vectors, num_snapshots, missing_payload_point_ids, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_VALUES;"
 
 # Assume table:
 # create table chaos_testing_shards (
@@ -243,7 +248,7 @@ docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PAS
 # );
 
 if [ -n "$CHAOS_TESTING_SHARD_VALUES" ]; then
-    docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_shards (url, peer_id, shard_id, points_count, state, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_SHARD_VALUES;"
+    docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_shards (url, peer_id, shard_id, points_count, state, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_SHARD_VALUES;"
 else
     echo "level=ERROR msg=\"No shards found\""
 fi
@@ -265,7 +270,7 @@ fi
 # );
 
 if [ -n "$CHAOS_TESTING_TRANSFER_VALUES" ]; then
-    docker run --rm jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_transfers (url, peer_id, shard_id, from_peer, to_peer, method, comment, progress_transfer, total_to_transfer, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_TRANSFER_VALUES;"
+    docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_transfers (url, peer_id, shard_id, from_peer, to_peer, method, comment, progress_transfer, total_to_transfer, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_TRANSFER_VALUES;"
 else
     echo "level=INFO msg=\"No transfers found\""
 fi
