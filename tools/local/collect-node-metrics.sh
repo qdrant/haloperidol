@@ -58,7 +58,7 @@ function insert_to_chaos_testing_table {
         CHAOS_TESTING_VALUES+=" ,"
     fi
 
-    CHAOS_TESTING_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, $num_snapshots, '$missing_payload_point_ids', '$consensus_thread_status', '$measure_timestamp', '$cluster_name)"
+    CHAOS_TESTING_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, $num_snapshots, '$missing_payload_point_ids', '$consensus_thread_status', '$measure_timestamp', '$cluster_name')"
 }
 
 # function to insert to CHAOS_TESTING_SHARD_VALUES:
