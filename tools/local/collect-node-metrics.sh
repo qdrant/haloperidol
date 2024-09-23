@@ -49,15 +49,16 @@ function insert_to_chaos_testing_table {
     local num_vectors=$4
     local num_snapshots=$5
     local missing_payload_point_ids=$6
-    local measure_timestamp=$7
-    local cluster_name=$8
+    local consensus_thread_status=$7
+    local measure_timestamp=$8
+    local cluster_name=$9
 
     if [ -n "$CHAOS_TESTING_VALUES" ]; then
         # If there are already values, add a comma
         CHAOS_TESTING_VALUES+=" ,"
     fi
 
-    CHAOS_TESTING_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, $num_snapshots, '$missing_payload_point_ids', '$measure_timestamp', '$cluster_name')"
+    CHAOS_TESTING_VALUES+=" ('$uri', '$version', '$commit_id', $num_vectors, $num_snapshots, '$missing_payload_point_ids', '$consensus_thread_status', '$measure_timestamp', '$cluster_name)"
 }
 
 # function to insert to CHAOS_TESTING_SHARD_VALUES:
@@ -108,7 +109,7 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     if ! (is_valid_json "$root_api_response"); then
         # Node is down
-        insert_to_chaos_testing_table "$uri" "null" "null" 0 0 "null" "$NOW" "$QC_NAME"
+        insert_to_chaos_testing_table "$uri" "null" "null" 0 0 "null" "null" "$NOW" "$QC_NAME"
         continue
     fi
 
@@ -116,13 +117,16 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     commit_id=$(echo "$root_api_response" | jq -r '.commit')
 
-    # This isn't stored in DB but is important for debugging
     cluster_response=$(curl -s "$uri/cluster" -H "api-key: $QDRANT_API_KEY")
+    consensus_status=$(echo "$cluster_response" | jq -rc '.result.consensus_thread_status.consensus_thread_status')
     peer_id=$(echo "$cluster_response" | jq '.result.peer_id')
     peer_count=$(echo "$cluster_response" | jq '.result.peers | length')
-    echo "level=INFO msg=\"Checked cluster\" peer_id=$peer_id uri=\"$uri\" cluster_response=\"$cluster_response\""
+    echo "level=INFO msg=\"Checked cluster\" consensus_status=$consensus_status peer_id=$peer_id uri=\"$uri\" cluster_response=\"$cluster_response\""
     if [ "$peer_count" -gt 4 ]; then
-        echo "level=CRITICAL msg=\"Cluster has too many peers\" peer_count=$peer_count peer_id=$peer_id uri=\"$uri\" cluster_response=\"$cluster_response\""
+        echo "level=CRITICAL msg=\"Cluster has too many peers\" consensus_status=$consensus_status peer_count=$peer_count peer_id=$peer_id uri=\"$uri\" cluster_response=\"$cluster_response\""
+    fi
+    if [ "$consensus_status" != "working" ]; then
+        echo "level=CRITICAL msg=\"Consensus is not working\" consensus_status=$consensus_status peer_count=$peer_count peer_id=$peer_id uri=\"$uri\" cluster_response=\"$cluster_response\""
     fi
 
     num_vectors=$(curl -s --request POST \
@@ -152,7 +156,7 @@ for uri in "${QDRANT_URIS[@]}"; do
         --header 'content-type: application/json' \
         --data '{"filter": {"must": {"is_empty": {"key": "a"}}}, "limit": 1000, "with_payload": false}' | jq -rc '[.result.points[].id]')
 
-    insert_to_chaos_testing_table "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" "$missing_payload_point_ids" "$NOW" "$QC_NAME"
+    insert_to_chaos_testing_table "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" "$missing_payload_point_ids" "$consensus_status" "$NOW" "$QC_NAME"
 
     peer_id=$(echo "$collection_cluster_response" | jq -r '.peer_id')
     local_shards=$(echo "$collection_cluster_response" | jq -rc '.local_shards[]') # [{"shard_id": 1, "points_count": .., "state": Active}, ...]
@@ -228,12 +232,13 @@ done
 #   num_vectors INT,
 #   num_snapshots INT,
 #   missing_payload_point_ids JSONB,
-#   measure_timestamp TIMESTAMP
+#   consensus_status VARCHAR(16),
+#   measure_timestamp TIMESTAMP,
 #   cluster_name VARCHAR(255)
 # );
 
 echo "level=INFO msg=\"Storing collect nodes in db\" data=$CHAOS_TESTING_VALUES"
-docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME  jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing (url, version, commit, num_vectors, num_snapshots, missing_payload_point_ids, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_VALUES;"
+docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME  jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing (url, version, commit, num_vectors, num_snapshots, missing_payload_point_ids, consensus_status, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_VALUES;"
 
 # Assume table:
 # create table chaos_testing_shards (
