@@ -27,7 +27,7 @@ BFB_PARAMETERS=" \
     ${QDRANT_URIS[@]/#/--uri } \
     --keywords 10 \
     --dim 768 \
-    -n 1000 \
+    -n 100000000000 \
     --threads 1 \
     --parallel 1 \
     --quantization scalar \
@@ -58,5 +58,5 @@ docker run \
     -e "QDRANT_API_KEY=$QDRANT_API_KEY" \
     -v "$(pwd)/$BFB_CONTAINER_NAME.log:/bfb/search.log" \
     ${BFB_IMAGE_NAME} \
-    bash -c "set -e; while true; do ${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} | tee /bfb/search.log; if [ $? -ne 0 ]; then echo \"bfb command crashed. Exiting loop.\"; break; fi; sleep 10; done"
+    bash -c "${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} | tee /bfb/search.log"
 
