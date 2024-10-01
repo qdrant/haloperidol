@@ -186,7 +186,7 @@ for uri in "${QDRANT_URIS[@]}"; do
       state=$(echo "$shard" | jq -r '.state')
 
       if [ "$state" == "Dead" ]; then
-        echo "level=CRITICAL msg=\"Remote Shard is dead\" shard_id=$shard_id peer_id=$peer_id uri=\"$uri\""
+        echo "level=WARN msg=\"Remote Shard is dead\" shard_id=$shard_id peer_id=$peer_id uri=\"$uri\""
       fi
     done <<< "$remote_shards"
 
