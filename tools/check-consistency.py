@@ -95,11 +95,14 @@ while True:
         exit(1)
     result = cluster_response.json()['result']
     num_peers = len(result["peers"])
+    pending_operations = result["raft_info"]["pending_operations"]
     peer_id = result['peer_id']
-    if num_peers < 5:
-        print(f'level=INFO msg="Fetched cluster peers" peer_id={peer_id} num_peers={num_peers}')
-    else:
+
+    if num_peers >= 5 and pending_operations == 0:
         print(f'level=CRITICAL msg="Fetched cluster peers. Found too many peers" num_peers={num_peers} peer_id={peer_id} response={result}')
+    else:
+        print(f'level=INFO msg="Fetched cluster peers" peer_id={peer_id} num_peers={num_peers}')
+
 
     QDRANT_URIS = [
         f"https://node-{idx}-{QDRANT_CLUSTER_URL}:6333" for idx in range(num_peers)
