@@ -121,8 +121,9 @@ for uri in "${QDRANT_URIS[@]}"; do
     consensus_status=$(echo "$cluster_response" | jq -rc '.result.consensus_thread_status.consensus_thread_status')
     peer_id=$(echo "$cluster_response" | jq '.result.peer_id')
     peer_count=$(echo "$cluster_response" | jq '.result.peers | length')
+    pending_operations=$(echo "$cluster_response" | jq '.result.raft_info.pending_operations')
     echo "level=INFO msg=\"Checked cluster\" consensus_status=$consensus_status peer_id=$peer_id uri=\"$uri\" cluster_response=\"$cluster_response\""
-    if [ "$peer_count" -gt 4 ]; then
+    if [ "$peer_count" -gt 4 ] && [ "$pending_operations" -eq 0 ]; then
         echo "level=CRITICAL msg=\"Cluster has too many peers\" consensus_status=$consensus_status peer_count=$peer_count peer_id=$peer_id uri=\"$uri\" cluster_response=\"$cluster_response\""
     fi
     if [ "$consensus_status" != "working" ]; then
