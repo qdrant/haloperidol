@@ -65,3 +65,28 @@ jobs:
           export SERVER_NAME=${{ inputs.server_name }}
           export BG_TASK_NAME=${{ inputs.bg_task_name }}
           bash -x tools/run-collect-stats.sh
+
+  update-collect-stats-3-cluster:
+    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' }}
+    needs: update-collect-stats
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Install tools
+        run: |
+          bash -x tools/ci/install-tools.sh
+          bash -x tools/ci/install-hcloud.sh
+      - name: Update collect stats script
+        run: |
+          export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
+          export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL_3 }}
+          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"
+          export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
+          export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
+          export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          export SERVER_NAME=${{ inputs.server_name }}
+          export BG_TASK_NAME=${{ inputs.bg_task_name }}
+          bash -x tools/run-collect-stats.sh
