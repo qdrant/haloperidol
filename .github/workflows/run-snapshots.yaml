@@ -57,7 +57,7 @@ jobs:
 
   run-snapshots-3-cluster:
     if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'disable-snapshots' }}
-    needs: run-snapshots
+    needs: run-snapshots-debug-cluster
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

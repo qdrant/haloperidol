@@ -72,7 +72,7 @@ jobs:
 
   collect-stats-3-cluster:
     if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' }}
-    needs: collect-stats
+    needs: collect-stats-debug-cluster
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

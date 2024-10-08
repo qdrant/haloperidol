@@ -50,7 +50,7 @@ jobs:
 
   update-bfb-upload-3-cluster:
     if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' }}
-    needs: update-bfb-upload
+    needs: update-bfb-upload-debug-cluster
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

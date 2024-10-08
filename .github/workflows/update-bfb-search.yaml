@@ -50,7 +50,7 @@ jobs:
 
   update-bfb-search-3-cluster:
     if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' }}
-    needs: update-bfb-search
+    needs: update-bfb-search-debug-cluster
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
