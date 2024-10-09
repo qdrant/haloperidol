@@ -27,6 +27,8 @@ POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-""}
 BG_TASK_NAME=${BG_TASK_NAME:-"collect-stats"}
 if [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
     BG_TASK_NAME="${BG_TASK_NAME}-debug"
+elif [ "$QC_NAME" == "qdrant-chaos-testing-3" ]; then
+    BG_TASK_NAME="${BG_TASK_NAME}-3"
 fi
 
 QDRANT_HOSTS=()

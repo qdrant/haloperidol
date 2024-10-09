@@ -22,6 +22,8 @@ if [ "$QC_NAME" == "qdrant-chaos-testing" ]; then
     CONTAINER_NAME="bfb-upload"
 elif [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
     CONTAINER_NAME="bfb-upload-debug"
+elif [ "$QC_NAME" == "qdrant-chaos-testing-3" ]; then
+    CONTAINER_NAME="bfb-upload-3"
 else
     echo "Unexpected QdrantCluster $QC_NAME"
     exit 1
@@ -37,6 +39,8 @@ if [ "$QC_NAME" == "qdrant-chaos-testing" ]; then
     CONTAINER_NAME="bfb-search"
 elif [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
     CONTAINER_NAME="bfb-search-debug"
+elif [ "$QC_NAME" == "qdrant-chaos-testing-3" ]; then
+    CONTAINER_NAME="bfb-search-3"
 else
     echo "Unexpected QdrantCluster $QC_NAME"
     exit 1

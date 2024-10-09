@@ -69,3 +69,35 @@ jobs:
       - name: Fail job if any check failed
         if: steps.cluster_checks.outputs.failed == 'true'
         run: exit 1
+
+  collect-stats-3-cluster:
+    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' }}
+    needs: collect-stats-debug-cluster
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Install tools
+        run: |
+          bash -x tools/ci/install-hcloud.sh
+      - name: Collect and store cluster and bfb status
+        id: cluster_checks
+        run: |
+          export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
+          export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
+          export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL_3 }}
+          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"          
+          export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
+          bash -x tools/check-cluster-health.sh
+          bash -x tools/collect-node-metrics.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: points-dump-debug
+          path: data/points-dump-debug
+          retention-days: 7
+      - name: Fail job if any check failed
+        if: steps.cluster_checks.outputs.failed == 'true'
+        run: exit 1

@@ -2,6 +2,8 @@
 
 import os
 import json
+from multiprocessing.managers import Value
+
 import requests
 import random
 import time
@@ -20,8 +22,12 @@ QC_NAME = os.getenv("QC_NAME", "qdrant-chaos-testing")
 
 if QC_NAME == "qdrant-chaos-testing":
     POINTS_DIR = "data/points-dump"
-else:
+elif QC_NAME == "qdrant-chaos-testing-debug":
     POINTS_DIR = "data/points-dump-debug"
+elif QC_NAME == "qdrant-chaos-testing-3":
+    POINTS_DIR = "data/points-dump-3"
+else:
+    raise NotImplementedError(f"Unknown cluster name {QC_NAME}")
 
 # Ensure the data/points-dump directory exists
 os.makedirs(POINTS_DIR, exist_ok=True)
