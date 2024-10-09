@@ -1,9 +1,6 @@
 #!/bin/python3
 
-import os
 import json
-from multiprocessing.managers import Value
-
 import requests
 import random
 import time
@@ -24,8 +21,8 @@ if QC_NAME == "qdrant-chaos-testing":
     POINTS_DIR = "data/points-dump"
 elif QC_NAME == "qdrant-chaos-testing-debug":
     POINTS_DIR = "data/points-dump-debug"
-elif QC_NAME == "qdrant-chaos-testing-3":
-    POINTS_DIR = "data/points-dump-3"
+elif QC_NAME == "qdrant-chaos-testing-three":
+    POINTS_DIR = "data/points-dump-three"
 else:
     raise NotImplementedError(f"Unknown cluster name {QC_NAME}")
 

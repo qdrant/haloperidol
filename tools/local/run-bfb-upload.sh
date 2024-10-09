@@ -8,8 +8,8 @@ if [ "$QC_NAME" == "qdrant-chaos-testing" ]; then
     BFB_CONTAINER_NAME="bfb-upload"
 elif [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
     BFB_CONTAINER_NAME="bfb-upload-debug"
-elif [ "$QC_NAME" == "qdrant-chaos-testing-3" ]; then
-    BFB_CONTAINER_NAME="bfb-upload-3"
+elif [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
+    BFB_CONTAINER_NAME="bfb-upload-three"
 else
     echo "Unexpected QdrantCluster $QC_NAME"
     exit 1
