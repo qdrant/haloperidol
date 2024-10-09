@@ -15,8 +15,8 @@ QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
 POSTGRES_CLIENT_CONTAINER_NAME="postgres-client"
 if [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
     POSTGRES_CLIENT_CONTAINER_NAME="$POSTGRES_CLIENT_CONTAINER_NAME-debug"
-elif  [ "$QC_NAME" == "qdrant-chaos-testing-3" ]; then
-    POSTGRES_CLIENT_CONTAINER_NAME="$POSTGRES_CLIENT_CONTAINER_NAME-3"
+elif  [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
+    POSTGRES_CLIENT_CONTAINER_NAME="$POSTGRES_CLIENT_CONTAINER_NAME-three"
 fi
 
 # https is important here

@@ -15,10 +15,10 @@ elif [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
     UPLOAD_CONTAINER_NAME="bfb-upload-debug"
     SEARCH_CONTAINER_NAME="bfb-search-debug"
     POSTGRES_CLIENT_CONTAINER_NAME="postgres-client-debug"
-elif [ "$QC_NAME" == "qdrant-chaos-testing-3" ]; then
-    UPLOAD_CONTAINER_NAME="bfb-upload-3"
-    SEARCH_CONTAINER_NAME="bfb-search-3"
-    POSTGRES_CLIENT_CONTAINER_NAME="postgres-client-3"
+elif [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
+    UPLOAD_CONTAINER_NAME="bfb-upload-three"
+    SEARCH_CONTAINER_NAME="bfb-search-three"
+    POSTGRES_CLIENT_CONTAINER_NAME="postgres-client-three"
 else
     echo "Unexpected QdrantCluster $QC_NAME"
     exit 1
