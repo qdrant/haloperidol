@@ -60,5 +60,5 @@ docker run \
     -e "QDRANT_API_KEY=$QDRANT_API_KEY" \
     -v "$(pwd)/$BFB_CONTAINER_NAME.log:/bfb/search.log" \
     ${BFB_IMAGE_NAME} \
-    bash -c "set -eou pipefail; while true; do ${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} 2>&1 | tee /bfb/search.log; done"
+    bash -c "set -eou pipefail; while true; do ${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS}; done"
 
