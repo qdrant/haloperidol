@@ -45,7 +45,7 @@ BFB_PARAMETERS=" \
     --retry-interval 1 \
 "
 
-BFB_ENV_VARS="RUST_LOG=debug,h2=info,tower=info,h2::proto=debug"
+BFB_ENV_VARS="RUST_BACKTRACE=full RUST_LOG=debug,h2=info,tower=info,h2::proto=debug"
 
 docker stop -t 10 ${BFB_CONTAINER_NAME} || true
 
