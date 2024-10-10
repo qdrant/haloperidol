@@ -29,7 +29,7 @@ BFB_PARAMETERS=" \
     ${QDRANT_URIS[@]/#/--uri } \
     --keywords 10 \
     --dim 768 \
-    -n 100000000000 \
+    -n 1000 \
     --threads 1 \
     --parallel 1 \
     --quantization scalar \
@@ -60,5 +60,5 @@ docker run \
     -e "QDRANT_API_KEY=$QDRANT_API_KEY" \
     -v "$(pwd)/$BFB_CONTAINER_NAME.log:/bfb/search.log" \
     ${BFB_IMAGE_NAME} \
-    bash -c "${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} 2>&1 | tee /bfb/search.log"
+    bash -c "set -eou pipefail; while true; ${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} 2>&1 | tee /bfb/search.log"
 
