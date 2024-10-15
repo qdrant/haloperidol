@@ -35,10 +35,18 @@ search_operational=$([ $exit_code -eq 0 ] && echo true || echo false)
 is_data_consistent=true
 pids=()
 
-for _ in {1..5}; do
-  tools/check-consistency.py &
-  pids+=($!)
-done
+if [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
+  for _ in {1..5}; do
+    tools/check-consistency-all-points.py &
+    pids+=($!)
+  done
+else
+  for _ in {1..5}; do
+    tools/check-consistency.py &
+    pids+=($!)
+  done
+fi
+
 
 
 for pid in "${pids[@]}"; do
