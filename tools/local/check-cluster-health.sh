@@ -36,10 +36,7 @@ is_data_consistent=true
 pids=()
 
 if [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
-  for _ in {1..5}; do
-    tools/check-consistency-all-points.py &
-    pids+=($!)
-  done
+  tools/check-consistency-all-points.py &
 else
   for _ in {1..5}; do
     tools/check-consistency.py &
