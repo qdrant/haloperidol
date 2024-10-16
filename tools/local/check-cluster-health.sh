@@ -48,7 +48,7 @@ fi
 for pid in "${pids[@]}"; do
   wait "$pid"
   exit_code=$?
-  echo "level=\"Process finished\" pid=$pid exit_code=$exit_code"
+  echo "level=INFO msg=\"Process finished\" pid=$pid exit_code=$exit_code"
   if [ $exit_code -ne 0 ]; then
     is_data_consistent=false
     break
