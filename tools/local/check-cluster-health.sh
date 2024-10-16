@@ -37,14 +37,13 @@ pids=()
 
 if [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
   tools/check-consistency-all-points.py &
+  pids+=($!)
 else
   for _ in {1..5}; do
     tools/check-consistency.py &
     pids+=($!)
   done
 fi
-
-
 
 for pid in "${pids[@]}"; do
   wait "$pid"
