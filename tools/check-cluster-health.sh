@@ -54,7 +54,7 @@ search_operational=$([ $exit_code -eq 0 ] && echo true || echo false)
 
 echo "Checking data consistency"
 if [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
-  python3 ./tools/check-consistency-all-points.py
+  python3 ./tools/check-consistency-all-points-all-peers.py
   exit_code=$?
   is_data_consistent=$([ $exit_code -eq 0 ] && echo true || echo false)
 else
