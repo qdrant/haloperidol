@@ -60,34 +60,6 @@ QDRANT_CLUSTER_URL = os.getenv("QDRANT_CLUSTER_URL", "")
 CONSISTENCY_ATTEMPTS_TOTAL = 10
 
 
-def calculate_inconsistent_points(source_points, target_points, point_ids):
-    source_point_idx_to_point = {
-        point["id"]: (point["payload"]) for point in source_points
-    }
-    target_point_idx_to_point = {
-        point["id"]: (point["payload"]) for point in target_points
-    }
-
-    # Mismatching or missing points
-    inconsistent_point_ids_by_payload = []
-
-    for point_id in point_ids:
-        source_payload = source_point_idx_to_point.get(
-            point_id, None
-        )
-        target_payload = target_point_idx_to_point.get(
-            point_id, None
-        )
-
-        if source_payload != target_payload:
-            inconsistent_point_ids_by_payload.append(point_id)
-
-    return (
-        inconsistent_point_ids_by_payload,
-        (source_point_idx_to_point, target_point_idx_to_point)
-    )
-
-
 def get_points_from_all_peers(qdrant_peers, attempt_number, node_points_map):
     for node_idx, uri in enumerate(qdrant_peers):
         if node_idx >= len(point_ids_for_node):
