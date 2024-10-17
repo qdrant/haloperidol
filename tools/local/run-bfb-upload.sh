@@ -3,6 +3,7 @@
 set -euo pipefail
 
 QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
+EXTRA_PARAMS=""
 
 if [ "$QC_NAME" == "qdrant-chaos-testing" ]; then
     BFB_CONTAINER_NAME="bfb-upload"
@@ -10,6 +11,7 @@ elif [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
     BFB_CONTAINER_NAME="bfb-upload-debug"
 elif [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
     BFB_CONTAINER_NAME="bfb-upload-three"
+    EXTRA_PARAMS="--write-consistency-factor 2"
 else
     echo "Unexpected QdrantCluster $QC_NAME"
     exit 1
@@ -37,7 +39,6 @@ BFB_PARAMETERS=" \
     --threads 1 \
     --parallel 1 \
     --wait-on-upsert \
-    --write-consistency-factor 2 \
     --create-if-missing \
     --quantization scalar \
     --timing-threshold 1 \
@@ -47,6 +48,7 @@ BFB_PARAMETERS=" \
     --timeout 30 \
     --retry 4 \
     --retry-interval 1 \
+    $EXTRA_PARAMS
 "
 
 BFB_ENV_VARS="RUST_BACKTRACE=full RUST_LOG=debug,h2=info,tower=info,h2::proto=debug"
