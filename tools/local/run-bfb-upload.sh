@@ -37,6 +37,7 @@ BFB_PARAMETERS=" \
     --threads 1 \
     --parallel 1 \
     --wait-on-upsert \
+    --write-consistency-factor 2 \
     --create-if-missing \
     --quantization scalar \
     --timing-threshold 1 \
