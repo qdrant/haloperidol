@@ -4,8 +4,8 @@ on:
   repository_dispatch:
   workflow_dispatch:
   schedule:
-    # Every 5 minutes
-    - cron: "*/5 * * * *"
+    # Every 30 minutes
+    - cron: "*/30 * * * *"
 
 jobs:
   update-bfb-upload:
