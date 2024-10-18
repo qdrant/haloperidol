@@ -68,7 +68,7 @@ docker run \
     -e "QDRANT_API_KEY=$QDRANT_API_KEY" \
     -v "$(pwd)/$BFB_CONTAINER_NAME.log:/bfb/upload.log" \
     ${BFB_IMAGE_NAME} \
-    sh -c "set -eou pipefail; while true; do ${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} 2>&1 | tee /bfb/upload.log; echo \"${BFB_CONTAINER_NAME} stopped\"; sleep 100; done"
+    bash -c "set -eou pipefail; while true; do ${BFB_ENV_VARS} ./bfb ${BFB_PARAMETERS} 2>&1 | tee /bfb/upload.log; echo \"${BFB_CONTAINER_NAME} stopped\"; sleep 100; done"
 
 sleep 5
 
