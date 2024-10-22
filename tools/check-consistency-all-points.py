@@ -12,7 +12,7 @@ def print(*args, **kwargs):
     new_args = args + (f"pid={pid}",)
     builtins.print(*new_args, **kwargs)
 
-print('level=INFO msg="Starting data consistency check script"')
+print('level=INFO msg="Starting all points data consistency check script"')
 
 QC_NAME = os.getenv("QC_NAME", "qdrant-chaos-testing")
 
@@ -204,14 +204,14 @@ while True:
 
     if is_data_consistent:
         print(
-            f'level=INFO msg="Data consistency check succeeded" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining}'
+            f'level=INFO msg="All points Data consistency check succeeded" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining}'
         )
         break
     else:
         if consistency_attempts_remaining == 0:
             try:
                 print(
-                    f'level=ERROR msg="Data consistency check failed" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} inconsistent_count={len(inconsistent_point_ids)} inconsistent_by_payload="{inconsistent_ids_by_payload}" inconsistent_points="{inconsistent_point_ids}"'
+                    f'level=ERROR msg="All points Data consistency check failed" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} inconsistent_count={len(inconsistent_point_ids)} inconsistent_by_payload="{inconsistent_ids_by_payload}" inconsistent_points="{inconsistent_point_ids}"'
                 )
                 first_node_inconsistent_points = []
                 last_fetched_node_inconsistent_points = []
@@ -228,7 +228,7 @@ while True:
             break
         else:
             print(
-                f'level=WARN msg="Retrying data consistency check" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} remaining_attempts={consistency_attempts_remaining}'
+                f'level=WARN msg="Retrying all points data consistency check" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} remaining_attempts={consistency_attempts_remaining}'
             )
             # Node might be unavailable which caused request to fail. Give some time to heal
             time.sleep(5)
