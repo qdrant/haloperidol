@@ -195,6 +195,7 @@ while True:
                 print(f'level=INFO msg="Node is consistent" uri="{uri}"')
                 point_ids_for_node[node_idx] = []
                 is_data_consistent = True
+                node_idx += 1
                 continue
             inconsistent_point_ids = list(
                 set(inconsistent_ids_by_vector).union(inconsistent_ids_by_payload)
