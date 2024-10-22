@@ -1,31 +1,4 @@
 #!/bin/python3
-"""
-	attempt 1 			attempt 2 		attempt 3 Ok
-node0:
-	Point x = A --->  point x = B ---> point x = B
-node1:
-	Point x = C --->  point x = A ---> point x = B
-node2:
-	Point x = C --->  point x = B ---> point x = D
-
-
-attempt X
-get all the points from all the nodes
-for each point start looking for inconsistencies:
-    for point_id check if already has been processed and marked as consistent
-        proceed to next point skip if yes
-	for point_id get a triple of point payloads from all the nodes
-    	if all 3 are the same -> mark point_id  as consistent, proceed to next point
-		if not 3 are not the same
-            build a list of sets of tuples for the point
-                - each tuple is a payload
-                - each set is a history of payloads for the point (over all the attempts)
-                - each node has its own set (so list  of nodes)
-
-            find common element in those sets
-                if there is a common element -> mark point_id  as consistent, proceed to next point
-                if there is no common element -> proceed to next point
-"""
 import json
 import requests
 import time
