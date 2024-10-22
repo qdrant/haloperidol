@@ -14,7 +14,7 @@ def print(*args, **kwargs):
 
 print('level=INFO msg="Starting all points data consistency check script"')
 
-QC_NAME = os.getenv("QC_NAME", "qdrant-chaos-testing")
+QC_NAME = os.getenv("QC_NAME", "qdrant-chaos-testing-three")
 
 if QC_NAME == "qdrant-chaos-testing":
     POINTS_DIR = "data/points-dump"
@@ -25,12 +25,14 @@ elif QC_NAME == "qdrant-chaos-testing-three":
 else:
     raise NotImplementedError(f"Unknown cluster name {QC_NAME}")
 
+print(f'level=DEBUG msg="Run all points data consistency check against {QC_NAME}"')
+
 # Ensure the data/points-dump directory exists
 os.makedirs(POINTS_DIR, exist_ok=True)
 
 # Environment variables with default values if not set
-QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", "")
-QDRANT_CLUSTER_URL = os.getenv("QDRANT_CLUSTER_URL", "")
+QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", "r7y5t9wYUFtSVZSMQgtpGhjNRZ85vxwN-zQj-PKQ-ZXzJm4DXXsNNg")
+QDRANT_CLUSTER_URL = os.getenv("QDRANT_CLUSTER_URL", "chaos-testing-three.eu-central.aws.staging-cloud.qdrant.io")
 CONSISTENCY_ATTEMPTS_TOTAL = 10
 
 is_data_consistent = False
@@ -135,7 +137,7 @@ while True:
             )
         except requests.exceptions.Timeout as e:
             print(
-                f'level=WARN msg="Request timed out after 10s, skipping consistency check for node" uri="{uri}" api="/collections/benchmark/points"'
+                f'level=WARN msg="Request timed out after 10s, skipping all points consistency check for node" uri="{uri}" api="/collections/benchmark/points"'
             )
             node_idx += 1
             continue
@@ -144,7 +146,7 @@ while True:
             error_msg = response.text.strip()
             if error_msg in ("404 page not found", "Service Unavailable"):
                 print(
-                    f'level=WARN msg="Node unreachable, skipping consistency check" uri="{uri}" status_code={response.status_code} err="{error_msg}"'
+                    f'level=WARN msg="Node unreachable, skipping all points consistency check" uri="{uri}" status_code={response.status_code} err="{error_msg}"'
                 )
                 # point_ids_for_node[node_idx] = []
                 node_idx += 1
@@ -187,6 +189,7 @@ while True:
                 print(f'level=INFO msg="Node is consistent" uri="{uri}"')
                 point_ids_for_node[node_idx] = []
                 is_data_consistent = True
+                node_idx += 1
                 continue
             inconsistent_point_ids = inconsistent_ids_by_payload
             print(
