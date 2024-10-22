@@ -38,7 +38,7 @@ def print(*args, **kwargs):
     new_args = args + (f"pid={pid}",)
     builtins.print(*new_args, **kwargs)
 
-print('level=INFO msg="Starting data consistency check script"')
+print('level=INFO msg="Starting all points all peers data consistency check script"')
 
 QC_NAME = os.getenv("QC_NAME", "qdrant-chaos-testing")
 
@@ -88,7 +88,7 @@ def get_points_from_all_peers(qdrant_peers, attempt_number, node_points_map):
             )
         except requests.exceptions.Timeout:
             print(
-                f'level=WARN msg="Request timed out after 10s, skipping consistency check for node" uri="{uri}" api="/collections/benchmark/points"'
+                f'level=WARN msg="Request timed out after 10s, skipping all points all peers consistency check for node" uri="{uri}" api="/collections/benchmark/points"'
             )
             node_points_map[node_idx][attempt_number] = None
             continue
@@ -97,7 +97,7 @@ def get_points_from_all_peers(qdrant_peers, attempt_number, node_points_map):
             error_msg = response.text.strip()
             if error_msg in ("404 page not found", "Service Unavailable"):
                 print(
-                    f'level=WARN msg="Node unreachable, skipping consistency check" uri="{uri}" status_code={response.status_code} err="{error_msg}"'
+                    f'level=WARN msg="Node unreachable, skipping all points all peers consistency check" uri="{uri}" status_code={response.status_code} err="{error_msg}"'
                 )
                 node_points_map[node_idx][attempt_number] = None
                 continue
@@ -220,7 +220,7 @@ while True:
 
     if is_data_consistent:
         print(
-            f'level=INFO msg="Data consistency check succeeded" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining}'
+            f'level=INFO msg="All points all peers data consistency check succeeded" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining}'
         )
         break
     else:
@@ -228,7 +228,7 @@ while True:
 
         if consistency_attempts_remaining == 0:
             print(
-                f'level=ERROR msg="Data consistency check failed" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} inconsistent_count={len(inconsistent_point_ids)} inconsistent_points="{inconsistent_point_ids}"'
+                f'level=ERROR msg="All points all peers data consistency check failed" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} inconsistent_count={len(inconsistent_point_ids)} inconsistent_points="{inconsistent_point_ids}"'
             )
 
             last_fetched_node_inconsistent_points = []
@@ -244,7 +244,7 @@ while True:
                 f'level=WARN msg="Nodes might be inconsistent. Will retry" inconsistent_count={len(inconsistent_point_ids)} inconsistent_points="{inconsistent_point_ids}"'
             )
             print(
-                f'level=WARN msg="Retrying data consistency check" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} remaining_attempts={consistency_attempts_remaining}'
+                f'level=WARN msg="Retrying all points all peers data consistency check" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} remaining_attempts={consistency_attempts_remaining}'
             )
             # Node might be unavailable which caused request to fail. Give some time to heal
             time.sleep(5)
