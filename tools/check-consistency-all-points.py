@@ -184,6 +184,7 @@ while True:
         elif fetched_points == first_node_points:
             print(f'level=INFO msg="Node is consistent with node-0" uri="{uri}"')
             point_ids_for_node[node_idx] = []
+            point_ids_for_node[0] = initial_point_ids
             is_data_consistent = True
         else:
             print(f'level=INFO msg="Checking points of node" uri="{uri}"')
@@ -195,6 +196,7 @@ while True:
             if len(inconsistent_ids_by_payload) == 0:
                 print(f'level=INFO msg="Node is consistent" uri="{uri}"')
                 point_ids_for_node[node_idx] = []
+                point_ids_for_node[0] = initial_point_ids
                 is_data_consistent = True
                 node_idx += 1
                 continue
