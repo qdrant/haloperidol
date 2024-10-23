@@ -162,7 +162,15 @@ while True:
                 is_data_consistent = False
                 break
 
-        fetched_points = sorted(response.json()["result"], key=lambda x: x["id"])
+        try:
+            fetched_points = sorted(response.json().get("result"), key=lambda x: x["id"])
+        except requests.exceptions.JSONDecodeError as er:
+            print(
+                f'level=WARN msg="Unexpected response during fetching points" uri="{uri}" response="{response.text}" error="{er}"'
+            )
+            is_data_consistent = False
+            break
+
         fetched_points_count = len(fetched_points)
 
         print(
