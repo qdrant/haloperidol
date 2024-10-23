@@ -159,7 +159,13 @@ while True:
                 is_data_consistent = False
                 break
 
-        fetched_points = sorted(response.json()["result"], key=lambda x: x["id"])
+        if response.json().get("result"):
+            fetched_points = sorted(response.json().get("result"), key=lambda x: x["id"])
+        else:
+            print(
+                f'level=WARN msg="Unexpected response during fetching points" uri="{uri}" response="{response.json()}"'
+            )
+            fetched_points = []
         fetched_points_count = len(fetched_points)
 
         print(
@@ -197,6 +203,7 @@ while True:
             )
 
             point_ids_for_node[node_idx] = inconsistent_point_ids
+            if node_idx != 0: point_ids_for_node[0] = inconsistent_point_ids
 
             is_data_consistent = False
             break
