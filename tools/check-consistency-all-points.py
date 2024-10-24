@@ -34,6 +34,7 @@ os.makedirs(POINTS_DIR, exist_ok=True)
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", "")
 QDRANT_CLUSTER_URL = os.getenv("QDRANT_CLUSTER_URL", "")
 CONSISTENCY_ATTEMPTS_TOTAL = 10
+MAX_NUM_POINTS_TO_LOG = 20
 
 is_data_consistent = False
 first_node_points = []
@@ -200,10 +201,19 @@ while True:
                 is_data_consistent = True
                 node_idx += 1
                 continue
+
             inconsistent_point_ids = inconsistent_ids_by_payload
-            print(
-                f'level=WARN msg="Node might be inconsistent compared to node-0. Need to retry" uri="{uri}" inconsistent_count={len(inconsistent_point_ids)} inconsistent_by_payload="{inconsistent_ids_by_payload}" inconsistent_points="{inconsistent_point_ids}"'
-            )
+            if len(inconsistent_ids_by_payload) > MAX_NUM_POINTS_TO_LOG:
+                print(
+                    f'level=WARN msg="Node might be inconsistent compared to node-0. Need to retry" uri="{uri}"'
+                )
+                print(
+                    f'level=WARN msg="The number of inconsistent points is too high, only show first {MAX_NUM_POINTS_TO_LOG}" original_inconsistent_count={len(inconsistent_point_ids)} inconsistent_points="{inconsistent_point_ids[:MAX_NUM_POINTS_TO_LOG]}"'
+                )
+            else:
+                print(
+                    f'level=WARN msg="Node might be inconsistent compared to node-0. Need to retry" uri="{uri}" inconsistent_count={len(inconsistent_point_ids)} inconsistent_points="{inconsistent_point_ids}"'
+                )
 
             point_ids_for_node[node_idx] = inconsistent_point_ids
             if node_idx != 0: point_ids_for_node[0] = inconsistent_point_ids
@@ -223,9 +233,18 @@ while True:
     else:
         if consistency_attempts_remaining == 0:
             try:
-                print(
-                    f'level=ERROR msg="All points Data consistency check failed" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} inconsistent_count={len(inconsistent_point_ids)} inconsistent_by_payload="{inconsistent_ids_by_payload}" inconsistent_points="{inconsistent_point_ids}"'
-                )
+                if len(inconsistent_ids_by_payload) > MAX_NUM_POINTS_TO_LOG:
+                    print(
+                        f'level=WARN msg="The number of inconsistent points is too high, only log first {MAX_NUM_POINTS_TO_LOG}"'
+                    )
+                    print(
+                        f'level=ERROR msg="All points Data consistency check failed" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} original_inconsistent_count={len(inconsistent_point_ids)} inconsistent_points="{inconsistent_point_ids[:MAX_NUM_POINTS_TO_LOG]}"'
+                    )
+                else:
+                    print(
+                        f'level=ERROR msg="All points Data consistency check failed" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} inconsistent_count={len(inconsistent_point_ids)} inconsistent_points="{inconsistent_point_ids}"'
+                    )
+
                 first_node_inconsistent_points = []
                 last_fetched_node_inconsistent_points = []
 
@@ -233,7 +252,11 @@ while True:
                     first_node_inconsistent_points.append(first_node_points_map[point_id])
                     last_fetched_node_inconsistent_points.append(fetched_node_points_map[point_id])
 
-                print(f'level=ERROR msg="Dumping inconsistent points compared to node-0" node="node-{node_idx}" expected_points="{first_node_inconsistent_points}" fetched_points={last_fetched_node_inconsistent_points}')
+                if len(inconsistent_ids_by_payload) > MAX_NUM_POINTS_TO_LOG:
+                    print(f'level=ERROR msg="Dumping first {MAX_NUM_POINTS_TO_LOG} of {len(inconsistent_ids_by_payload)} inconsistent points compared to node-0" node="node-{node_idx}" expected_points="{first_node_inconsistent_points[:MAX_NUM_POINTS_TO_LOG]}" fetched_points={last_fetched_node_inconsistent_points[:MAX_NUM_POINTS_TO_LOG]}')
+                else:
+                    print(
+                        f'level=ERROR msg="Dumping inconsistent points compared to node-0" node="node-{node_idx}" expected_points="{first_node_inconsistent_points}" fetched_points={last_fetched_node_inconsistent_points}')
 
             except Exception as e:
                 print(f'level=ERROR msg="Failed while printing inconsistent points" err={e}')
