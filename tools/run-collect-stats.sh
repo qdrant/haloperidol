@@ -32,7 +32,7 @@ elif [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
 fi
 
 QDRANT_HOSTS=()
-for IDX in {0..3}; do
+for IDX in {0..4}; do
     QDRANT_HOSTS+=("node-${IDX}-${QDRANT_CLUSTER_URL}")
 done
 

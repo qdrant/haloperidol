@@ -110,7 +110,7 @@ for uri in "${QDRANT_URIS[@]}"; do
     root_api_response=$(curl -s --url "$uri/" --header "api-key: $QDRANT_API_KEY")
 
     if ! (is_valid_json "$root_api_response"); then
-        # Node is down
+        echo "level=WARN msg=\"Node is down\" uri=\"$uri\" uri_response=\"$root_api_response\""
         insert_to_chaos_testing_table "$uri" "null" "null" 0 0 "null" "null" "$NOW" "$QC_NAME"
         continue
     fi
