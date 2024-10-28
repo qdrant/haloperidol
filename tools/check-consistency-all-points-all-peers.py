@@ -106,17 +106,20 @@ def check_for_consistency(node_to_points_map, attempt_number, consistent_points)
         f'level=INFO msg="Start checking points, attempt_number={attempt_number}"'
     )
     for point in initial_point_ids:
-        if consistent_points[point]:
-            # if point is already consistent, no need to check again
-            continue
+        # if consistent_points[point]:
+        #     # if point is already consistent, no need to check again
+        #     continue
 
         # get point's payload from all nodes
         point_attempt_versions_list = []
         for node_idx, node in node_to_points_map.items():
+            if not node or not node.get(attempt_number):
+                print(f"level=INFO msg='No points for node, skip' node_idx={node_idx} attempt_number={attempt_number}")
+                continue
             try:
-                version = node[attempt_number][point] if node.get(attempt_number) else None
+                version = node[attempt_number][point]
             except KeyError:
-                print(f"level=WARN msg='No point for node' node_idx={node_idx} attempt_number={attempt_number} point={point}")
+                print(f"level=WARN msg='Missing point for node' node_idx={node_idx} attempt_number={attempt_number} point={point}")
                 version = None
             point_attempt_versions_list.append(version)
 
