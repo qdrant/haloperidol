@@ -1,5 +1,7 @@
 #!/bin/python3
 import json
+from concurrent.futures import as_completed, ProcessPoolExecutor
+
 import requests
 import time
 
@@ -33,83 +35,89 @@ QDRANT_CLUSTER_URL = os.getenv("QDRANT_CLUSTER_URL", "")
 CONSISTENCY_ATTEMPTS_TOTAL = 10
 
 
-def get_points_from_all_peers(qdrant_peers, attempt_number, node_points_map):
-    for node_idx, uri in enumerate(qdrant_peers):
-        if node_idx >= len(point_ids_for_node):
-            print(
-                f'level=CRITICAL msg="Unexpected node index found. Breaking loop" node_idx={node_idx}'
-            )
-            break
+def get_points_ids_from_peer(uri, point_ids):
+    if len(point_ids) == 0:
+        print(
+            f'level=INFO msg="Skipping because no check required for node" node={node_idx}'
+        )
+        return None
 
-        point_ids = point_ids_for_node[node_idx]
+    try:
+        response = requests.post(
+            f"{uri}/collections/benchmark/points",
+            headers={"api-key": QDRANT_API_KEY, "content-type": "application/json"},
+            json={"ids": point_ids, "with_vector": False, "with_payload": True},
+            timeout=10,
+        )
+    except requests.exceptions.Timeout:
+        print(
+            f'level=WARN msg="Request timed out after 10s, skipping all points all peers consistency check for node" uri="{uri}" api="/collections/benchmark/points"'
+        )
+        return None
+
+    if response.status_code != 200:
+        error_msg = response.text.strip()
+        if error_msg in ("404 page not found", "Service Unavailable"):
+            print(
+                f'level=WARN msg="Node unreachable, skipping all points all peers consistency check" uri="{uri}" status_code={response.status_code} err="{error_msg}"'
+            )
+            return None
+        else:
+            # Some unknown error:
+            print(
+                f'level=ERROR msg="Failed to fetch points" uri="{uri}" status_code={response.status_code} err="{error_msg}"'
+            )
+            return None
+
+    return {item["id"]: item["payload"] for item in response.json()["result"]}
+
+
+def get_points_from_all_peers_parallel(qdrant_peers, attempt_number, node_points_map):
+    for node_idx, uri in enumerate(qdrant_peers):
         if not node_points_map.get(node_idx):
             node_points_map[node_idx] = {}
 
-        if len(point_ids) == 0:
-            print(
-                f'level=INFO msg="Skipping because no check required for node" node={node_idx}'
-            )
-            node_points_map[node_idx][attempt_number] = None
-            continue
+    with ProcessPoolExecutor() as executor:
+        future_to_uri = {executor.submit(get_points_ids_from_peer, uri, point_ids_for_node[node_idx]): (node_idx, uri) for node_idx, uri in enumerate(qdrant_peers)}
+        for future in as_completed(future_to_uri):
+            node_idx, uri = future_to_uri[future]
+            fetched_points = future.result()
 
-        try:
-            response = requests.post(
-                f"{uri}/collections/benchmark/points",
-                headers={"api-key": QDRANT_API_KEY, "content-type": "application/json"},
-                json={"ids": point_ids, "with_vector": False, "with_payload": True},
-                timeout=10,
-            )
-        except requests.exceptions.Timeout:
-            print(
-                f'level=WARN msg="Request timed out after 10s, skipping all points all peers consistency check for node" uri="{uri}" api="/collections/benchmark/points"'
-            )
-            node_points_map[node_idx][attempt_number] = None
-            continue
-
-        if response.status_code != 200:
-            error_msg = response.text.strip()
-            if error_msg in ("404 page not found", "Service Unavailable"):
-                print(
-                    f'level=WARN msg="Node unreachable, skipping all points all peers consistency check" uri="{uri}" status_code={response.status_code} err="{error_msg}"'
-                )
-                node_points_map[node_idx][attempt_number] = None
-                continue
+            if fetched_points:
+                fetched_points_count = len(fetched_points)
+                node_points_map[node_idx][attempt_number] = fetched_points
             else:
-                # Some unknown error:
-                print(
-                    f'level=ERROR msg="Failed to fetch points" uri="{uri}" status_code={response.status_code} err="{error_msg}"'
-                )
-                node_points_map[node_idx][attempt_number] = None
-                break
+                fetched_points_count = 0
+                fetched_points = {}
 
-        fetched_points = {item["id"]: item["payload"] for item in response.json()["result"]}
-        fetched_points_count = len(fetched_points)
-        node_points_map[node_idx][attempt_number] = fetched_points
-
-        print(
-            f'level=INFO msg="Fetched points" num_points={fetched_points_count} uri="{uri}"'
-        )
-
-        with open(
-                f"{POINTS_DIR}/node-{node_idx}-attempt-{attempt_number}.json", "w"
-        ) as f:
-            json.dump(fetched_points, f)
+            print(
+                f'level=INFO msg="Fetched points" num_points={fetched_points_count} uri="{uri}"'
+            )
+            with open(
+                    f"{POINTS_DIR}/node-{node_idx}-attempt-{attempt_number}.json", "w"
+            ) as f:
+                json.dump(fetched_points, f)
 
     return node_points_map
 
 
-def check_for_consistency(node_to_points_map, attempt_number, initial_point_ids, consistent_points):
+def check_for_consistency(node_to_points_map, attempt_number, consistent_points):
     print(
         f'level=INFO msg="Start checking points, attempt_number={attempt_number}"'
     )
     for point in initial_point_ids:
         if consistent_points[point]:
+            # if point is already consistent, no need to check again
             continue
 
         # get point's payload from all nodes
         point_attempt_versions_list = []
         for node_idx, node in node_to_points_map.items():
-            version = node[attempt_number][point] if node.get(attempt_number) else None
+            try:
+                version = node[attempt_number][point] if node.get(attempt_number) else None
+            except KeyError:
+                print(f"level=WARN msg='No point for node' node_idx={node_idx} attempt_number={attempt_number} point={point}")
+                version = None
             point_attempt_versions_list.append(version)
 
         first_obj = point_attempt_versions_list[0]
@@ -126,7 +134,10 @@ def check_for_consistency(node_to_points_map, attempt_number, initial_point_ids,
             for attempt in range(attempt_number + 1):
                 if node.get(attempt):
                     payload = node.get(attempt).get(point, None)
-                    point_history.add(tuple(sorted(payload.items())))
+                    if payload:
+                        point_history.add(tuple(sorted(payload.items())))
+                    else:
+                        point_history.add(())
 
             point_history_nodes.append(point_history)
 
@@ -183,11 +194,13 @@ while True:
         f"https://node-{idx}-{QDRANT_CLUSTER_URL}:6333" for idx in range(num_peers)
     ]
 
-    node_to_points_map = get_points_from_all_peers(qdrant_peers, attempt_number, node_to_points_map)
+    # node_to_points_map = get_points_from_all_peers(qdrant_peers, attempt_number, node_to_points_map)
+    node_to_points_map = get_points_from_all_peers_parallel(qdrant_peers, attempt_number, node_to_points_map)
+    # track consistency of each point
     for point in initial_point_ids:
         consistent_points[point] = False
 
-    is_data_consistent = check_for_consistency(node_to_points_map, attempt_number, initial_point_ids, consistent_points)
+    is_data_consistent = check_for_consistency(node_to_points_map, attempt_number, consistent_points)
 
     consistency_attempts_remaining -= 1
 
@@ -201,20 +214,22 @@ while True:
 
         if consistency_attempts_remaining == 0:
             print(
-                f'level=ERROR msg="All points all peers data consistency check failed" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} inconsistent_count={len(inconsistent_point_ids)} inconsistent_points="{inconsistent_point_ids}"'
+                f'level=ERROR msg="All points all peers data consistency check failed" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} inconsistent_count={len(inconsistent_point_ids)} inconsistent_points="{inconsistent_point_ids[:20]}"'
             )
 
             last_fetched_node_inconsistent_points = []
             for point_id in inconsistent_point_ids:
-                point_data = {point_id: node_to_points_map[0][attempt_number][point_id]}
+                point_data = {point_id : {}}
+                for node_idx, node_data in node_to_points_map.items():
+                    point_data[point_id][f"node-{node_idx}"] = node_data[attempt_number][point_id] if node_data.get(attempt_number) else None
                 last_fetched_node_inconsistent_points.append(point_data)
 
             print(
-                    f'level=ERROR msg="Dumping inconsistent points" fetched_points={last_fetched_node_inconsistent_points}')
+                    f'level=ERROR msg="Dumping inconsistent points (max 5)" last_fetched_points={last_fetched_node_inconsistent_points[:5]}')
             break
         else:
             print(
-                f'level=WARN msg="Nodes might be inconsistent. Will retry" inconsistent_count={len(inconsistent_point_ids)} inconsistent_points="{inconsistent_point_ids}"'
+                f'level=WARN msg="Nodes might be inconsistent. Will retry" inconsistent_count={len(inconsistent_point_ids)} inconsistent_points="{inconsistent_point_ids[:20]}"'
             )
             print(
                 f'level=WARN msg="Retrying all points all peers data consistency check" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} remaining_attempts={consistency_attempts_remaining}'
