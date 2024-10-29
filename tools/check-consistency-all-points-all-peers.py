@@ -106,9 +106,9 @@ def check_for_consistency(node_to_points_map, attempt_number, consistent_points)
         f'level=INFO msg="Start checking points, attempt_number={attempt_number}"'
     )
     for point in initial_point_ids:
-        # if consistent_points[point]:
-        #     # if point is already consistent, no need to check again
-        #     continue
+        if consistent_points[point]:
+            # if point is already consistent, no need to check again
+            continue
 
         # get point's payload from all nodes
         point_attempt_versions_list = []
@@ -200,8 +200,10 @@ while True:
     # node_to_points_map = get_points_from_all_peers(qdrant_peers, attempt_number, node_to_points_map)
     node_to_points_map = get_points_from_all_peers_parallel(qdrant_peers, attempt_number, node_to_points_map)
     # track consistency of each point
-    for point in initial_point_ids:
-        consistent_points[point] = False
+    if attempt_number == 0:
+        # initialize all points on the 1st attempt
+        for point in initial_point_ids:
+            consistent_points[point] = False
 
     is_data_consistent = check_for_consistency(node_to_points_map, attempt_number, consistent_points)
 
@@ -235,8 +237,11 @@ while True:
                 f'level=WARN msg="Nodes might be inconsistent. Will retry" inconsistent_count={len(inconsistent_point_ids)} inconsistent_points="{inconsistent_point_ids[:20]}"'
             )
             print(
-                f'level=WARN msg="Retrying all points all peers data consistency check" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} remaining_attempts={consistency_attempts_remaining}'
+                f'level=WARN msg="Retrying all points all peers data consistency check, inconsistent points only" inconsistent_count={len(inconsistent_point_ids)} attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} remaining_attempts={consistency_attempts_remaining}'
             )
+            point_ids_for_node = [
+                inconsistent_point_ids for _ in range(4)
+            ]
             # Node might be unavailable which caused request to fail. Give some time to heal
             time.sleep(5)
             continue
