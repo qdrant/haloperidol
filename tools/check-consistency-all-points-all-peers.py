@@ -78,7 +78,7 @@ def get_points_from_all_peers_parallel(qdrant_peers, attempt_number, node_points
             node_points_map[node_idx] = {}
 
     with ProcessPoolExecutor() as executor:
-        future_to_uri = {executor.submit(get_points_ids_from_peer, uri, point_ids_for_node[node_idx]): (node_idx, uri) for node_idx, uri in enumerate(qdrant_peers)}
+        future_to_uri = {executor.submit(get_points_ids_from_peer, uri, point_ids_for_node): (node_idx, uri) for node_idx, uri in enumerate(qdrant_peers)}
         for future in as_completed(future_to_uri):
             node_idx, uri = future_to_uri[future]
             fetched_points = future.result()
@@ -114,7 +114,7 @@ def check_for_consistency(node_to_points_map, attempt_number, consistent_points)
         point_attempt_versions_list = []
         for node_idx, node in node_to_points_map.items():
             if not node or not node.get(attempt_number):
-                print(f"level=INFO msg='No points for node, skip' node_idx={node_idx} attempt_number={attempt_number}")
+                # print(f"level=INFO msg='No points for node, skip' node_idx={node_idx} attempt_number={attempt_number}")
                 continue
             try:
                 version = node[attempt_number][point]
@@ -154,9 +154,7 @@ def check_for_consistency(node_to_points_map, attempt_number, consistent_points)
 
 num_points_to_check = 200000
 initial_point_ids = list(range(num_points_to_check))
-point_ids_for_node = [
-    initial_point_ids for _ in range(4)
-]  # point ids to check for node-0 to node-3
+point_ids_for_node = list(range(num_points_to_check))
 is_data_consistent = False
 consistency_attempts_remaining = CONSISTENCY_ATTEMPTS_TOTAL
 node_to_points_map = {}
@@ -239,9 +237,7 @@ while True:
             print(
                 f'level=WARN msg="Retrying all points all peers data consistency check, inconsistent points only" inconsistent_count={len(inconsistent_point_ids)} attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} remaining_attempts={consistency_attempts_remaining}'
             )
-            point_ids_for_node = [
-                inconsistent_point_ids for _ in range(4)
-            ]
+            point_ids_for_node = [ x for x in inconsistent_point_ids]
             # Node might be unavailable which caused request to fail. Give some time to heal
             time.sleep(5)
             continue
