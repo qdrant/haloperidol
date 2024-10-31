@@ -142,7 +142,9 @@ def check_for_consistency(node_to_points_map, attempt_number, consistent_points)
                     else:
                         point_history.add(())
 
-            point_history_nodes.append(point_history)
+            if point_history:
+                # if node has no data for this point, skip it
+                point_history_nodes.append(point_history)
 
         common_objects = set.intersection(*point_history_nodes)
         common_objects = [dict(obj) for obj in common_objects]
