@@ -143,7 +143,7 @@ def check_for_consistency(node_to_points_map, attempt_number, consistent_points)
                         point_history.add(())
 
             if point_history:
-                # if node has no data for this point, skip it
+                # if node has no data for this point (was unreachable all this time), skip it
                 point_history_nodes.append(point_history)
 
         common_objects = set.intersection(*point_history_nodes)
