@@ -119,7 +119,7 @@ def check_for_consistency(node_to_points_map, attempt_number, consistent_points)
             try:
                 version = node[attempt_number][point]
             except KeyError:
-                print(f"level=WARN msg='Missing point for node' node_idx={node_idx} attempt_number={attempt_number} point={point}")
+                # print(f"level=WARN msg='Missing point for node' node_idx={node_idx} attempt_number={attempt_number} point={point}")
                 version = None
             point_attempt_versions_list.append(version)
 
