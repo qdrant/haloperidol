@@ -11,7 +11,7 @@ elif [ "$QC_NAME" == "qdrant-chaos-testing-debug" ]; then
     BFB_CONTAINER_NAME="bfb-upload-debug"
 elif [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
     BFB_CONTAINER_NAME="bfb-upload-three"
-    EXTRA_PARAMS="--write-consistency-factor 2"
+    # EXTRA_PARAMS="--write-consistency-factor 2"
 else
     echo "Unexpected QdrantCluster $QC_NAME"
     exit 1
