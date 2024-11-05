@@ -42,7 +42,7 @@ jobs:
           bash -x tools/run-collect-stats.sh
 
   update-collect-stats-debug-cluster:
-    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' }}
+    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' && ! cancelled() }}
     needs: update-collect-stats
     runs-on: ubuntu-latest
     steps:
@@ -66,8 +66,8 @@ jobs:
           export BG_TASK_NAME=${{ inputs.bg_task_name }}
           bash -x tools/run-collect-stats.sh
 
-  update-collect-stats-3-cluster:
-    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' }}
+  update-collect-stats-three-cluster:
+    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' && ! cancelled() }}
     needs: update-collect-stats-debug-cluster
     runs-on: ubuntu-latest
     steps:

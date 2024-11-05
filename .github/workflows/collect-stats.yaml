@@ -39,7 +39,7 @@ jobs:
         run: exit 1
 
   collect-stats-debug-cluster:
-    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' }}
+    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' && ! cancelled() }}
     needs: collect-stats
     runs-on: ubuntu-latest
     steps:
@@ -70,8 +70,8 @@ jobs:
         if: steps.cluster_checks.outputs.failed == 'true'
         run: exit 1
 
-  collect-stats-3-cluster:
-    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' }}
+  collect-stats-three-cluster:
+    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' && ! cancelled() }}
     needs: collect-stats-debug-cluster
     runs-on: ubuntu-latest
     steps:

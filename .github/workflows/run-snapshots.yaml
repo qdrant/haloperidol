@@ -31,7 +31,7 @@ jobs:
         run: exit 1
 
   run-snapshots-debug-cluster:
-    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'disable-snapshots' }}
+    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'disable-snapshots' && ! cancelled() }}
     needs: run-snapshots
     runs-on: ubuntu-latest
     steps:
@@ -56,7 +56,7 @@ jobs:
         run: exit 1
 
   run-snapshots-3-cluster:
-    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'disable-snapshots' }}
+    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'disable-snapshots' && ! cancelled() }}
     needs: run-snapshots-debug-cluster
     runs-on: ubuntu-latest
     steps:
