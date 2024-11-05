@@ -28,7 +28,7 @@ jobs:
           bash -x tools/run-bfb-upload.sh
 
   update-bfb-upload-debug-cluster:
-    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' }}
+    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' && ! cancelled() }}
     needs: update-bfb-upload
     runs-on: ubuntu-latest
     steps:
@@ -49,7 +49,7 @@ jobs:
           bash -x tools/run-bfb-upload.sh
 
   update-bfb-upload-3-cluster:
-    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' }}
+    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' && ! cancelled() }}
     needs: update-bfb-upload-debug-cluster
     runs-on: ubuntu-latest
     steps:
