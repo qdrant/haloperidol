@@ -211,7 +211,7 @@ while True:
 
     if is_data_consistent:
         print(
-            f'level=INFO msg="All points all peers data consistency check succeeded" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining}'
+            f'level=INFO msg="All points all peers data consistency check succeeded" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} inconsistent_count=0'
         )
         break
     else:
