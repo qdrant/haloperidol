@@ -48,7 +48,7 @@ jobs:
           export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"
           bash -x tools/run-bfb-search.sh
 
-  update-bfb-search-3-cluster:
+  update-bfb-search-three-cluster:
     if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' && ! cancelled() }}
     needs: update-bfb-search-debug-cluster
     runs-on: ubuntu-latest
