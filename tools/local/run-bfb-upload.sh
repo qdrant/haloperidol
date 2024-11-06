@@ -25,11 +25,6 @@ QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 QDRANT_URIS=( ${QDRANT_HOSTS[@]/#/https://} )
 # shellcheck disable=SC2206
 QDRANT_URIS=( ${QDRANT_URIS[@]/%/:6334} )
-if [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
-  # shellcheck disable=SC2206
-  QDRANT_URIS=( "https://node-0-${QDRANT_HOSTS[0]}:6334" "https://node-1-${QDRANT_HOSTS[0]}:6334" )
-fi
-
 
 # shellcheck disable=SC2124
 BFB_PARAMETERS=" \
