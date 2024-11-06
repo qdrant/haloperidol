@@ -23,7 +23,12 @@ declare QDRANT_HOSTS=()
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
 QC_NAME=${QC_NAME:-""}
-QDRANT_HOSTS+=("${QDRANT_CLUSTER_URL}")
+if [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
+  QDRANT_HOSTS=( "https://node-0-${QDRANT_CLUSTER_URL}:6334" "https://node-1-${QDRANT_CLUSTER_URL}:6334" )
+else
+  QDRANT_HOSTS+=("${QDRANT_CLUSTER_URL}")
+fi
+
 
 # shellcheck disable=SC2124
 ENV_CONTEXT="${QDRANT_HOSTS[@]@A} ${QDRANT_API_KEY@A} ${QC_NAME@A}" \
