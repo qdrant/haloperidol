@@ -54,8 +54,8 @@ BFB_PARAMETERS=" \
 if [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
   # shellcheck disable=SC2124
   BFB_PARAMETERS=" \
-      --uri https://node-0-${QDRANT_CLUSTER_URL}:6334 \
-      --uri https://node-1-${QDRANT_CLUSTER_URL}:6334 \
+      --uri https://node-0-${QDRANT_HOSTS[0]}:6334 \
+      --uri https://node-1-${QDRANT_HOSTS[0]}:6334 \
       --replication-factor 2 \
       --shards 3 \
       --keywords 10 \
