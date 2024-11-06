@@ -25,6 +25,11 @@ QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 QDRANT_URIS=( ${QDRANT_HOSTS[@]/#/https://} )
 # shellcheck disable=SC2206
 QDRANT_URIS=( ${QDRANT_URIS[@]/%/:6334} )
+if [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
+  # shellcheck disable=SC2206
+  QDRANT_URIS=( "https://node-0-${QDRANT_HOSTS[0]}:6334" "https://node-1-${QDRANT_HOSTS[0]}:6334" )
+fi
+
 
 # shellcheck disable=SC2124
 BFB_PARAMETERS=" \
@@ -50,34 +55,6 @@ BFB_PARAMETERS=" \
     --retry-interval 1 \
     $EXTRA_PARAMS
 "
-
-if [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
-  # shellcheck disable=SC2124
-  BFB_PARAMETERS=" \
-      --uri https://node-0-${QDRANT_HOSTS[0]}:6334 \
-      --uri https://node-1-${QDRANT_HOSTS[0]}:6334 \
-      --replication-factor 2 \
-      --shards 3 \
-      --keywords 10 \
-      --timestamp-payload \
-      --dim 768 \
-      -n 1000000000 \
-      --batch-size 100 \
-      --threads 1 \
-      --parallel 1 \
-      --wait-on-upsert \
-      --create-if-missing \
-      --quantization scalar \
-      --timing-threshold 1 \
-      --on-disk-vectors true \
-      --max-id 200000 \
-      --delay 1000 \
-      --timeout 30 \
-      --retry 4 \
-      --retry-interval 1 \
-      $EXTRA_PARAMS
-  "
-fi
 
 BFB_ENV_VARS="RUST_BACKTRACE=full RUST_LOG=debug,h2=info,tower=info,h2::proto=debug"
 
