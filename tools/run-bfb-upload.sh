@@ -23,7 +23,7 @@ declare QDRANT_HOSTS=()
 QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
 QC_NAME=${QC_NAME:-""}
-if [ "$QC_NAME" == "experiment" ]; then
+if [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
   QDRANT_HOSTS=( "node-0-${QDRANT_CLUSTER_URL}" "node-1-${QDRANT_CLUSTER_URL}" )
 else
   QDRANT_HOSTS+=("${QDRANT_CLUSTER_URL}")
