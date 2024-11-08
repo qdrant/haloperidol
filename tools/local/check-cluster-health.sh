@@ -35,7 +35,7 @@ search_operational=$([ $exit_code -eq 0 ] && echo true || echo false)
 is_data_consistent=true
 pids=()
 
-if [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
+if [ "$QC_NAME" != "qdrant-chaos-testing" ]; then
   tools/check-consistency-all-points-all-peers.py &
   pids+=($!)
 else
