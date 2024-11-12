@@ -53,15 +53,15 @@ exit_code=$?
 search_operational=$([ $exit_code -eq 0 ] && echo true || echo false)
 
 echo "Checking data consistency"
-if [ "$QC_NAME" != "qdrant-chaos-testing" ]; then
-  python3 ./tools/check-consistency-all-points-all-peers.py
-  exit_code=$?
-  is_data_consistent=$([ $exit_code -eq 0 ] && echo true || echo false)
-else
-  python3 ./tools/check-consistency.py
-  exit_code=$?
-  is_data_consistent=$([ $exit_code -eq 0 ] && echo true || echo false)
-fi
+python3 ./tools/check-consistency-all-points-all-peers.py
+exit_code=$?
+is_data_consistent=$([ $exit_code -eq 0 ] && echo true || echo false)
+
+# old consistency check
+#python3 ./tools/check-consistency.py
+#exit_code=$?
+#is_data_consistent=$([ $exit_code -eq 0 ] && echo true || echo false)
+
 
 echo "upload_operational: $upload_operational, search_operational: $search_operational, is_data_consistent: $is_data_consistent, measure_timestamp: $NOW, cluster_name: $QC_NAME"
 
