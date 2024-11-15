@@ -3,6 +3,10 @@ name: Collect cluster stats
 on:
   repository_dispatch:
   workflow_dispatch:
+    inputs:
+      qdrant_python_client_version:
+          description: "Qdrant python client version"
+          default: 1.12.1
   schedule:
     # Run every 15 minutes
     - cron: "*/15 * * * *"
@@ -27,6 +31,7 @@ jobs:
           export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"
           export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
+          export QDRANT_PYTHON_CLIENT_VERSION=${{ inputs.qdrant_python_client_version }}
           bash -x tools/check-cluster-health.sh
           bash -x tools/collect-node-metrics.sh
       - uses: actions/upload-artifact@v4
@@ -59,6 +64,7 @@ jobs:
           export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"          
           export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
+          export QDRANT_PYTHON_CLIENT_VERSION=${{ inputs.qdrant_python_client_version }}
           bash -x tools/check-cluster-health.sh
           bash -x tools/collect-node-metrics.sh
       - uses: actions/upload-artifact@v4
@@ -91,6 +97,7 @@ jobs:
           export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"          
           export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           export POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
+          export QDRANT_PYTHON_CLIENT_VERSION=${{ inputs.qdrant_python_client_version }}
           bash -x tools/check-cluster-health.sh
           bash -x tools/collect-node-metrics.sh
       - uses: actions/upload-artifact@v4

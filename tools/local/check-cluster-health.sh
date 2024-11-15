@@ -35,6 +35,10 @@ search_operational=$([ $exit_code -eq 0 ] && echo true || echo false)
 is_data_consistent=true
 pids=()
 
+echo "Ensure 'qdrant-client' version '${QDRANT_PYTHON_CLIENT_VERSION}' is installed..."
+pip install --quiet "qdrant-client==${QDRANT_PYTHON_CLIENT_VERSION}" || { echo "Failed to install qdrant-client version ${QDRANT_PYTHON_CLIENT_VERSION}. Exiting."; exit 1; }
+
+
 if [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
   tools/check-consistency-improved.py &
   pids+=($!)

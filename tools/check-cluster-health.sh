@@ -52,6 +52,9 @@ RUN_SCRIPT=$RUN_SCRIPT \
 exit_code=$?
 search_operational=$([ $exit_code -eq 0 ] && echo true || echo false)
 
+echo "Ensure 'qdrant-client' version '${QDRANT_PYTHON_CLIENT_VERSION}' is installed..."
+pip install --quiet "qdrant-client==${QDRANT_PYTHON_CLIENT_VERSION}" || { echo "Failed to install qdrant-client version ${QDRANT_PYTHON_CLIENT_VERSION}. Exiting."; exit 1; }
+
 echo "Checking data consistency"
 if [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
   python3 ./tools/check-consistency-improved.py
