@@ -13,6 +13,10 @@ on:
       bg_task_name:
           description: "Unique name for the background task"
           default: collect-stats
+      qdrant_python_client_version:
+          description: "Qdrant python client version"
+          default: 1.12.1
+
   schedule:
     - cron: "20 23 * * *"
 
@@ -39,6 +43,7 @@ jobs:
           export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           export SERVER_NAME=${{ inputs.server_name }}
           export BG_TASK_NAME=${{ inputs.bg_task_name }}
+          export QDRANT_PYTHON_CLIENT_VERSION=${{ inputs.qdrant_python_client_version }}
           bash -x tools/run-collect-stats.sh
 
   update-collect-stats-debug-cluster:
@@ -64,6 +69,7 @@ jobs:
           export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           export SERVER_NAME=${{ inputs.server_name }}
           export BG_TASK_NAME=${{ inputs.bg_task_name }}
+          export QDRANT_PYTHON_CLIENT_VERSION=${{ inputs.qdrant_python_client_version }}
           bash -x tools/run-collect-stats.sh
 
   update-collect-stats-three-cluster:
@@ -89,4 +95,5 @@ jobs:
           export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           export SERVER_NAME=${{ inputs.server_name }}
           export BG_TASK_NAME=${{ inputs.bg_task_name }}
+          export QDRANT_PYTHON_CLIENT_VERSION=${{ inputs.qdrant_python_client_version }}
           bash -x tools/run-collect-stats.sh
