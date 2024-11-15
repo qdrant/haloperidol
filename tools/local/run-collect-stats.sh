@@ -36,6 +36,9 @@ cd haloperidol || exit
 git pull # this can fail if repo is touched
 set +e
 
+echo "Ensure 'qdrant-client' version '${QDRANT_PYTHON_CLIENT_VERSION}' is installed..."
+pip install --quiet "qdrant-client==${QDRANT_PYTHON_CLIENT_VERSION}" || { echo "Failed to install qdrant-client version ${QDRANT_PYTHON_CLIENT_VERSION}. Exiting."; exit 1; }
+
 while true; do
     echo "level=INFO msg=\"Collect stats script triggered\""
 
