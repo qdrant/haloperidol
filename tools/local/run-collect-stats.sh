@@ -10,6 +10,7 @@ log_with_timestamp() {
 }
 
 QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
+QDRANT_PYTHON_CLIENT_VERSION=${QDRANT_PYTHON_CLIENT_VERSION:-"1.12.1"}
 # Redirect stdout (1) and stderr (2) to a log file
 exec > >(log_with_timestamp >> "/var/log/${QC_NAME}-collect-stats-cron.log") 2>&1
 
