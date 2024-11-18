@@ -56,15 +56,9 @@ echo "Ensure 'qdrant-client' version '${QDRANT_PYTHON_CLIENT_VERSION}' is instal
 pip install --quiet "qdrant-client==${QDRANT_PYTHON_CLIENT_VERSION}" || { echo "Failed to install qdrant-client version ${QDRANT_PYTHON_CLIENT_VERSION}. Exiting."; exit 1; }
 
 echo "Checking data consistency"
-if [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
-  python3 ./tools/check-consistency-improved.py
-  exit_code=$?
-  is_data_consistent=$([ $exit_code -eq 0 ] && echo true || echo false)
-else
-  python3 ./tools/check-consistency-all-points-all-peers.py
-  exit_code=$?
-  is_data_consistent=$([ $exit_code -eq 0 ] && echo true || echo false)
-fi
+python3 ./tools/check-consistency-improved.py
+exit_code=$?
+is_data_consistent=$([ $exit_code -eq 0 ] && echo true || echo false)
 
 echo "upload_operational: $upload_operational, search_operational: $search_operational, is_data_consistent: $is_data_consistent, measure_timestamp: $NOW, cluster_name: $QC_NAME"
 
