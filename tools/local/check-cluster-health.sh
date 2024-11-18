@@ -6,6 +6,7 @@ set -x
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
+QDRANT_PYTHON_CLIENT_VERSION=${QDRANT_PYTHON_CLIENT_VERSION:-"1.12.1"}
 
 if [ "$QC_NAME" == "qdrant-chaos-testing" ]; then
     UPLOAD_CONTAINER_NAME="bfb-upload"

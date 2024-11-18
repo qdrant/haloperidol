@@ -17,6 +17,7 @@ NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 RUN_SCRIPT="$ROOT/local/check-docker-exit-code.sh"
 
 QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
+QDRANT_PYTHON_CLIENT_VERSION=${QDRANT_PYTHON_CLIENT_VERSION:-"1.12.1"}
 
 if [ "$QC_NAME" == "qdrant-chaos-testing" ]; then
     CONTAINER_NAME="bfb-upload"
