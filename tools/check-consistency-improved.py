@@ -116,7 +116,8 @@ while retries > 0:
         print(
             f'level=ERROR msg="Failed to retrieve inconsistent points" error="{str(e)}"'
         )
-        exit(1)
+        time.sleep(5)
+        continue
 
     if not inconsistent_points:
         print(
