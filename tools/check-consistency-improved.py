@@ -48,12 +48,12 @@ IGNORED_ERRORS = ["does not have enough active replicas"]
 class IgnoredError(Exception):
     pass
 
-def get_inconsistent_points_ids(point_ids: Set[PointId]) -> Set[PointId]:
+def get_inconsistent_point_ids(point_ids: Set[PointId]) -> Set[PointId]:
     """Returns (bool, set) where bool represents whether it passed successfully"""
     try:
         if len(point_ids) == num_points_to_check:
             # It's faster to use scroll
-            points_ids = initial_point_ids
+            point_ids = initial_point_ids
             points, _nxt = qdrant_client.scroll(
                 COLLECTION_NAME,
                 limit=num_points_to_check,
@@ -70,7 +70,7 @@ def get_inconsistent_points_ids(point_ids: Set[PointId]) -> Set[PointId]:
                 consistency=models.ReadConsistencyType.ALL,
             )
         found_points = set([int(point.id) for point in points])
-        missing_points = points_ids - found_points
+        missing_points = point_ids - found_points
 
         return missing_points
     except Exception as e:
@@ -89,7 +89,7 @@ while True:
     consistency_attempts_remaining -= 1
 
     try:
-        inconsistent_points = get_inconsistent_points_ids(inconsistent_points)
+        inconsistent_points = get_inconsistent_point_ids(inconsistent_points)
     except IgnoredError as e:
         e_str = str(e).replace("\n", " ")
         print(f'level=WARN msg="Failed to retrieve inconsistent points. But ignoring error and passing check" error="{e_str}"')
