@@ -31,7 +31,7 @@ BFB_PARAMETERS=" \
     --dim 768 \
     -n 1000 \
     --sparse-dim 30000 \
-    --sparse-vectors 0.005 \
+    --sparse-vectors 0.05 \
     --threads 1 \
     --parallel 1 \
     --quantization scalar \
