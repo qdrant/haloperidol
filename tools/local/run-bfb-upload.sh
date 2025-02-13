@@ -35,6 +35,8 @@ BFB_PARAMETERS=" \
     --timestamp-payload \
     --dim 768 \
     -n 1000000000 \
+    --sparse-dim 30000 \
+    --sparse-vectors 0.05 \
     --batch-size 100 \
     --threads 1 \
     --parallel 1 \
