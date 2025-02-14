@@ -30,7 +30,7 @@ BFB_PARAMETERS=" \
     --keywords 10 \
     --dim 768 \
     -n 1000 \
-    --sparse-dim 30000 \
+    --sparse-dim 3000 \
     --sparse-vectors 0.05 \
     --threads 1 \
     --parallel 1 \
