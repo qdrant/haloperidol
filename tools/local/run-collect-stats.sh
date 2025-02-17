@@ -1,6 +1,8 @@
 #!/bin/bash
-PS4='ts=$(date "+%Y-%m-%dT%H:%M:%SZ") level=DEBUG line=$LINENO '
-set -x
+# PS4='ts=$(date -u "+%Y-%m-%dT%H:%M:%SZ") level=trace line=$LINENO '; set -x; # too verbose; disabled
+# trap 'echo "ts=$(date -u "+%Y-%m-%dT%H:%M:%SZ") level=trace line=$LINENO cmd=\"$BASH_COMMAND\""' DEBUG # less verbose; but still noisy; disabled
+
+source "tools/local/logging.sh"
 
 log_with_timestamp() {
     while IFS= read -r line; do
@@ -37,8 +39,8 @@ cd haloperidol || exit
 git pull # this can fail if repo is touched
 set +e
 
-echo "Ensure 'qdrant-client' version '${QDRANT_PYTHON_CLIENT_VERSION}' is installed..."
-pip install --quiet "qdrant-client==${QDRANT_PYTHON_CLIENT_VERSION}" || { echo "Failed to install qdrant-client version ${QDRANT_PYTHON_CLIENT_VERSION}. Exiting."; exit 1; }
+log debug "Ensure 'qdrant-client' version '${QDRANT_PYTHON_CLIENT_VERSION}' is installed..."
+pip install --quiet "qdrant-client==${QDRANT_PYTHON_CLIENT_VERSION}" || { log error "Failed to install qdrant-client version ${QDRANT_PYTHON_CLIENT_VERSION}. Exiting."; exit 1; }
 
 while true; do
     echo "level=INFO msg=\"Collect stats script triggered\""

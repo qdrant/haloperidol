@@ -2,6 +2,7 @@
 import time
 import os
 import builtins
+from datetime import datetime, timezone
 
 from typing import Set
 from qdrant_client import QdrantClient, models
@@ -10,11 +11,13 @@ pid = os.getpid()
 
 PointId = int
 
-def print(*args, **kwargs):
-    new_args = args + (f"pid={pid}",)
-    builtins.print(*new_args, **kwargs)
+def log(level: str, message: str, **kwargs):
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    log_message = f'ts={ts} level={level} msg="{message}" '
+    log_message += " ".join(f'{k}="{v}"' for k, v in kwargs.items())
+    log_message += f" pid={pid}"
+    builtins.print(log_message)
 
-print('level=INFO msg="Starting data consistency check script"')
 
 QC_NAME = os.getenv("QC_NAME", "qdrant-chaos-testing")
 
@@ -45,8 +48,13 @@ qdrant_client = QdrantClient(
 )
 IGNORED_ERRORS = ["does not have enough active replicas"]
 
+
+log("info", "Starting data consistency check script", cluster_url=QDRANT_CLUSTER_URL)
+
+
 class IgnoredError(Exception):
     pass
+
 
 def get_inconsistent_point_ids(point_ids: Set[PointId]) -> Set[PointId]:
     """Returns (bool, set) where bool represents whether it passed successfully"""
@@ -81,6 +89,7 @@ def get_inconsistent_point_ids(point_ids: Set[PointId]) -> Set[PointId]:
 
         raise e
 
+
 # Assume all points are inconsistent
 inconsistent_points = initial_point_ids
 consistency_attempts_remaining = CONSISTENCY_ATTEMPTS_TOTAL
@@ -92,30 +101,49 @@ while True:
         inconsistent_points = get_inconsistent_point_ids(inconsistent_points)
     except IgnoredError as e:
         e_str = str(e).replace("\n", " ")
-        print(f'level=WARN msg="Failed to retrieve inconsistent points. But ignoring error and passing check" error="{e_str}"')
+        log(
+            "warn",
+            "Failed to retrieve inconsistent points. But ignoring error and passing check",
+            error=e_str,
+        )
         exit(0)
     except Exception as e:
         e_str = str(e).replace("\n", " ")
-        print(f'level=WARN msg="Failed to retrieve inconsistent points" error="{e_str}"')
+        log("warn", "Failed to retrieve inconsistent points", error=e_str)
 
     if len(inconsistent_points) == 0:
-        print(
-            f'level=INFO msg="Data consistency check succeeded" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} inconsistent_count=0 inconsistent_points="[]"'
+        log(
+            "info",
+            "Data consistency check succeeded",
+            attempts=CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining,
+            inconsistent_count=0,
+            inconsistent_points=[],
         )
         exit(0)
     else:
         sample_inconsistent_points = sorted(list(inconsistent_points))[:20]
 
         if consistency_attempts_remaining == 0:
-            print(
-                f'level=ERROR msg="Data consistency check failed" attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} inconsistent_count={len(inconsistent_points)} sample_inconsistent_points="{sample_inconsistent_points}"'
+            log(
+                "error",
+                "Data consistency check failed",
+                attempts=CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining,
+                inconsistent_count=len(inconsistent_points),
+                sample_inconsistent_points=sample_inconsistent_points,
             )
             exit(1)
         else:
-            print(
-                f'level=WARN msg="Nodes might be inconsistent. Will retry" inconsistent_count={len(inconsistent_points)} sample_inconsistent_points="{sample_inconsistent_points}"'
+            log(
+                "warn",
+                "Nodes might be inconsistent. Will retry",
+                inconsistent_count=len(inconsistent_points),
+                sample_inconsistent_points=sample_inconsistent_points,
             )
-            print(
-                f'level=WARN msg="Retrying data consistency check, inconsistent points only" inconsistent_count={len(inconsistent_points)} attempts={CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining} remaining_attempts={consistency_attempts_remaining}'
+            log(
+                "warn",
+                "Retrying data consistency check, inconsistent points only",
+                inconsistent_count=len(inconsistent_points),
+                attempts=CONSISTENCY_ATTEMPTS_TOTAL - consistency_attempts_remaining,
+                remaining_attempts=consistency_attempts_remaining,
             )
             time.sleep(5)

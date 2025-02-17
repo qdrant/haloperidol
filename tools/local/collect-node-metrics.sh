@@ -1,6 +1,8 @@
 #!/bin/bash
-PS4='ts=$(date "+%Y-%m-%dT%H:%M:%SZ") level=DEBUG line=$LINENO ' # Replace + with more meaningful debug trace logs
-set -xuo pipefail
+# PS4='ts=$(date "+%Y-%m-%dT%H:%M:%SZ") level=TRACE line=$LINENO '; set -x; # too verbose; disabled
+# trap 'echo "ts=$(date -u "+%Y-%m-%dT%H:%M:%SZ") level=trace line=$LINENO cmd=\"$BASH_COMMAND\""' DEBUG # less verbose; but still noisy; disabled
+source "tools/local/logging.sh"
+set -uo pipefail
 
 export QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -19,6 +21,9 @@ elif  [ "$QC_NAME" == "qdrant-chaos-testing-three" ]; then
     POSTGRES_CLIENT_CONTAINER_NAME="$POSTGRES_CLIENT_CONTAINER_NAME-three"
 fi
 
+POSTGRES_HOST=${POSTGRES_HOST:-""}
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-""}
+
 # https is important here
 QDRANT_URIS=( "${QDRANT_HOSTS[@]/#/https://}" )
 QDRANT_URIS=( "${QDRANT_URIS[@]/%/:6333}" )
@@ -28,12 +33,11 @@ CHAOS_TESTING_SHARD_VALUES=""
 CHAOS_TESTING_TRANSFER_VALUES=""
 
 function handle_error() {
-    local error_code error_line error_command ts
+    local error_code error_line error_command
     error_code=$?
     error_line=${BASH_LINENO[0]}
     error_command=$BASH_COMMAND
-    ts=$(date +"%Y-%m-%d %H:%M:%S" --utc)
-    echo "ts=$ts level=ERROR line=$error_line cmd=\"$error_command\" exit_code=$error_code"
+    log error "Error occurred" line "$error_line" cmd "$error_command" exit_code "$error_code"
 }
 
 function is_valid_json() {
@@ -103,20 +107,22 @@ function insert_to_chaos_testing_transfer_table {
     CHAOS_TESTING_TRANSFER_VALUES+=" ('$uri', $peer_id, $shard_id, $from_peer, $to_peer, '$method', '$comment', $progress_transfer, $total_to_transfer, '$measure_timestamp', '$cluster_name')"
 }
 
+log info "Collecting node metrics" uris "${QDRANT_URIS[*]}"
 
 for uri in "${QDRANT_URIS[@]}"; do
-    echo "level=INFO msg=\"Checking node\" uri=$uri"
+    log debug "Checking node" uri "$uri"
 
     root_api_response=$(curl -s --url "$uri/" --header "api-key: $QDRANT_API_KEY")
 
     if ! (is_valid_json "$root_api_response"); then
-        echo "level=WARN msg=\"Node is down\" uri=\"$uri\" uri_response=\"$root_api_response\""
+        log warn "Node is down" uri "$uri" root_response "$root_api_response"
         insert_to_chaos_testing_table "$uri" "null" "null" 0 0 "null" "null" "$NOW" "$QC_NAME"
         continue
+    else
+        log info "Node is up" uri "$uri" root_response "$root_api_response"
     fi
 
     version=$(echo "$root_api_response" | jq -r '.version')
-
     commit_id=$(echo "$root_api_response" | jq -r '.commit')
 
     cluster_response=$(curl -s "$uri/cluster" -H "api-key: $QDRANT_API_KEY")
@@ -124,12 +130,15 @@ for uri in "${QDRANT_URIS[@]}"; do
     peer_id=$(echo "$cluster_response" | jq '.result.peer_id')
     peer_count=$(echo "$cluster_response" | jq '.result.peers | length')
     pending_operations=$(echo "$cluster_response" | jq '.result.raft_info.pending_operations')
-    echo "level=INFO msg=\"Checked cluster\" consensus_status=$consensus_status peer_id=$peer_id uri=\"$uri\" cluster_response=\"$cluster_response\""
+    log info "Checked cluster API" consensus_status "$consensus_status" peer_id "$peer_id" uri "$uri" cluster_response "$cluster_response"
+
     if [ "$peer_count" -gt 4 ] && [ "$pending_operations" -eq 0 ]; then
-        echo "level=CRITICAL msg=\"Cluster has too many peers\" consensus_status=$consensus_status peer_count=$peer_count peer_id=$peer_id uri=\"$uri\" cluster_response=\"$cluster_response\""
+        # Main cluster scales till size 5; so not necessary critical
+        log warn "Cluster has too many peers" peer_count "$peer_count" consensus_status "$consensus_status" peer_id "$peer_id" uri "$uri" cluster_response "$cluster_response"
     fi
     if [ "$consensus_status" != "working" ]; then
-        echo "level=CRITICAL msg=\"Consensus is not working\" consensus_status=$consensus_status peer_count=$peer_count peer_id=$peer_id uri=\"$uri\" cluster_response=\"$cluster_response\""
+        # Can happen when downscaling a node
+        log warn "Consensus is not working" peer_count "$peer_count" consensus_status "$consensus_status" peer_id "$peer_id" uri "$uri" cluster_response "$cluster_response"
     fi
 
     num_vectors=$(curl -s --request POST \
@@ -173,13 +182,13 @@ for uri in "${QDRANT_URIS[@]}"; do
         state=$(echo "$shard" | jq -r '.state')
 
         if [ "$shard_id" == "" ]; then
-            echo "level=WARN msg=\"Shard not found\" peer_id=$peer_id uri=\"$uri\" local_shards=\"$local_shards\" "
+            log warn "Shard not found" peer_id "$peer_id" uri "$uri" local_shards "$local_shards"
         else
           insert_to_chaos_testing_shards_table "$uri" "$peer_id" "$shard_id" "$points_count" "$state" "$NOW" "$QC_NAME"
         fi
 
-        if [ "$state" == "Dead" ]; then
-            echo "level=CRITICAL msg=\"Shard is dead\" shard_id=$shard_id peer_id=$peer_id uri=\"$uri\""
+        if [ "$state" != "Active" ]; then
+            log warn "Local shard is not active" shard_id "$shard_id" shard_state "$state" peer_id "$peer_id" uri "$uri"
         fi
     done <<< "$local_shards"
 
@@ -188,8 +197,8 @@ for uri in "${QDRANT_URIS[@]}"; do
       peer_id=$(echo "$shard" | jq -r '.peer_id')
       state=$(echo "$shard" | jq -r '.state')
 
-      if [ "$state" == "Dead" ]; then
-        echo "level=WARN msg=\"Remote Shard is dead\" shard_id=$shard_id peer_id=$peer_id uri=\"$uri\""
+      if [ "$state" != "Active" ]; then
+        log warn "Remote shard is not active" shard_id "$shard_id" shard_state "$state" peer_id "$peer_id" uri "$uri"
       fi
     done <<< "$remote_shards"
 
@@ -225,6 +234,11 @@ for uri in "${QDRANT_URIS[@]}"; do
     done <<< "$shard_transfers"
 done
 
+if [ -z "$POSTGRES_HOST" ] || [ -z "$POSTGRES_PASSWORD" ] ; then
+    log error "Postgres credentials not provided"
+    exit 1
+fi
+
 # Read search results from json file and upload it to postgres
 # Assume table:
 # create table chaos_testing (
@@ -240,7 +254,8 @@ done
 #   cluster_name VARCHAR(255)
 # );
 
-echo "level=INFO msg=\"Storing collect nodes in db\" data=$CHAOS_TESTING_VALUES"
+# echo "level=INFO msg=\"Storing collect nodes in db\" data=$CHAOS_TESTING_VALUES"
+log info "Storing collected node metrics in db" data "$CHAOS_TESTING_VALUES"
 docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME  jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing (url, version, commit, num_vectors, num_snapshots, missing_payload_point_ids, consensus_status, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_VALUES;"
 
 # Assume table:
@@ -258,7 +273,7 @@ docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME  jbergknoff/postgresql-cl
 if [ -n "$CHAOS_TESTING_SHARD_VALUES" ]; then
     docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_shards (url, peer_id, shard_id, points_count, state, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_SHARD_VALUES;"
 else
-    echo "level=ERROR msg=\"No shards found\""
+    log debug "No shards found" # Can happen when a node during scaling
 fi
 
 # Assume table:
@@ -280,5 +295,5 @@ fi
 if [ -n "$CHAOS_TESTING_TRANSFER_VALUES" ]; then
     docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_transfers (url, peer_id, shard_id, from_peer, to_peer, method, comment, progress_transfer, total_to_transfer, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_TRANSFER_VALUES;"
 else
-    echo "level=INFO msg=\"No transfers found\""
+    log debug "No transfers found"
 fi
