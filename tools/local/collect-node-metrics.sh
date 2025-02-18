@@ -33,11 +33,11 @@ CHAOS_TESTING_SHARD_VALUES=""
 CHAOS_TESTING_TRANSFER_VALUES=""
 
 function handle_error() {
-    local error_code error_line error_command
-    error_code=$?
+    local exit_code error_line error_command
+    exit_code=$1
     error_line=${BASH_LINENO[0]}
     error_command=$BASH_COMMAND
-    log error "Error occurred" line "$error_line" cmd "$error_command" exit_code "$error_code"
+    log error "Error occurred" line "$error_line" cmd "$error_command" exit_code "$exit_code"
 }
 
 function is_valid_json() {
@@ -45,7 +45,7 @@ function is_valid_json() {
 }
 
 # Trap ERR signal and call handle_error function
-trap 'handle_error' ERR
+trap 'exit_code=$?; handle_error "$exit_code"' ERR
 
 # function to insert to CHAOS_TESTING_VALUES:
 function insert_to_chaos_testing_table {
@@ -134,11 +134,11 @@ for uri in "${QDRANT_URIS[@]}"; do
 
     if [ "$peer_count" -gt 4 ] && [ "$pending_operations" -eq 0 ]; then
         # Main cluster scales till size 5; so not necessary critical
-        log warn "Cluster has too many peers" peer_count "$peer_count" consensus_status "$consensus_status" peer_id "$peer_id" uri "$uri" cluster_response "$cluster_response"
+        log warn "Cluster has too many peers" peer_count "$peer_count" consensus_status "$consensus_status" peer_id "$peer_id" uri "$uri"
     fi
     if [ "$consensus_status" != "working" ]; then
         # Can happen when downscaling a node
-        log warn "Consensus is not working" peer_count "$peer_count" consensus_status "$consensus_status" peer_id "$peer_id" uri "$uri" cluster_response "$cluster_response"
+        log warn "Consensus is not working" peer_count "$peer_count" consensus_status "$consensus_status" peer_id "$peer_id" uri "$uri"
     fi
 
     num_vectors=$(curl -s --request POST \
@@ -166,13 +166,15 @@ for uri in "${QDRANT_URIS[@]}"; do
         --url "$uri/collections/benchmark/points/scroll" \
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
-        --data '{"filter": {"must": {"is_empty": {"key": "a"}}}, "limit": 1000, "with_payload": false}' | jq -rc '[.result.points[].id]')
+        --data '{"filter": {"must": {"is_empty": {"key": "a"}}}, "limit": 200000, "with_payload": false}' | jq -rc '[.result.points[].id]')
 
     insert_to_chaos_testing_table "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" "$missing_payload_point_ids" "$consensus_status" "$NOW" "$QC_NAME"
 
     peer_id=$(echo "$collection_cluster_response" | jq -r '.peer_id')
     local_shards=$(echo "$collection_cluster_response" | jq -rc '.local_shards[]') # [{"shard_id": 1, "points_count": .., "state": Active}, ...]
     remote_shards=$(echo "$collection_cluster_response" | jq -rc '.remote_shards[]')
+
+    log info "Checked collection topology" peer_id "$peer_id" collection_cluster_response "$collection_cluster_response"
 
     # Note: Using echo "$local_shards" | while read -r shard; ... done creates a subshell which leads to global var
     # not being set.
@@ -271,6 +273,7 @@ docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME  jbergknoff/postgresql-cl
 # );
 
 if [ -n "$CHAOS_TESTING_SHARD_VALUES" ]; then
+    log info "Storing collected shards in db" data "$CHAOS_TESTING_SHARD_VALUES"
     docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_shards (url, peer_id, shard_id, points_count, state, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_SHARD_VALUES;"
 else
     log debug "No shards found" # Can happen when a node during scaling
@@ -293,6 +296,7 @@ fi
 # );
 
 if [ -n "$CHAOS_TESTING_TRANSFER_VALUES" ]; then
+    log info "Storing ongoing transfers in db" data "$CHAOS_TESTING_TRANSFER_VALUES"
     docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_transfers (url, peer_id, shard_id, from_peer, to_peer, method, comment, progress_transfer, total_to_transfer, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_TRANSFER_VALUES;"
 else
     log debug "No transfers found"
