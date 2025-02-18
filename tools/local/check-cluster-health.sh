@@ -64,7 +64,7 @@ log info "Checked chaos-testing components" upload_operational "$upload_operatio
 
 if [ -z "$POSTGRES_HOST" ] || [ -z "$POSTGRES_PASSWORD" ]; then
   log error "Postgres credentials not provided"
-    exit 1
+  exit 1
 fi
 
 # Assume table:

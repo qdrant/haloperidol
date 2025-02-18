@@ -40,8 +40,8 @@ CONSISTENCY_ATTEMPTS_TOTAL = 10
 COLLECTION_NAME = "benchmark"
 QDRANT_REQUEST_TIMEOUT = 30
 
-num_points_to_check = 200000
-initial_point_ids = set(range(num_points_to_check))
+NUM_POINTS_TO_CHECK = 200000
+initial_point_ids = set(range(NUM_POINTS_TO_CHECK))
 
 qdrant_client = QdrantClient(
     url=QDRANT_CLUSTER_URL, api_key=QDRANT_API_KEY, timeout=100
@@ -59,12 +59,12 @@ class IgnoredError(Exception):
 def get_inconsistent_point_ids(point_ids: Set[PointId]) -> Set[PointId]:
     """Returns (bool, set) where bool represents whether it passed successfully"""
     try:
-        if len(point_ids) == num_points_to_check:
+        if len(point_ids) == NUM_POINTS_TO_CHECK:
             # It's faster to use scroll
             point_ids = initial_point_ids
             points, _nxt = qdrant_client.scroll(
                 COLLECTION_NAME,
-                limit=num_points_to_check,
+                limit=NUM_POINTS_TO_CHECK,
                 with_payload=["timestamp"],
                 with_vectors=False,
                 consistency=models.ReadConsistencyType.ALL,

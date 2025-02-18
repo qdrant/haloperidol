@@ -17,16 +17,15 @@ QDRANT_PYTHON_CLIENT_VERSION=${QDRANT_PYTHON_CLIENT_VERSION:-"1.12.1"}
 exec > >(log_with_timestamp >> "/var/log/${QC_NAME}-collect-stats-cron.log") 2>&1
 
 function handle_error() {
-    local error_code error_line error_command ts
-    error_code=$?
+    local exit_code error_line error_command
+    exit_code=$1
     error_line=${BASH_LINENO[0]}
     error_command=$BASH_COMMAND
-    ts=$(date +"%Y-%m-%d %H:%M:%S" --utc)
-    echo "ts=$ts level=ERROR line=$error_line cmd=\"$error_command\" exit_code=$error_code"
+    log error "Error occurred" line "$error_line" cmd "$error_command" exit_code "$exit_code"
 }
 
 # Trap ERR signal and call handle_error function
-trap 'handle_error' ERR
+trap 'exit_code=$?; handle_error "$exit_code"' ERR
 
 # Fail on error:
 set -e
@@ -43,7 +42,7 @@ log debug "Ensure 'qdrant-client' version '${QDRANT_PYTHON_CLIENT_VERSION}' is i
 pip install --quiet "qdrant-client==${QDRANT_PYTHON_CLIENT_VERSION}" || { log error "Failed to install qdrant-client version ${QDRANT_PYTHON_CLIENT_VERSION}. Exiting."; exit 1; }
 
 while true; do
-    echo "level=INFO msg=\"Collect stats script triggered\""
+    log info "Collect stats script triggered"
 
     QDRANT_HOSTS_STR=$(IFS=, ; echo "${QDRANT_HOSTS[*]}")
     export QDRANT_HOSTS_STR
@@ -52,6 +51,6 @@ while true; do
     # python3 tools/check-empty-payload.py
     tools/local/collect-node-metrics.sh
 
-    echo "level=INFO msg=\"Sleeping for 1m\""
+    log info "Sleeping for 1m"
     sleep 60 # 1m
 done
