@@ -2,7 +2,18 @@
 # PS4='ts=$(date -u "+%Y-%m-%dT%H:%M:%SZ") level=trace line=$LINENO '; set -x; # too verbose; disabled
 # trap 'echo "ts=$(date -u "+%Y-%m-%dT%H:%M:%SZ") level=trace line=$LINENO cmd=\"$BASH_COMMAND\""' DEBUG # less verbose; but still noisy; disabled
 
-source "tools/local/logging.sh"
+# Fail on error:
+set -e
+# Clone repo if not exists:
+if [ ! -d "haloperidol" ]; then
+    git clone https://github.com/qdrant/haloperidol.git
+fi
+
+cd haloperidol || exit
+git pull # this can fail if repo is touched
+set +e
+
+source "tools/local/logging.sh" # Can be imported only after we are in haloperidol dir
 
 log_with_timestamp() {
     while IFS= read -r line; do
@@ -13,8 +24,12 @@ log_with_timestamp() {
 
 QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
 QDRANT_PYTHON_CLIENT_VERSION=${QDRANT_PYTHON_CLIENT_VERSION:-"1.12.1"}
+
+LOGGING_DIR="/var/log"
+LOGGING_FILE="${QC_NAME}-collect-stats-cron.log"
+
 # Redirect stdout (1) and stderr (2) to a log file
-exec > >(log_with_timestamp >> "/var/log/${QC_NAME}-collect-stats-cron.log") 2>&1
+exec > >(log_with_timestamp >> "${LOGGING_DIR}/${LOGGING_FILE}") 2>&1
 
 function handle_error() {
     local exit_code error_line error_command
@@ -27,16 +42,6 @@ function handle_error() {
 # Trap ERR signal and call handle_error function
 trap 'exit_code=$?; handle_error "$exit_code"' ERR
 
-# Fail on error:
-set -e
-# Clone repo if not exists:
-if [ ! -d "haloperidol" ]; then
-    git clone https://github.com/qdrant/haloperidol.git
-fi
-
-cd haloperidol || exit
-git pull # this can fail if repo is touched
-set +e
 
 log debug "Ensure 'qdrant-client' version '${QDRANT_PYTHON_CLIENT_VERSION}' is installed..."
 pip install --quiet "qdrant-client==${QDRANT_PYTHON_CLIENT_VERSION}" || { log error "Failed to install qdrant-client version ${QDRANT_PYTHON_CLIENT_VERSION}. Exiting."; exit 1; }
