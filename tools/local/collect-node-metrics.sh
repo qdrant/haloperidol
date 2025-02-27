@@ -166,7 +166,8 @@ for uri in "${QDRANT_URIS[@]}"; do
         --url "$uri/collections/benchmark/points/scroll" \
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
-        --data '{"filter": {"must": {"is_empty": {"key": "a"}}}, "limit": 200000, "with_payload": false}' | jq -rc '[.result.points[].id]')
+        --data '{"filter": {"must": {"is_empty": {"key": "a"}}}, "limit": 200000, "with_payload": false}' \
+        | jq -rc '[.result.points[].id]' 2>/dev/null || echo '[]') # Must be a valid json for postgres to accept entry or query will fail. We need '[]' as fallback
 
     insert_to_chaos_testing_table "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" "$missing_payload_point_ids" "$consensus_status" "$NOW" "$QC_NAME"
 
