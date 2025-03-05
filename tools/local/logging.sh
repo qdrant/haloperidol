@@ -6,10 +6,9 @@ log() {
   local level=$1
   shift
 
-  # Check if there's input from stdin
   local message=""
-  # Read input from stdin if available
-  if ! [ -t 0 ]; then
+  # Read input from stdin if it's a pipe
+  if [ -p /dev/stdin ]; then
     while IFS= read -r line; do
       message+="$line"$'\n'
     done
