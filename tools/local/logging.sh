@@ -99,3 +99,6 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   # ts=<ts> level=error msg="ls: cannot access '/nonexistent2': No such file or directory" command="ls /nonexistent1 /nonexistent2 /nonexistent3" exit_code=2
   # ts=<ts> level=error msg="ls: cannot access '/nonexistent3': No such file or directory" command="ls /nonexistent1 /nonexistent2 /nonexistent3" exit_code=2
 fi
+
+# To simulate a k8s cronjob pod without ttl:
+# docker run --rm -v "$(realpath kubernetes/scripts/logging.sh):/script.sh" ubuntu bash -c '/script.sh'
