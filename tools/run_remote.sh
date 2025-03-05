@@ -46,7 +46,7 @@ else
 
     if [ -n "$LOG_FILE_NAME" ]; then
         ssh -oStrictHostKeyChecking=no "$SSH_USER@$SERVER_IP" \
-        "screen -dmS $BG_TASK_NAME bash -c 'echo \"$ENV_CONTEXT\" | cat - /tmp/$BG_TASK_NAME.sh | bash -x &> /var/logs/$LOG_FILE_NAME'"
+        "screen -dmS $BG_TASK_NAME bash -c 'echo \"$ENV_CONTEXT\" | cat - /tmp/$BG_TASK_NAME.sh | bash -x &> /var/log/$LOG_FILE_NAME'"
     else
         ssh -oStrictHostKeyChecking=no "$SSH_USER@$SERVER_IP" "screen -dmS $BG_TASK_NAME bash -c 'echo \"$ENV_CONTEXT\" | cat - /tmp/$BG_TASK_NAME.sh | bash -x'"
     fi
