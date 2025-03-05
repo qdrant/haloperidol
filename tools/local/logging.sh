@@ -7,8 +7,9 @@ log() {
   shift
 
   local message=""
-  # Read input from stdin if it's a pipe
-  if [ -p /dev/stdin ]; then
+  # -p /dev/stdin: Read input from stdin if it's a pipe
+  # 0 (stdin) is not a terminal
+  if [ -p /dev/stdin ] && ! [ -t 0 ] ; then
     while IFS= read -r line; do
       message+="$line"$'\n'
     done
