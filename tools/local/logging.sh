@@ -8,8 +8,7 @@ log() {
 
   local message=""
   # -p /dev/stdin: Read input from stdin if it's a pipe
-  # -z "$STY": Not running inside a screen
-  if [ -p /dev/stdin ] && [ -z "$STY" ]; then
+  if [ -p /dev/stdin ]; then
     while IFS= read -r line; do
       message+="$line"$'\n'
     done
