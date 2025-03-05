@@ -1,5 +1,5 @@
 #!/bin/bash
-# PS4='ts=$(date -u "+%Y-%m-%dT%H:%M:%SZ") level=trace line=$LINENO '; set -x; # too verbose; disabled
+PS4='ts=$(date -u "+%Y-%m-%dT%H:%M:%SZ") level=trace line=$LINENO '; set -x; # too verbose; disabled
 # trap 'echo "ts=$(date -u "+%Y-%m-%dT%H:%M:%SZ") level=trace line=$LINENO cmd=\"$BASH_COMMAND\""' DEBUG # less verbose; but still noisy; disabled
 
 # Fail on error:
@@ -15,21 +15,21 @@ set +e
 
 source "tools/local/logging.sh" # Can be imported only after we are in haloperidol dir
 
-log_with_timestamp() {
-    while IFS= read -r line; do
-        # ts=$(date "+%Y-%m-%dT%H:%M:%SZ") # ts=$ts
-        echo "$line"
-    done
-}
+# log_with_timestamp() {
+#     while IFS= read -r line; do
+#         # ts=$(date "+%Y-%m-%dT%H:%M:%SZ") # ts=$ts
+#         echo "$line"
+#     done
+# }
 
 QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
 QDRANT_PYTHON_CLIENT_VERSION=${QDRANT_PYTHON_CLIENT_VERSION:-"1.12.1"}
 
-LOGGING_DIR="/var/log"
-LOGGING_FILE="${QC_NAME}-collect-stats-cron.log"
+# LOGGING_DIR="/var/log"
+# LOGGING_FILE="${QC_NAME}-collect-stats-cron.log"
 
 # Redirect stdout (1) and stderr (2) to a log file
-exec > >(log_with_timestamp >> "${LOGGING_DIR}/${LOGGING_FILE}") 2>&1
+# exec > >(log_with_timestamp >> "${LOGGING_DIR}/${LOGGING_FILE}") 2>&1
 
 function handle_error() {
     local exit_code error_line error_command
