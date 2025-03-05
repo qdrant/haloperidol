@@ -29,7 +29,7 @@ log() {
 
   # Ensure remaining arguments are key-value pairs
   if (( $# % 2 != 0 )); then
-    echo "ts=$ts level=error msg=\"Each key should have a value\""
+    echo "ts=$ts level=error msg=\"Each key should have a value\"" fields="\"$*\""
     return 1
   fi
 
