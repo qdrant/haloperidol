@@ -9,7 +9,7 @@ log() {
   local message=""
   # -p /dev/stdin: Read input from stdin if it's a pipe
   # ! -t /dev/stdin: stdin is not a terminal
-  if [ -p /dev/stdin ] && ! [ -t /dev/stdin ] ; then
+  if [ -p /dev/stdin ] && ! [ -t 0 ]; then
     while IFS= read -r line; do
       message+="$line"$'\n'
     done
