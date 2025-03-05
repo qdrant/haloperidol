@@ -8,8 +8,8 @@ log() {
 
   local message=""
   # -p /dev/stdin: Read input from stdin if it's a pipe
-  # ! -t /dev/stdin: stdin is not a terminal
-  if [ -p /dev/stdin ] && ! [ -t 0 ]; then
+  # -z $STY: Temporary hack. I couldn't figure out how make it take stdin only when piped in non interactive terminal.
+  if [ -p /dev/stdin ]&& [ -z "$STY" ]; then
     while IFS= read -r line; do
       message+="$line"$'\n'
     done
