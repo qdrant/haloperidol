@@ -1,9 +1,25 @@
 #!/bin/bash
+# set -x
 
 # logfmt style logging for bash
 log() {
-  level=$1
-  message=$2
+  local level=$1
+  shift
+
+  # Check if there's input from stdin
+  local message=""
+  # Read input from stdin if available
+  if ! [ -t 0 ]; then
+    while IFS= read -r line; do
+      message+="$line"$'\n'
+    done
+    message=${message%$'\n'} # Remove trailing newline
+  else
+    message="$1"
+    shift
+  fi
+
+  local ts
   ts=$(date -u "+%Y-%m-%dT%H:%M:%SZ")
 
   # Validate log level
@@ -12,24 +28,49 @@ log() {
     return 1
   fi
 
-  output="ts=$ts level=$level msg=\"$message\""
-
-  shift 2  # Skip log level and message
-
-  # Check if the remaining arguments are even (key-value pairs)
+  # Ensure remaining arguments are key-value pairs
   if (( $# % 2 != 0 )); then
     echo "ts=$ts level=error msg=\"Each key should have a value\""
     return 1
   fi
 
+  # Store key-value pairs for later use
+  local kv_pairs=""
   while [[ $# -gt 0 ]]; do
-    key=$1
-    value=$2
-    output="$output $key=\"$value\""
+    local key=$1
+    local value=$2
+    if [[ "$value" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+      kv_pairs="$kv_pairs $key=$value"
+    elif [[ "$value" =~ ^[a-zA-Z0-9_]+$ ]]; then
+      kv_pairs="$kv_pairs $key=$value"
+    else
+      kv_pairs="$kv_pairs $key=\"$value\""
+    fi
     shift 2
   done
 
-  echo "$output"
+  # Print each line separately with the same log level
+  while IFS= read -r line; do
+    # Reduce multiple spaces to exactly two spaces
+    line=$(echo -n "$line" | sed 's/  \+/  /g')
+    echo "ts=$ts level=$level msg=\"$line\"$kv_pairs"
+  done <<< "$message"
+}
+
+# Run a command and only log output if it fails
+log_error() {
+  local cmd_output
+  local exit_code
+
+  # Capture both stdout and stderr into a variable, while preserving exit code
+  cmd_output=$(eval "$*" 2>&1)
+  exit_code=$?
+
+  if (( exit_code != 0 )); then
+    log error "$cmd_output" command "$*" exit_code "$exit_code"
+  fi
+
+  return $exit_code
 }
 
 # Test cases to run if script if run directly:
@@ -41,4 +82,21 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   log debug "debug message" key1 "value1" key2 "value2"
   log fatal "fatal message"
   log invalid "invalid message"
+
+  echo "passed from stdin" | log info key1 value1 key2 value2
+  kubectl get pods | log info title "hello world"
+
+  log_error 'ls /nonexistent1 /nonexistent2 /nonexistent3'
+
+  # Expected output:
+  # ts=<ts> level=info msg="message" uri="http://example.com" uri_response="404 Not Found" foo="bar baz"
+  # ts=<ts> level=error msg="Each key should have a value"
+  # ts=<ts> level=debug msg="debug message" key1=value1 key2=value2
+  # ts=<ts> level=fatal msg="fatal message"
+  # ts=<ts> level=error msg="Invalid log level: invalid"
+  # ts=<ts> level=info msg="passed from stdin" key1=value1 key2=value2
+  # ts=<ts> level=info msg="NAME  READY  STATUS  RESTARTS  AGE" title="hello world"
+  # ts=<ts> level=error msg="ls: cannot access '/nonexistent1': No such file or directory" command="ls /nonexistent1 /nonexistent2 /nonexistent3" exit_code=2
+  # ts=<ts> level=error msg="ls: cannot access '/nonexistent2': No such file or directory" command="ls /nonexistent1 /nonexistent2 /nonexistent3" exit_code=2
+  # ts=<ts> level=error msg="ls: cannot access '/nonexistent3': No such file or directory" command="ls /nonexistent1 /nonexistent2 /nonexistent3" exit_code=2
 fi
