@@ -1,5 +1,5 @@
 #!/bin/bash
-PS4='ts=$(date -u "+%Y-%m-%dT%H:%M:%SZ") level=trace line=$LINENO '; set -x; # too verbose; disabled
+# PS4='ts=$(date -u "+%Y-%m-%dT%H:%M:%SZ") level=trace line=$LINENO '; set -x; # too verbose; disabled
 # trap 'echo "ts=$(date -u "+%Y-%m-%dT%H:%M:%SZ") level=trace line=$LINENO cmd=\"$BASH_COMMAND\""' DEBUG # less verbose; but still noisy; disabled
 
 # Fail on error:
