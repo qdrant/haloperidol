@@ -73,6 +73,24 @@ log_error() {
   return $exit_code
 }
 
+# Run command and log its output (level depends on exit code)
+log_cmd() {
+  local cmd_output
+  local exit_code
+
+  # Capture both stdout and stderr into a variable, while preserving exit code
+  cmd_output=$(eval "$*" 2>&1)
+  exit_code=$?
+
+  if (( exit_code != 0 )); then
+    log error "$cmd_output" command "$*" exit_code "$exit_code"
+  else
+    log info "$cmd_output" command "$*"
+  fi
+
+  return $exit_code
+}
+
 # Test cases to run if script if run directly:
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   uri="http://example.com"

@@ -52,7 +52,7 @@ pids+=($!)
 for pid in "${pids[@]}"; do
   wait "$pid"
   exit_code=$?
-  log info "Process finished" pid "$pid" exit_code "$exit_code"
+  log debug "Process finished" pid "$pid" exit_code "$exit_code"
   if [ $exit_code -ne 0 ]; then
     is_data_consistent=false
     break
@@ -67,6 +67,11 @@ if [ -z "$POSTGRES_HOST" ] || [ -z "$POSTGRES_PASSWORD" ]; then
   exit 1
 fi
 
+function postgres_query() {
+    sql_query=$1
+    log_cmd "docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client $POSTGRES_URL -c \"$sql_query\""
+}
+
 # Assume table:
 # create table bfb_health (
 # 	id SERIAL PRIMARY key,
@@ -77,4 +82,4 @@ fi
 # );
 
 # TODO: Rename table as cluster_health
-docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO bfb_health (upload_operational, search_operational, is_data_consistent, measure_timestamp, cluster_name) VALUES ($upload_operational, $search_operational, $is_data_consistent, '$NOW', '$QC_NAME');"
+postgres_query "INSERT INTO bfb_health (upload_operational, search_operational, is_data_consistent, measure_timestamp, cluster_name) VALUES ($upload_operational, $search_operational, $is_data_consistent, '$NOW', '$QC_NAME');"
