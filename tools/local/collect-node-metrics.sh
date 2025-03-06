@@ -153,7 +153,7 @@ for uri in "${QDRANT_URIS[@]}"; do
         --url "$uri/collections/benchmark/snapshots" \
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
-        | jq -r '.result | length // 0' || echo '0' || echo '0')
+        | jq -r '.result | length' || echo '0')
 
     collection_cluster_response=$(curl -s --request GET \
         --url "$uri/collections/benchmark/cluster" \
