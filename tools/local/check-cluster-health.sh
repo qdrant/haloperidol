@@ -69,7 +69,7 @@ fi
 
 function postgres_query() {
     sql_query=$1
-    log_cmd "docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client $POSTGRES_URL -c \"$sql_query\""
+    log_cmd "docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client \"$POSTGRES_URL\" -c \"$sql_query\""
 }
 
 # Assume table:

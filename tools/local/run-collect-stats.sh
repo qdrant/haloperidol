@@ -10,7 +10,7 @@ if [ ! -d "haloperidol" ]; then
 fi
 
 cd haloperidol || exit
-git pull # this can fail if repo is touched
+log_cmd "git pull" # this can fail if repo is touched
 set +e
 
 source "tools/local/logging.sh" # Can be imported only after we are in haloperidol dir
@@ -33,7 +33,7 @@ log debug "Ensure 'qdrant-client' version '${QDRANT_PYTHON_CLIENT_VERSION}' is i
 pip install --quiet "qdrant-client==${QDRANT_PYTHON_CLIENT_VERSION}" || { log error "Failed to install qdrant-client version ${QDRANT_PYTHON_CLIENT_VERSION}. Exiting."; exit 1; }
 
 while true; do
-    log info "Collect stats script triggered"
+    log debug "Collect stats script triggered"
 
     QDRANT_HOSTS_STR=$(IFS=, ; echo "${QDRANT_HOSTS[*]}")
     export QDRANT_HOSTS_STR
