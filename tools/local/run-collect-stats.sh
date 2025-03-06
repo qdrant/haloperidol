@@ -4,19 +4,37 @@
 
 # Fail on error:
 set -e
-# Clone repo if not exists:
-if [ ! -d "haloperidol" ]; then
-    git clone https://github.com/qdrant/haloperidol.git
+
+dirname=$(basename "$PWD")
+
+if [ "$dirname" != "haloperidol" ]; then # introduced condition to run locally smoothly
+    # Clone repo if not exists:
+    if [ ! -d "haloperidol" ]; then
+        git clone https://github.com/qdrant/haloperidol.git
+    fi
+
+    cd haloperidol || exit
+    git pull # this can fail if repo is touched
 fi
 
-cd haloperidol || exit
-git pull # this can fail if repo is touched
 set +e
 
 source "tools/local/logging.sh" # Can be imported only after we are in haloperidol dir
 
 QC_NAME=${QC_NAME:-"qdrant-chaos-testing"}
+QDRANT_CLUSTER_URL=${QDRANT_CLUSTER_URL:-""}
+QDRANT_API_KEY=${QDRANT_API_KEY:-""}
 QDRANT_PYTHON_CLIENT_VERSION=${QDRANT_PYTHON_CLIENT_VERSION:-"1.12.1"}
+
+if [ -z "$QDRANT_CLUSTER_URL" ] || [ -z "$QDRANT_API_KEY" ]; then
+    log error "Must pass QDRANT_CLUSTER_URL and QDRANT_API_KEY"
+    exit 0
+fi
+
+QDRANT_HOSTS=()
+for IDX in {0..4}; do
+    QDRANT_HOSTS+=("node-${IDX}-${QDRANT_CLUSTER_URL}")
+done
 
 function handle_error() {
     local exit_code error_line error_command
@@ -28,9 +46,6 @@ function handle_error() {
 
 # Trap ERR signal and call handle_error function
 trap 'exit_code=$?; handle_error "$exit_code"' ERR
-
-log debug "Ensure 'qdrant-client' version '${QDRANT_PYTHON_CLIENT_VERSION}' is installed..."
-pip install --quiet "qdrant-client==${QDRANT_PYTHON_CLIENT_VERSION}" || { log error "Failed to install qdrant-client version ${QDRANT_PYTHON_CLIENT_VERSION}. Exiting."; exit 1; }
 
 while true; do
     log debug "Collect stats script triggered"

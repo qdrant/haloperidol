@@ -119,12 +119,12 @@ for uri in "${QDRANT_URIS[@]}"; do
         log warn "Node is down" uri "$uri" root_response "$root_api_response"
         insert_to_chaos_testing_table "$uri" "null" "null" 0 0 "null" "null" "$NOW" "$QC_NAME"
         continue
-    else
-        log info "Node is up" uri "$uri" root_response "$root_api_response"
     fi
 
     version=$(echo "$root_api_response" | jq -r '.version')
     commit_id=$(echo "$root_api_response" | jq -r '.commit')
+
+    log info "Node is up" uri "$uri" version "$version" commit_id "$commit_id" root_response "$root_api_response"
 
     cluster_response=$(curl -s "$uri/cluster" -H "api-key: $QDRANT_API_KEY")
     consensus_status=$(echo "$cluster_response" | jq -rc '.result.consensus_thread_status.consensus_thread_status')
