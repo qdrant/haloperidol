@@ -59,33 +59,33 @@ log() {
 
 # Run a command and only log output if it fails
 log_error() {
-  local cmd_output
-  local exit_code
+  local cmd_output exit_code e=$-
 
-  # Capture both stdout and stderr into a variable, while preserving exit code
+  [[ $e == *e* ]] && set +e # Disable `set -e`
   cmd_output=$(eval "$*" 2>&1)
   exit_code=$?
+  [[ $e == *e* ]] && set -e # Reset `set -e` to original state
 
   if (( exit_code != 0 )); then
-    log error "$cmd_output" command "$*" exit_code "$exit_code"
+    log error "Executed command" output "$cmd_output" command "$*" exit_code "$exit_code"
   fi
 
   return $exit_code
 }
 
 # Run command and log its output (level depends on exit code)
-log_cmd() {
-  local cmd_output
-  local exit_code
+log_cmd() { # FIXME: Doesn't work with `set -e`. It exits the moment eval returns non 0 exit code
+  local cmd_output exit_code e=$-
 
-  # Capture both stdout and stderr into a variable, while preserving exit code
+  [[ $e == *e* ]] && set +e # Disable `set -e`
   cmd_output=$(eval "$*" 2>&1)
   exit_code=$?
+  [[ $e == *e* ]] && set -e # Reset `set -e` to original state
 
   if (( exit_code != 0 )); then
-    log error "$cmd_output" command "$*" exit_code "$exit_code"
+    log error "Executed command" output "$cmd_output" command "$*" exit_code "$exit_code"
   else
-    log debug "$cmd_output" command "$*"
+    log debug "Executed command" output "$cmd_output" command "$*"
   fi
 
   return $exit_code
