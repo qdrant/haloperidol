@@ -145,7 +145,7 @@ for uri in "${QDRANT_URIS[@]}"; do
         --url "$uri/collections/benchmark/points/count" \
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
-        --data '{"exact": true}' | jq -r '.result.count')
+        --data '{"exact": true}' | jq -r '.result.count' || echo '0')
 
     # jq '... // 0' sets default value to 0
     # otherwise jq returns empty string which leads to invalid SQL
@@ -153,7 +153,7 @@ for uri in "${QDRANT_URIS[@]}"; do
         --url "$uri/collections/benchmark/snapshots" \
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
-        | jq -r '.result | length // 0')
+        | jq -r '.result | length // 0' || echo '0' || echo '0')
 
     collection_cluster_response=$(curl -s --request GET \
         --url "$uri/collections/benchmark/cluster" \
@@ -167,7 +167,7 @@ for uri in "${QDRANT_URIS[@]}"; do
         --header "api-key: $QDRANT_API_KEY" \
         --header 'content-type: application/json' \
         --data '{"filter": {"must": {"is_empty": {"key": "a"}}}, "limit": 200000, "with_payload": false}' \
-        | jq -rc '[.result.points[].id]' 2>/dev/null || echo '[]') # Must be a valid json for postgres to accept entry or query will fail. We need '[]' as fallback
+        | jq -rc '[.result.points[].id]' || echo '[]') # Must be a valid json for postgres to accept entry or query will fail. We need '[]' as fallback
 
     insert_to_chaos_testing_table "$uri" "$version" "$commit_id" "$num_vectors" "$num_snapshots" "$missing_payload_point_ids" "$consensus_status" "$NOW" "$QC_NAME"
 
