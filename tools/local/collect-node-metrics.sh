@@ -245,7 +245,9 @@ fi
 
 function postgres_query() {
     sql_query=$1
+    set -x
     docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client "$POSTGRES_URL" -c "$sql_query"
+    set +x
 }
 
 # Read search results from json file and upload it to postgres
