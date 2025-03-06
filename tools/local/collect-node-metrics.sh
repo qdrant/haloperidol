@@ -23,7 +23,6 @@ fi
 
 POSTGRES_HOST=${POSTGRES_HOST:-""}
 POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-""}
-POSTGRES_URL="postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres"
 
 # https is important here
 QDRANT_URIS=( "${QDRANT_HOSTS[@]/#/https://}" )
@@ -243,11 +242,11 @@ if [ -z "$POSTGRES_HOST" ] || [ -z "$POSTGRES_PASSWORD" ] ; then
     exit 1
 fi
 
+POSTGRES_URL="postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres"
+
 function postgres_query() {
     sql_query=$1
-    set -x
-    docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client "$POSTGRES_URL" -c "$sql_query"
-    set +x
+    log_cmd "docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client \"$POSTGRES_URL\" -c \"$sql_query\""
 }
 
 # Read search results from json file and upload it to postgres
