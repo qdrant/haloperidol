@@ -10,7 +10,7 @@ if [ ! -d "haloperidol" ]; then
 fi
 
 cd haloperidol || exit
-log_cmd "git pull" # this can fail if repo is touched
+git pull # this can fail if repo is touched
 set +e
 
 source "tools/local/logging.sh" # Can be imported only after we are in haloperidol dir
