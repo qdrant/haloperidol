@@ -41,7 +41,7 @@ log() {
     local value=$2
     if [[ "$value" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
       kv_pairs="$kv_pairs $key=$value"
-    elif [[ "$value" =~ ^[a-zA-Z0-9_]+$ ]]; then
+    elif [[ "$value" =~ ^[a-zA-Z0-9_-]+$ ]]; then
       kv_pairs="$kv_pairs $key=$value"
     else
       kv_pairs="$kv_pairs $key=\"$value\""
@@ -97,7 +97,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   root_api_response="404 Not Found"
   log info "message" uri "$uri" uri_response "$root_api_response" foo "bar baz"
   log warn "message" uri "$uri" uri_response "$root_api_response" foo
-  log debug "debug message" key1 "value1" key2 "value2"
+  log debug "debug message" k1 "v1" k2 "a2 b2" k3 "a3_B3-dev"
   log fatal "fatal message"
   log invalid "invalid message"
 
@@ -109,7 +109,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   # Expected output:
   # ts=<ts> level=info msg="message" uri="http://example.com" uri_response="404 Not Found" foo="bar baz"
   # ts=<ts> level=error msg="Each key should have a value"
-  # ts=<ts> level=debug msg="debug message" key1=value1 key2=value2
+  # ts=<ts> level=debug msg="debug message" k1=v1 k2="a2 b2" k3=a3_B3-dev
   # ts=<ts> level=fatal msg="fatal message"
   # ts=<ts> level=error msg="Invalid log level: invalid"
   # ts=<ts> level=info msg="passed from stdin" key1=value1 key2=value2
