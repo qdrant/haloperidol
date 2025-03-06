@@ -23,6 +23,7 @@ fi
 
 POSTGRES_HOST=${POSTGRES_HOST:-""}
 POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-""}
+POSTGRES_URL="postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres"
 
 # https is important here
 QDRANT_URIS=( "${QDRANT_HOSTS[@]/#/https://}" )
@@ -107,7 +108,7 @@ function insert_to_chaos_testing_transfer_table {
     CHAOS_TESTING_TRANSFER_VALUES+=" ('$uri', $peer_id, $shard_id, $from_peer, $to_peer, '$method', '$comment', $progress_transfer, $total_to_transfer, '$measure_timestamp', '$cluster_name')"
 }
 
-log info "Collecting node metrics" uris "${QDRANT_URIS[*]}"
+log debug "Collecting node metrics" uris "${QDRANT_URIS[*]}"
 
 for uri in "${QDRANT_URIS[@]}"; do
     log debug "Checking node" uri "$uri"
@@ -242,6 +243,11 @@ if [ -z "$POSTGRES_HOST" ] || [ -z "$POSTGRES_PASSWORD" ] ; then
     exit 1
 fi
 
+function postgres_query() {
+    sql_query=$1
+    log_error "docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client $POSTGRES_URL -c \"$sql_query\""
+}
+
 # Read search results from json file and upload it to postgres
 # Assume table:
 # create table chaos_testing (
@@ -257,9 +263,8 @@ fi
 #   cluster_name VARCHAR(255)
 # );
 
-# echo "level=INFO msg=\"Storing collect nodes in db\" data=$CHAOS_TESTING_VALUES"
 log info "Storing collected node metrics in db" data "$CHAOS_TESTING_VALUES"
-docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME  jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing (url, version, commit, num_vectors, num_snapshots, missing_payload_point_ids, consensus_status, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_VALUES;"
+postgres_query "INSERT INTO chaos_testing (url, version, commit, num_vectors, num_snapshots, missing_payload_point_ids, consensus_status, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_VALUES;"
 
 # Assume table:
 # create table chaos_testing_shards (
@@ -275,7 +280,7 @@ docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME  jbergknoff/postgresql-cl
 
 if [ -n "$CHAOS_TESTING_SHARD_VALUES" ]; then
     log info "Storing collected shards in db" data "$CHAOS_TESTING_SHARD_VALUES"
-    docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_shards (url, peer_id, shard_id, points_count, state, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_SHARD_VALUES;"
+    postgres_query "INSERT INTO chaos_testing_shards (url, peer_id, shard_id, points_count, state, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_SHARD_VALUES;"
 else
     log debug "No shards found" # Can happen when a node during scaling
 fi
@@ -298,7 +303,7 @@ fi
 
 if [ -n "$CHAOS_TESTING_TRANSFER_VALUES" ]; then
     log info "Storing ongoing transfers in db" data "$CHAOS_TESTING_TRANSFER_VALUES"
-    docker run --rm --name $POSTGRES_CLIENT_CONTAINER_NAME jbergknoff/postgresql-client "postgresql://qdrant:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/postgres" -c "INSERT INTO chaos_testing_transfers (url, peer_id, shard_id, from_peer, to_peer, method, comment, progress_transfer, total_to_transfer, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_TRANSFER_VALUES;"
+    postgres_query "INSERT INTO chaos_testing_transfers (url, peer_id, shard_id, from_peer, to_peer, method, comment, progress_transfer, total_to_transfer, measure_timestamp, cluster_name) VALUES $CHAOS_TESTING_TRANSFER_VALUES;"
 else
     log debug "No transfers found"
 fi
