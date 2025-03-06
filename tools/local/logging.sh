@@ -85,7 +85,7 @@ log_cmd() {
   if (( exit_code != 0 )); then
     log error "$cmd_output" command "$*" exit_code "$exit_code"
   else
-    log info "$cmd_output" command "$*"
+    log debug "$cmd_output" command "$*"
   fi
 
   return $exit_code
