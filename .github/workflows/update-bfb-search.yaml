@@ -9,6 +9,7 @@ on:
 
 jobs:
   update-bfb-search:
+    if: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -28,7 +29,7 @@ jobs:
           bash -x tools/run-bfb-search.sh
 
   update-bfb-search-debug-cluster:
-    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' && ! cancelled() }}
+    if: false
     needs: update-bfb-search
     runs-on: ubuntu-latest
     steps:
@@ -48,23 +49,23 @@ jobs:
           export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"
           bash -x tools/run-bfb-search.sh
 
-#  update-bfb-search-three-cluster:
-#    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'true' && ! cancelled() }}
-#    needs: update-bfb-search-debug-cluster
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v3
-#      - uses: webfactory/ssh-agent@v0.8.0
-#        with:
-#          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-#      - name: Install tools
-#        run: |
-#          bash -x tools/ci/install-tools.sh
-#          bash -x tools/ci/install-hcloud.sh
-#      - name: Update bfb
-#        run: |
-#          export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
-#          export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
-#          export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL_3 }}
-#          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"
-#          bash -x tools/run-bfb-search.sh
+  update-bfb-search-three-cluster:
+    if: false
+    needs: update-bfb-search-debug-cluster
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Install tools
+        run: |
+          bash -x tools/ci/install-tools.sh
+          bash -x tools/ci/install-hcloud.sh
+      - name: Update bfb
+        run: |
+          export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
+          export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
+          export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL_3 }}
+          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"
+          bash -x tools/run-bfb-search.sh

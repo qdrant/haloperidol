@@ -6,6 +6,7 @@ permissions:
   actions: write
 jobs:
   daily-active-workflow:
+    if: false
     name: Daily Active Workflow
     runs-on: ubuntu-latest
     steps:

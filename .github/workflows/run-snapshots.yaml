@@ -8,6 +8,7 @@ on:
 
 jobs:
   run-snapshots:
+    if: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -31,7 +32,7 @@ jobs:
         run: exit 1
 
   run-snapshots-debug-cluster:
-    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'disable-snapshots' && ! cancelled() }}
+    if: false
     needs: run-snapshots
     runs-on: ubuntu-latest
     steps:
@@ -49,33 +50,33 @@ jobs:
           export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
           export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
           export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL_2 }}
-          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"          
+          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"
           bash -x tools/run-snapshots.sh
       - name: Fail job if any check failed
         if: steps.run_snapshots.outputs.failed == 'true'
         run: exit 1
 
-#  run-snapshots-3-cluster:
-#    if: ${{ vars.ENABLE_DEBUG_CLUSTER == 'disable-snapshots' && ! cancelled() }}
-#    needs: run-snapshots-debug-cluster
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v3
-#      - uses: webfactory/ssh-agent@v0.8.0
-#        with:
-#          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-#      - name: Install tools
-#        run: |
-#          bash -x tools/ci/install-tools.sh
-#          bash -x tools/ci/install-hcloud.sh
-#      - name: Run snapshots
-#        id: run_snapshots
-#        run: |
-#          export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
-#          export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
-#          export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL_3 }}
-#          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"
-#          bash -x tools/run-snapshots.sh
-#      - name: Fail job if any check failed
-#        if: steps.run_snapshots.outputs.failed == 'true'
-#        run: exit 1
+  run-snapshots-3-cluster:
+    if: false
+    needs: run-snapshots-debug-cluster
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Install tools
+        run: |
+          bash -x tools/ci/install-tools.sh
+          bash -x tools/ci/install-hcloud.sh
+      - name: Run snapshots
+        id: run_snapshots
+        run: |
+          export HCLOUD_TOKEN=${{ secrets.HCLOUD_TOKEN }}
+          export QDRANT_API_KEY=${{ secrets.QDRANT_API_KEY }}
+          export QDRANT_CLUSTER_URL=${{ secrets.QDRANT_CLUSTER_URL_3 }}
+          export QC_NAME="qdrant-$(echo $QDRANT_CLUSTER_URL | sed -E 's~([^.]+)\..*~\1~')"
+          bash -x tools/run-snapshots.sh
+      - name: Fail job if any check failed
+        if: steps.run_snapshots.outputs.failed == 'true'
+        run: exit 1
