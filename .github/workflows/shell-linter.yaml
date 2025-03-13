@@ -15,6 +15,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v1
       - name: Run ShellCheck
-        uses: azohra/shell-linter@latest
+        uses: Azbagheri/shell-linter@latest
         with:
           exclude-paths: tools/run_azure_cluster.sh,tools/shard-transfer/transfer_shards.sh,tools/shard-transfer/run_read_write_setup.sh,tools/setup_cluster.sh,tools/local/restart-qdrant-node.sh,tools/local/drop-qdrant-node.sh,tools/local/run-qdrant-node.sh,tools/local/install-postgres.sh,tools/local/install-docker.sh,tools/run-qdrant-cluster.sh,tools/common/wait-qdrant-start.sh,tools/clouds/hetzner/create_and_install.sh,tools/clouds/custom/create_and_install.sh,tools/ci/stress-testing.sh,tools/kill-random-node.sh,tools/run-postgres.sh,tools/local/run-cluster-manager.sh
