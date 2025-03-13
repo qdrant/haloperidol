@@ -56,6 +56,7 @@ while true; do
     tools/local/check-cluster-health.sh
     # python3 tools/check-empty-payload.py
     tools/local/collect-node-metrics.sh
+    tools/local/check-ps.sh
 
     log info "Sleeping for 1m"
     sleep 60 # 1m
